@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ClaudeLogo } from "../components/ModelLogos";
 import { GlossaryTerm } from "../components/GlossaryTerm";
+import { AutoGlossary } from "../components/AutoGlossary";
 
 type Lang = "en" | "es";
 
@@ -43,7 +44,7 @@ function Card({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
+function Table({ headers, rows, lang = "en" }: { headers: string[]; rows: string[][]; lang?: Lang }) {
   return (
     <motion.div variants={fadeUp} className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-white/[0.03]">
       <table className="w-full text-left text-sm">
@@ -67,7 +68,7 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
             >
               {row.map((cell, j) => (
                 <td key={j} className="p-3 text-neutral-300">
-                  {cell}
+                  <AutoGlossary text={cell} lang={lang} />
                 </td>
               ))}
             </motion.tr>
@@ -147,6 +148,7 @@ function ClaudeContent({ lang }: { lang: Lang }) {
 
             <p className="mt-4 font-medium text-white">Understanding the preparer hierarchy</p>
             <Table
+              lang={lang}
               headers={["Level", "What's required", "Representation rights", "IRS directory listing"]}
               rows={[
                 ["PTIN only", "PTIN ($18.75/yr)", "None", "No"],
@@ -202,6 +204,7 @@ function ClaudeContent({ lang }: { lang: Lang }) {
 
           <Section title={isEn ? "Complete startup cost breakdown" : "Desglose completo de costes de arranque"}>
             <Table
+              lang={lang}
               headers={["Category", "Minimum", "Comfortable"]}
               rows={[
                 ["PTIN (annual)", "$19", "$19"],
@@ -234,6 +237,7 @@ function ClaudeContent({ lang }: { lang: Lang }) {
           <Section title={isEn ? "What to charge and how to find clients" : "Qué cobrar y cómo encontrar clientes"}>
             <p className="font-medium text-white">Pricing for the Georgia market (2025–2026)</p>
             <Table
+              lang={lang}
               headers={["Return type", "Typical range"]}
               rows={[
                 ["Simple 1040 (W-2, standard deduction)", "$150–$300"],
@@ -251,6 +255,7 @@ function ClaudeContent({ lang }: { lang: Lang }) {
 
           <Section title={isEn ? "Sandra's ideal timeline" : "Cronograma ideal de Sandra"}>
             <Table
+              lang={lang}
               headers={["When", "What to do"]}
               rows={[
                 ["June–July", "Self-study: IRS Pub 17, Taxes Made Simple. Start Link & Learn. Apply for PTIN ($18.75)."],

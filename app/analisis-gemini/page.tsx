@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { GeminiLogo } from "../components/ModelLogos";
 import { GlossaryTerm } from "../components/GlossaryTerm";
+import { AutoGlossary } from "../components/AutoGlossary";
 
 type Lang = "en" | "es";
 
@@ -43,7 +44,7 @@ function Card({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
+function Table({ headers, rows, lang = "en" }: { headers: string[]; rows: string[][]; lang?: Lang }) {
   return (
     <motion.div variants={fadeUp} className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-white/[0.03]">
       <table className="w-full text-left text-sm">
@@ -67,7 +68,7 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
             >
               {row.map((cell, j) => (
                 <td key={j} className="p-3 text-neutral-300">
-                  {cell}
+                  <AutoGlossary text={cell} lang={lang} />
                 </td>
               ))}
             </motion.tr>
@@ -119,6 +120,7 @@ function GeminiContent({ lang }: { lang: Lang }) {
               <li><strong className="text-white">Digital Academy Path:</strong> Intuit Academy—free, self-paced, designed for TurboTax Live. Focus on 1099/W-2 scenarios and high-income taxpayers. Ideal for starting as a remote practice with digital workflows.</li>
             </ul>
             <Table
+              lang={lang}
               headers={["Pathway", "Primary Provider Examples", "Duration/Experience", "Key Benefit"]}
               rows={[
                 ["Retail Firm Apprenticeship", "Jackson Hewitt, H&R Block", "30–60 Hours", "Supervised environment, low overhead"],
@@ -132,6 +134,7 @@ function GeminiContent({ lang }: { lang: Lang }) {
             <p><GlossaryTerm id="ptin" lang={lang}>PTIN</GlossaryTerm> — {isEn ? "Mandatory for anyone who prepares federal returns for compensation. Online application via IRS (~15 min). 2025 fee: $18.75. Renew every year (mid-October–Dec 31). The PTIN belongs to the individual; each preparer in a firm must have their own." : "Obligatorio para quien prepare declaraciones federales por pago. Solicitud en línea en IRS (~15 min). Tarifa 2025: $18.75. Renovación anual (mitad de octubre–31 dic). El PTIN es individual."}</p>
             <p><GlossaryTerm id="efin" lang={lang}>EFIN</GlossaryTerm> — {isEn ? "Identifies the firm authorized to e-file. Federal rules require e-filing if you expect to file 11+ individual returns per year. The EFIN process includes a suitability check (criminal history, credit, tax compliance). Non-CPA/non-attorney applicants need fingerprints: call IRS 866-255-0654 for fingerprint card. Allow up to 45 days—apply at least two months before tax season." : "Identifica a la firma autorizada para e-file. Las normas federales exigen e-file si presentarás 11 o más declaraciones individuales al año. Incluye verificación de idoneidad (antecedentes, crédito, cumplimiento fiscal). No CPA/no abogado: huellas dactilares; llamar al IRS 866-255-0654. Hasta 45 días; solicitar al menos dos meses antes de la temporada."}</p>
             <Table
+              lang={lang}
               headers={isEn ? ["Federal Credential", "Issuing Body", "Purpose", "Requirement for Beginners"] : ["Credencial federal", "Emisor", "Propósito", "Requisito para principiantes"]}
               rows={isEn ? [["PTIN", "IRS", "Individual legal authorization", "Mandatory for all paid preparers"], ["EFIN", "IRS", "Firm-level e-filing authorization", "Mandatory for those filing 11+ returns"], ["AFSP", "IRS", "Voluntary professional distinction", "Requires 18 hours of annual CE"]] : [["PTIN", "IRS", "Autorización legal individual", "Obligatorio para preparadores pagados"], ["EFIN", "IRS", "Autorización e-file de la firma", "Obligatorio si presentas 11+ declaraciones"], ["AFSP", "IRS", "Distinción profesional voluntaria", "18 horas de CE anual"]]}
             />
@@ -160,6 +163,7 @@ function GeminiContent({ lang }: { lang: Lang }) {
               <GlossaryTerm id="occupational-tax-certificate" lang={lang}>Occupational Tax Certificate</GlossaryTerm> (business license): Administered at city/county level in Georgia. Even home-based businesses must pay and display the certificate. Requirements vary by jurisdiction (e.g., Atlanta: E-Verify/SAVE affidavits; Douglas County: zoning approval, driver’s license, utility bill; Peachtree City: tax based on employee count, ~$107 minimum for first four employees; Cherokee: in-person application, proof of residency).
             </p>
             <Table
+              lang={lang}
               headers={["County/City", "Key Requirement", "Fee Basis", "Notable Detail"]}
               rows={[
                 ["Atlanta", "E-Verify/SAVE Affidavits", "Gross Receipts", "ATLBIZ portal preferred"],
@@ -183,6 +187,7 @@ function GeminiContent({ lang }: { lang: Lang }) {
 
           <Section title={isEn ? "Risk Management: Insurance" : "Gestión de riesgos: seguros"}>
             <Table
+              lang={lang}
               headers={["Insurance Type", "Average Annual Cost (GA)", "Key Protection"]}
               rows={[
                 ["Errors & Omissions", "$340", "Professional mistakes/advice"],

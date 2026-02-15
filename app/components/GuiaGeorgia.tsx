@@ -604,14 +604,14 @@ export function GuiaGeorgia({ backLink }: { backLink?: ReactNode }) {
             <div className="grid gap-3">
               {t.sections.costs.rows.map((r) => (
                 <motion.div key={r.name} variants={fadeUp} className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-950/30 p-4">
-                  <div className="text-sm text-neutral-200">{r.name}</div>
+                  <div className="text-sm text-neutral-200"><AutoGlossary text={r.name} lang={lang} /></div>
                   <div className="text-sm font-semibold text-white">{r.value}</div>
                 </motion.div>
               ))}
             </div>
 
             <motion.p variants={fadeUp} className="mt-4 text-xs text-neutral-400">
-              {t.sections.costs.note}
+              <AutoGlossary text={t.sections.costs.note} lang={lang} />
             </motion.p>
           </motion.div>
         </section>
@@ -620,7 +620,7 @@ export function GuiaGeorgia({ backLink }: { backLink?: ReactNode }) {
           <SectionTitle title={t.sections.faq.title} />
           <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} className="space-y-3">
             {t.sections.faq.qs.map((qa) => (
-              <Faq key={qa.q} q={qa.q} a={qa.a} />
+              <Faq key={qa.q} q={qa.q} a={qa.a} lang={lang} />
             ))}
           </motion.div>
         </section>
@@ -749,9 +749,12 @@ function HeroCard({ lang }: { lang: Lang }) {
         </div>
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-neutral-300">
-          {lang === "en"
-            ? "Tip: Apply for EFIN early — approval can take a few weeks."
-            : "Tip: Pide el EFIN con tiempo — la aprobación puede tardar semanas."}
+          <AutoGlossary
+            text={lang === "en"
+              ? "Tip: Apply for EFIN early — approval can take a few weeks."
+              : "Tip: Pide el EFIN con tiempo — la aprobación puede tardar semanas."}
+            lang={lang}
+          />
         </div>
       </div>
     </div>

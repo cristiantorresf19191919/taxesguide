@@ -43,19 +43,17 @@ function getSuggestions(prefix: string, lang: Lang, limit = 8): TermRecord[] {
   const p = prefix.trim().toLowerCase();
   if (p.length < 2) return [];
   const labelKey = lang === "es" ? "labelEs" : "labelEn";
-  return TERMS.filter(
-    (t) =>
+  const seen = new Set<string>();
+  return TERMS.filter((t) => {
+    const match =
       t[labelKey].toLowerCase().startsWith(p) ||
       t.labelEn.toLowerCase().startsWith(p) ||
       t.labelEs.toLowerCase().startsWith(p) ||
-      t.id.toLowerCase().includes(p)
-  )
-    .slice(0, limit)
-    .reduce((acc, t) => {
-      const label = t[labelKey] || t.labelEn;
-      if (!acc.some((x) => (x[labelKey] || x.labelEn) === label)) acc.push(t);
-      return acc;
-    }, [] as TermRecord[]);
+      t.id.toLowerCase().includes(p);
+    if (!match || seen.has(t.id)) return false;
+    seen.add(t.id);
+    return true;
+  }).slice(0, limit);
 }
 
 function getWordAtCursor(text: string, cursor: number): { word: string; start: number; end: number } {
@@ -107,7 +105,14 @@ export default function NotesPage() {
   const t = ui[lang];
 
   useEffect(() => {
-    setNotes(loadNotes());
+    const loaded = loadNotes();
+    setNotes(loaded);
+    if (loaded.length > 0 && activeId === null) {
+      const first = loaded[0]!;
+      setActiveId(first.id);
+      setTitle(first.title);
+      setContent(first.content);
+    }
   }, []);
 
   const persist = useCallback((next: Note[]) => {
@@ -160,7 +165,7 @@ export default function NotesPage() {
     persist(next);
     setActiveId(next[0]?.id ?? null);
     if (next[0]) openNote(next[0]);
-    else setTitle("") || setContent("");
+    else { setTitle(""); setContent(""); }
   }, [activeId, notes, persist, openNote]);
 
   const updateContent = useCallback(
@@ -321,7 +326,7 @@ export default function NotesPage() {
                   transition={{ duration: 0.2 }}
                   className="relative"
                 >
-                  <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
+                  <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5" data-readaloud-content>
                     <input
                       type="text"
                       value={title}
