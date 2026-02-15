@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Skill(check-and-fix)",
+      "Skill(check-and-fix:*)"
+    ]
+  }
+}
