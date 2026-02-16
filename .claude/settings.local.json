@@ -6,7 +6,13 @@
       "Skill(check-and-fix:*)",
       "Skill(build-and-push)",
       "Skill(build-and-push:*)",
-      "Bash(npx next build:*)"
+      "Bash(npx next build:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(git add:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
