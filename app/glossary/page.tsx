@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useGlossary } from "../contexts/GlossaryContext";
 import { TERMS } from "../data/terms";
 import type { TermId } from "../data/terms";
+import { LangSwitchWrapper } from "../components/LangSwitchWrapper";
 
 type Lang = "en" | "es";
 
@@ -177,6 +178,7 @@ export default function GlossaryPage() {
       </motion.header>
 
       <main className="mx-auto max-w-5xl px-4 pb-28 pt-10" data-readaloud-content>
+        <LangSwitchWrapper lang={lang}>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -285,6 +287,7 @@ export default function GlossaryPage() {
             </motion.p>
           )}
         </section>
+        </LangSwitchWrapper>
       </main>
     </div>
   );

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ChatGPTLogo } from "../components/ModelLogos";
 import { GlossaryTerm } from "../components/GlossaryTerm";
 import { Section, Card, Table, fadeUp, stagger } from "../components/AnalysisUI";
+import { LangSwitchWrapper } from "../components/LangSwitchWrapper";
 
 type Lang = "en" | "es";
 
@@ -541,7 +542,9 @@ export default function AnalisisChatGPTPage() {
         </div>
       </motion.header>
       <main className="mx-auto max-w-4xl px-4 pb-28 pt-10 sm:px-6" data-readaloud-content>
-        <ChatGPTContent lang={lang} />
+        <LangSwitchWrapper lang={lang}>
+          <ChatGPTContent lang={lang} />
+        </LangSwitchWrapper>
       </main>
     </div>
   );

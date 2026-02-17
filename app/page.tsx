@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChatGPTLogo, GeminiLogo, ClaudeLogo } from "./components/ModelLogos";
+import { LangSwitchWrapper } from "./components/LangSwitchWrapper";
 import { TERMS } from "./data/terms";
 
 type Lang = "en" | "es";
@@ -296,9 +297,18 @@ export default function HomePage() {
             </Link>
             <button
               onClick={() => setLang((l) => (l === "en" ? "es" : "en"))}
-              className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
+              className="relative overflow-hidden rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
             >
-              {lang === "en" ? "ES" : "EN"}
+              <motion.span
+                key={lang}
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="inline-block"
+              >
+                {lang === "en" ? "ES" : "EN"}
+              </motion.span>
             </button>
           </div>
         </div>
@@ -306,6 +316,7 @@ export default function HomePage() {
 
       {/* Dashboard grid */}
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8" data-readaloud-content>
+        <LangSwitchWrapper lang={lang}>
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -568,6 +579,7 @@ export default function HomePage() {
             </div>
           </motion.div>
         </motion.div>
+        </LangSwitchWrapper>
       </main>
     </div>
   );
