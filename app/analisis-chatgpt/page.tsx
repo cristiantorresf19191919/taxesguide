@@ -5,79 +5,14 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChatGPTLogo } from "../components/ModelLogos";
 import { GlossaryTerm } from "../components/GlossaryTerm";
-import { AutoGlossary } from "../components/AutoGlossary";
+import { Section, Card, Table, fadeUp, stagger } from "../components/AnalysisUI";
 
 type Lang = "en" | "es";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
-};
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-};
 
 const ui = {
   en: { menu: "Menu", title: "ChatGPT analysis" },
   es: { menu: "Menú", title: "Análisis de ChatGPT" },
 };
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <motion.section variants={fadeUp} className="mt-14 first:mt-0">
-      <h2 className="mb-5 text-lg font-bold tracking-tight text-white md:text-xl">{title}</h2>
-      <div className="space-y-4 text-sm leading-relaxed text-neutral-300">{children}</div>
-    </motion.section>
-  );
-}
-
-function Card({ children }: { children: React.ReactNode }) {
-  return (
-    <motion.div
-      variants={fadeUp}
-      className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function Table({ headers, rows, lang = "en" }: { headers: string[]; rows: string[][]; lang?: Lang }) {
-  return (
-    <motion.div variants={fadeUp} className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-white/[0.03]">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-white/10">
-            {headers.map((h) => (
-              <th key={h} className="p-3 font-semibold text-white">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <motion.tr
-              key={i}
-              className="border-b border-white/5 last:border-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.03 }}
-            >
-              {row.map((cell, j) => (
-                <td key={j} className="p-3 text-neutral-300">
-                  <AutoGlossary text={cell} lang={lang} />
-                </td>
-              ))}
-            </motion.tr>
-          ))}
-        </tbody>
-      </table>
-    </motion.div>
-  );
-}
 
 function ChatGPTContent({ lang }: { lang: Lang }) {
   const isEn = lang === "en";
@@ -577,7 +512,7 @@ export default function AnalisisChatGPTPage() {
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className="sticky top-0 z-50 border-b border-white/[0.06] bg-neutral-950/80 backdrop-blur-xl"
       >
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
           <div className="flex items-center gap-2">
             <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white">
@@ -605,7 +540,7 @@ export default function AnalisisChatGPTPage() {
           </div>
         </div>
       </motion.header>
-      <main className="mx-auto max-w-3xl px-4 pb-28 pt-10" data-readaloud-content>
+      <main className="mx-auto max-w-4xl px-4 pb-28 pt-10 sm:px-6" data-readaloud-content>
         <ChatGPTContent lang={lang} />
       </main>
     </div>

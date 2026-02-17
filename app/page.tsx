@@ -219,7 +219,7 @@ function ActivityDots({ months }: { months: string[] }) {
 
 /* ─── Card wrapper ─────────────────────────────────────────────────── */
 
-const CARD = "rounded-2xl border border-white/[0.07] bg-[#141417] p-5 sm:p-6";
+const CARD = "rounded-2xl border border-white/[0.07] bg-[#141417] p-5 sm:p-7";
 
 /* ─── Main ─────────────────────────────────────────────────────────── */
 
@@ -310,7 +310,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="grid gap-4 sm:gap-5 md:grid-cols-2"
+          className="grid gap-5 sm:gap-6 md:grid-cols-2"
         >
           {/* ═══════ Card 1 — AI Analyses (Top Left) ═══════ */}
           <motion.div

@@ -17,6 +17,10 @@ const ui = {
     allTerms: "All terms",
     emptyBookmarks: "No terms saved yet. Click any green-underlined or abbreviated term in the analyses to open its definition, then add it here.",
     back: "Back to menu",
+    search: "Search terms...",
+    showing: "Showing",
+    of: "of",
+    terms: "terms",
   },
   es: {
     title: "Glosario y marcadores",
@@ -25,6 +29,10 @@ const ui = {
     allTerms: "Todos los términos",
     emptyBookmarks: "Aún no has guardado términos. Haz clic en cualquier término subrayado en verde o abreviado en los análisis para ver su definición y añadirlo aquí.",
     back: "Volver al menú",
+    search: "Buscar términos...",
+    showing: "Mostrando",
+    of: "de",
+    terms: "términos",
   },
 };
 
@@ -101,10 +109,23 @@ function TermCard({
 
 export default function GlossaryPage() {
   const [lang, setLang] = useState<Lang>("en");
+  const [search, setSearch] = useState("");
   const { bookmarks, openTerm, toggleBookmark, isBookmarked } = useGlossary();
   const t = ui[lang];
 
   const bookmarkedTerms = TERMS.filter((t) => bookmarks.includes(t.id));
+
+  const filteredTerms = TERMS.filter((term) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      term.labelEn.toLowerCase().includes(q) ||
+      term.labelEs.toLowerCase().includes(q) ||
+      term.longEn.toLowerCase().includes(q) ||
+      term.longEs.toLowerCase().includes(q) ||
+      term.id.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-200">
@@ -123,7 +144,7 @@ export default function GlossaryPage() {
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className="sticky top-0 z-10 border-b border-white/[0.06] bg-neutral-950/85 backdrop-blur-xl"
       >
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
           <motion.span whileHover={{ x: -2 }} whileTap={{ scale: 0.98 }}>
             <Link
               href="/"
@@ -155,18 +176,43 @@ export default function GlossaryPage() {
         </div>
       </motion.header>
 
-      <main className="mx-auto max-w-3xl px-4 pb-28 pt-10" data-readaloud-content>
+      <main className="mx-auto max-w-5xl px-4 pb-28 pt-10" data-readaloud-content>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-12"
+          className="mb-8"
         >
           <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">{t.title}</h1>
           <p className="mt-2 text-neutral-400">{t.subtitle}</p>
         </motion.div>
 
-        {bookmarkedTerms.length > 0 && (
+        {/* Search */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="relative mb-8"
+        >
+          <svg
+            className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t.search}
+            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-neutral-200 placeholder-neutral-500 outline-none transition-colors focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30"
+          />
+        </motion.div>
+
+        {bookmarkedTerms.length > 0 && !search.trim() && (
           <motion.section
             className="mb-12"
             initial={{ opacity: 0 }}
@@ -174,7 +220,7 @@ export default function GlossaryPage() {
             transition={{ delay: 0.1 }}
           >
             <h2 className="mb-5 text-lg font-bold tracking-tight text-white">{t.bookmarks}</h2>
-            <div className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               {bookmarkedTerms.map((term, i) => (
                 <TermCard
                   key={term.id}
@@ -190,7 +236,7 @@ export default function GlossaryPage() {
           </motion.section>
         )}
 
-        {bookmarkedTerms.length === 0 && (
+        {bookmarkedTerms.length === 0 && !search.trim() && (
           <motion.p
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -201,16 +247,23 @@ export default function GlossaryPage() {
         )}
 
         <section>
-          <motion.h2
-            className="mb-5 text-lg font-bold tracking-tight text-white"
+          <motion.div
+            className="mb-5 flex items-center justify-between"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.15 }}
           >
-            {t.allTerms}
-          </motion.h2>
-          <div className="space-y-4">
-            {TERMS.map((term, i) => (
+            <h2 className="text-lg font-bold tracking-tight text-white">
+              {t.allTerms}
+            </h2>
+            {search.trim() && (
+              <span className="text-xs text-neutral-500">
+                {t.showing} {filteredTerms.length} {t.of} {TERMS.length} {t.terms}
+              </span>
+            )}
+          </motion.div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {filteredTerms.map((term, i) => (
               <TermCard
                 key={term.id}
                 id={term.id}
@@ -222,6 +275,15 @@ export default function GlossaryPage() {
               />
             ))}
           </div>
+          {filteredTerms.length === 0 && search.trim() && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-8 text-center text-sm text-neutral-500"
+            >
+              {lang === "en" ? "No terms match your search." : "Ningún término coincide con tu búsqueda."}
+            </motion.p>
+          )}
         </section>
       </main>
     </div>
