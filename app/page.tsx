@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChatGPTLogo, GeminiLogo, ClaudeLogo } from "./components/ModelLogos";
@@ -11,10 +11,30 @@ type Lang = "en" | "es";
 
 /* ─── i18n ─────────────────────────────────────────────────────────── */
 
+const QUOTES = {
+  en: [
+    "The secret of getting ahead is getting started.",
+    "Every expert was once a beginner.",
+    "Knowledge is power — especially in tax law.",
+    "Small daily improvements lead to stunning results.",
+    "Invest in your knowledge, it pays the best interest.",
+    "Success is the sum of small efforts repeated daily.",
+  ],
+  es: [
+    "El secreto para avanzar es comenzar.",
+    "Todo experto fue una vez principiante.",
+    "El conocimiento es poder — especialmente en leyes fiscales.",
+    "Pequeñas mejoras diarias llevan a resultados impresionantes.",
+    "Invierte en tu conocimiento, paga los mejores intereses.",
+    "El éxito es la suma de pequeños esfuerzos repetidos diariamente.",
+  ],
+};
+
 const copy = {
   en: {
     navTitle: "Tax Preparer",
     navSub: "Study Dashboard",
+    cmdK: "Search",
     /* Card 1 – Analyses */
     analysesTitle: "AI Analyses",
     totalAnalyses: "total analyses",
@@ -45,10 +65,23 @@ const copy = {
       { title: "Study Notes", sub: "Your learning notes", badge: "Active", href: "/notes" },
       { title: "Georgia Guide", sub: "State prep roadmap", badge: "Featured", href: "/analisis-claude" },
     ],
+    /* Card 5 – Quiz */
+    quizTitle: "Flashcard Quiz",
+    quizSub: "Test your knowledge with interactive flashcards and multiple choice",
+    quizBtn: "Start Quiz",
+    quizScore: "Accuracy",
+    quizMastered: "Mastered",
+    /* Streak */
+    streakTitle: "Study Streak",
+    streakDays: "days",
+    streakBest: "best",
+    streakToday: "Come back tomorrow to keep your streak!",
+    streakStart: "Start your study streak today!",
   },
   es: {
     navTitle: "Preparador de Impuestos",
     navSub: "Panel de Estudio",
+    cmdK: "Buscar",
     analysesTitle: "Análisis de IA",
     totalAnalyses: "análisis totales",
     entries: [
@@ -75,6 +108,16 @@ const copy = {
       { title: "Apuntes de Estudio", sub: "Tus notas de aprendizaje", badge: "Activo", href: "/notes" },
       { title: "Guía de Georgia", sub: "Ruta de preparación estatal", badge: "Destacado", href: "/analisis-claude" },
     ],
+    quizTitle: "Quiz de Tarjetas",
+    quizSub: "Pon a prueba tu conocimiento con tarjetas interactivas y opción múltiple",
+    quizBtn: "Iniciar Quiz",
+    quizScore: "Precisión",
+    quizMastered: "Dominados",
+    streakTitle: "Racha de Estudio",
+    streakDays: "días",
+    streakBest: "mejor",
+    streakToday: "¡Vuelve mañana para mantener tu racha!",
+    streakStart: "¡Comienza tu racha de estudio hoy!",
   },
 };
 
@@ -87,10 +130,75 @@ const analysisConfig = [
 const AREA_VALUES = [87, 90, 89, 39, 38, 21];
 const AREA_COLORS = ["#6ee7b7", "#818cf8", "#22d3ee", "#f472b6", "#fbbf24", "#a78bfa"];
 
+const STREAK_KEY = "tax-guide-study-streak";
+
+type StreakData = {
+  current: number;
+  best: number;
+  lastDate: string;
+};
+
+function loadStreak(): StreakData {
+  if (typeof window === "undefined") return { current: 0, best: 0, lastDate: "" };
+  try {
+    const raw = localStorage.getItem(STREAK_KEY);
+    if (!raw) return { current: 0, best: 0, lastDate: "" };
+    return JSON.parse(raw);
+  } catch { return { current: 0, best: 0, lastDate: "" }; }
+}
+
+function updateStreak(): StreakData {
+  const data = loadStreak();
+  const today = new Date().toISOString().slice(0, 10);
+
+  if (data.lastDate === today) return data;
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+  if (data.lastDate === yesterday) {
+    data.current += 1;
+  } else if (data.lastDate !== today) {
+    data.current = 1;
+  }
+
+  if (data.current > data.best) data.best = data.current;
+  data.lastDate = today;
+
+  try { localStorage.setItem(STREAK_KEY, JSON.stringify(data)); } catch {}
+  return data;
+}
+
 /* ─── Deterministic pseudo-random for activity dots ───────────────── */
 function seededRandom(seed: number) {
   const x = Math.sin(seed * 9301 + 49297) * 49297;
   return x - Math.floor(x);
+}
+
+/* ─── Animated Counter ─────────────────────────────────────────────── */
+function AnimatedNumber({ value, duration = 1200 }: { value: number; duration?: number }) {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef<number>(0);
+
+  useEffect(() => {
+    const start = ref.current;
+    const diff = value - start;
+    if (diff === 0) return;
+
+    const startTime = performance.now();
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * eased);
+      setDisplay(current);
+      ref.current = current;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [value, duration]);
+
+  return <>{display.toLocaleString()}</>;
 }
 
 /* ─── Small components ─────────────────────────────────────────────── */
@@ -113,6 +221,7 @@ function ProgressRing({ value, size = 28, color = "#8b5cf6" }: { value: number; 
         strokeDasharray={c}
         strokeDashoffset={offset}
         strokeLinecap="round"
+        className="transition-all duration-1000"
       />
     </svg>
   );
@@ -132,8 +241,11 @@ function PetalChart({ lang }: { lang: Lang }) {
       {petals.map((p, i) => {
         const angle = i * 60;
         return (
-          <div
+          <motion.div
             key={i}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3 + i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="absolute left-1/2 top-1/2 h-[90px] w-[46px] rounded-full sm:h-[100px] sm:w-[50px]"
             style={{
               background: `radial-gradient(ellipse at 50% 80%, ${p.color}45 0%, ${p.color}18 50%, transparent 75%)`,
@@ -146,11 +258,15 @@ function PetalChart({ lang }: { lang: Lang }) {
 
       {/* Center glow */}
       <div className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-emerald-400/25 via-cyan-400/15 to-violet-500/20 blur-md" />
-      <div className="absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/[0.06] text-sm text-violet-300">
+      <motion.div
+        animate={{ scale: [1, 1.15, 1] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/[0.06] text-sm text-violet-300"
+      >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
         </svg>
-      </div>
+      </motion.div>
 
       {/* Labels at petal tips */}
       {petals.map((p, i) => {
@@ -159,8 +275,11 @@ function PetalChart({ lang }: { lang: Lang }) {
         const x = Math.cos(angleRad) * radius;
         const y = Math.sin(angleRad) * radius;
         return (
-          <div
+          <motion.div
             key={i}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 + i * 0.1 }}
             className="absolute text-center"
             style={{
               left: `calc(50% + ${x}px)`,
@@ -170,7 +289,7 @@ function PetalChart({ lang }: { lang: Lang }) {
           >
             <div className="text-xs font-bold text-white sm:text-sm">{p.value}%</div>
             <div className="text-[9px] leading-tight text-neutral-400 sm:text-[10px]">{p.label}</div>
-          </div>
+          </motion.div>
         );
       })}
     </div>
@@ -195,8 +314,11 @@ function ActivityDots({ months }: { months: string[] }) {
               const r = seededRandom(seed);
               const level = r < 0.3 ? 0 : r < 0.5 ? 1 : r < 0.7 ? 2 : r < 0.85 ? 3 : 4;
               return (
-                <div
+                <motion.div
                   key={row}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.3 + (col * rows + row) * 0.008 }}
                   className={`h-[7px] w-[7px] rounded-full sm:h-2 sm:w-2 ${
                     level === 0
                       ? "bg-white/[0.06]"
@@ -220,7 +342,7 @@ function ActivityDots({ months }: { months: string[] }) {
 
 /* ─── Card wrapper ─────────────────────────────────────────────────── */
 
-const CARD = "rounded-2xl border border-white/[0.07] bg-[#141417] p-5 sm:p-7";
+const CARD = "glow-card rounded-2xl border border-white/[0.07] bg-[#141417] p-5 sm:p-7";
 
 /* ─── Main ─────────────────────────────────────────────────────────── */
 
@@ -229,6 +351,10 @@ export default function HomePage() {
   const [notesCount, setNotesCount] = useState(0);
   const [bookmarksCount, setBookmarksCount] = useState(0);
   const [quickTab, setQuickTab] = useState<"week" | "month">("week");
+  const [streak, setStreak] = useState<StreakData>({ current: 0, best: 0, lastDate: "" });
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [quizScore, setQuizScore] = useState(0);
+  const [quizMastered, setQuizMastered] = useState(0);
 
   const t = copy[lang];
   const totalTerms = TERMS.length;
@@ -242,6 +368,22 @@ export default function HomePage() {
       const b = JSON.parse(localStorage.getItem("tax-guide-glossary-bookmarks") || "[]");
       setBookmarksCount(Array.isArray(b) ? b.length : 0);
     } catch { setBookmarksCount(0); }
+
+    // Streak
+    const s = updateStreak();
+    setStreak(s);
+
+    // Quote
+    setQuoteIndex(Math.floor(Math.random() * QUOTES.en.length));
+
+    // Quiz stats
+    try {
+      const qh = JSON.parse(localStorage.getItem("tax-guide-quiz-history") || "{}");
+      if (qh.totalAttempted > 0) {
+        setQuizScore(Math.round((qh.totalCorrect / qh.totalAttempted) * 100));
+      }
+      setQuizMastered(qh.mastered?.length ?? 0);
+    } catch {}
   }, []);
 
   const bookmarkPct = totalTerms > 0 ? Math.round((bookmarksCount / totalTerms) * 100) : 0;
@@ -260,6 +402,11 @@ export default function HomePage() {
           animate={{ x: [0, 20, 0] }}
           transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
         />
+        <motion.div
+          className="absolute left-[-80px] bottom-[20%] h-[280px] w-[280px] rounded-full bg-amber-500/8 blur-[100px]"
+          animate={{ opacity: [0.2, 0.45, 0.2] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        />
       </div>
 
       {/* Header */}
@@ -271,18 +418,35 @@ export default function HomePage() {
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/30 to-emerald-500/20 text-sm ring-1 ring-white/10">
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/30 to-emerald-500/20 text-sm ring-1 ring-white/10"
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
-            </div>
+            </motion.div>
             <div className="leading-tight">
               <div className="text-sm font-semibold text-white">{t.navTitle}</div>
               <div className="hidden text-[11px] text-neutral-500 sm:block">{t.navSub}</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Cmd+K button */}
+            <button
+              onClick={() => {
+                window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
+              }}
+              className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-neutral-400 transition-colors hover:bg-white/10 hover:text-white sm:inline-flex"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              {t.cmdK}
+              <kbd className="ml-1 rounded border border-white/10 bg-white/[0.06] px-1 py-0.5 text-[9px] font-semibold">⌘K</kbd>
+            </button>
             <Link
               href="/glossary"
               className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
@@ -317,6 +481,49 @@ export default function HomePage() {
       {/* Dashboard grid */}
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8" data-readaloud-content>
         <LangSwitchWrapper lang={lang}>
+
+        {/* Motivational Quote + Streak Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          {/* Quote */}
+          <motion.div
+            key={`quote-${quoteIndex}-${lang}`}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex-1"
+          >
+            <p className="text-sm italic text-neutral-400">
+              &ldquo;{QUOTES[lang][quoteIndex]}&rdquo;
+            </p>
+          </motion.div>
+
+          {/* Streak pill */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, type: "spring", damping: 20 }}
+            className="flex items-center gap-3 self-start rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-2.5"
+          >
+            <span className={`text-2xl ${streak.current > 0 ? "animate-streak-fire" : ""}`}>
+              🔥
+            </span>
+            <div className="leading-tight">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-lg font-bold text-amber-400">{streak.current}</span>
+                <span className="text-xs text-amber-400/60">{t.streakDays}</span>
+              </div>
+              <div className="text-[10px] text-neutral-500">
+                {t.streakBest}: {streak.best} {t.streakDays}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -351,7 +558,7 @@ export default function HomePage() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-white/[0.04]"
+                  className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-all duration-200 hover:bg-white/[0.04] hover:translate-x-0.5"
                 >
                   <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${item.color}/15`}>
                     <item.Logo size={28} className="scale-[0.35] origin-center" />
@@ -394,14 +601,16 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Big number */}
+            {/* Big number with animation */}
             <div className="mt-3 flex items-end justify-between">
               <div>
-                <div className="text-4xl font-bold tracking-tight text-white">{totalTerms.toLocaleString()}</div>
+                <div className="text-4xl font-bold tracking-tight text-white">
+                  <AnimatedNumber value={totalTerms} />
+                </div>
                 <div className="mt-0.5 text-xs text-neutral-500">{t.termsLabel}</div>
               </div>
               <div className="text-right">
-                <span className="text-sm font-semibold text-emerald-400">{bookmarkPct}%</span>
+                <span className="text-sm font-semibold text-emerald-400"><AnimatedNumber value={bookmarkPct} />%</span>
                 <span className="ml-1.5 text-xs text-neutral-500">{t.progressLabel}</span>
               </div>
             </div>
@@ -414,9 +623,11 @@ export default function HomePage() {
                   background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #06b6d4)",
                 }}
               />
-              <div
+              <motion.div
                 className="absolute right-0 top-0 bottom-0 bg-neutral-800/80"
-                style={{ width: `${100 - Math.min(bookmarkPct * 2, 100)}%` }}
+                initial={{ width: "100%" }}
+                animate={{ width: `${100 - Math.min(bookmarkPct * 2, 100)}%` }}
+                transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
               />
               <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-white drop-shadow">
                 {bookmarksCount}
@@ -541,7 +752,7 @@ export default function HomePage() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="group flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-white/[0.04]"
+                    className="group flex items-center gap-3 rounded-xl px-2 py-3 transition-all duration-200 hover:bg-white/[0.04] hover:translate-x-0.5"
                   >
                     {/* Avatar */}
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg ${avatarColors[i]}`}>
@@ -576,6 +787,53 @@ export default function HomePage() {
                   </Link>
                 );
               })}
+            </div>
+          </motion.div>
+
+          {/* ═══════ Card 5 — Flashcard Quiz (Full width) ═══════ */}
+          <motion.div
+            className={`${CARD} md:col-span-2`}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <motion.div
+                  animate={{ rotate: [0, 8, -8, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-violet-500/20 text-2xl"
+                >
+                  ⚡
+                </motion.div>
+                <div>
+                  <h2 className="text-[15px] font-semibold text-white">{t.quizTitle}</h2>
+                  <p className="mt-0.5 text-xs text-neutral-500">{t.quizSub}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                {/* Quick stats */}
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-emerald-400">{quizScore}%</div>
+                    <div className="text-[9px] text-neutral-500">{t.quizScore}</div>
+                  </div>
+                  <div className="h-8 w-px bg-white/[0.06]" />
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-violet-400">{quizMastered}</div>
+                    <div className="text-[9px] text-neutral-500">{t.quizMastered}</div>
+                  </div>
+                </div>
+                <Link
+                  href="/quiz"
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-violet-500/20 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:from-amber-500/30 hover:to-violet-500/30 hover:shadow-[0_0_20px_rgba(139,92,246,0.15)]"
+                >
+                  {t.quizBtn}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </Link>
+              </div>
             </div>
           </motion.div>
         </motion.div>
