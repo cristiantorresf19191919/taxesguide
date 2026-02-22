@@ -91,43 +91,47 @@ export function Table({
   lang?: Lang;
 }) {
   return (
-    <motion.div variants={fadeUp} className="overflow-x-auto rounded-2xl border border-white/[0.08]">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-white/[0.08] bg-white/[0.04]">
-            {headers.map((h) => (
-              <th
-                key={h}
-                className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-neutral-400"
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <motion.tr
-              key={i}
-              className={`border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.04] ${
-                i % 2 === 1 ? "bg-white/[0.02]" : ""
-              }`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.03 }}
-            >
-              {row.map((cell, j) => (
-                <td
-                  key={j}
-                  className={`px-4 py-3 ${j === 0 ? "font-medium text-white/90" : "text-neutral-300"}`}
+    <motion.div variants={fadeUp} className="relative overflow-hidden rounded-2xl border border-white/[0.08]">
+      <div className="-mb-px overflow-x-auto">
+        <table className="w-full min-w-[480px] text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/[0.08] bg-white/[0.04]">
+              {headers.map((h) => (
+                <th
+                  key={h}
+                  className="whitespace-nowrap px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-neutral-400 sm:px-4"
                 >
-                  <AutoGlossary text={cell} lang={lang} />
-                </td>
+                  {h}
+                </th>
               ))}
-            </motion.tr>
-          ))}
-        </tbody>
-      </table>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <motion.tr
+                key={i}
+                className={`border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.04] ${
+                  i % 2 === 1 ? "bg-white/[0.02]" : ""
+                }`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.03 }}
+              >
+                {row.map((cell, j) => (
+                  <td
+                    key={j}
+                    className={`px-3 py-3 sm:px-4 ${j === 0 ? "font-medium text-white/90" : "text-neutral-300"}`}
+                  >
+                    <AutoGlossary text={cell} lang={lang} />
+                  </td>
+                ))}
+              </motion.tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* Mobile scroll hint */}
+      <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-6 bg-gradient-to-l from-neutral-950/60 to-transparent sm:hidden" />
     </motion.div>
   );
 }

@@ -513,21 +513,21 @@ export default function AnalisisChatGPTPage() {
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className="sticky top-0 z-50 border-b border-white/[0.06] bg-neutral-950/80 backdrop-blur-xl"
       >
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-2">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-2 px-3 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white">
+              <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3 sm:py-2 sm:text-sm">
                 ← {t.menu}
               </Link>
             </motion.span>
             <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/glossary" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white">
+              <Link href="/glossary" className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3 sm:py-2 sm:text-sm">
                 {lang === "en" ? "Glossary" : "Glosario"}
               </Link>
             </motion.span>
           </div>
-          <div className="flex items-center gap-2">
-            <ChatGPTLogo size={32} />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <ChatGPTLogo size={28} />
             <span className="hidden text-sm font-semibold sm:inline">{t.title}</span>
             <motion.button
               onClick={() => setLang((p) => (p === "en" ? "es" : "en"))}
@@ -541,7 +541,7 @@ export default function AnalisisChatGPTPage() {
           </div>
         </div>
       </motion.header>
-      <main className="mx-auto max-w-4xl px-4 pb-28 pt-10 sm:px-6" data-readaloud-content>
+      <main className="mx-auto max-w-4xl px-4 pb-36 pt-8 sm:px-6 sm:pb-28 sm:pt-10" data-readaloud-content>
         <LangSwitchWrapper lang={lang}>
           <ChatGPTContent lang={lang} />
         </LangSwitchWrapper>
