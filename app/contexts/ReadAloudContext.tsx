@@ -66,7 +66,10 @@ function getVoices(): VoiceOption[] {
 
 function pickDefaultVoice(voices: VoiceOption[], lang: ReadAloudLang, gender: ReadAloudGender): VoiceOption | undefined {
   if (lang === "es") {
-    // Prefer Latino Spanish voices, fall back to any Spanish voice
+    // Prefer "Google español" voice first
+    const googleEspanol = voices.find((v) => v.name.toLowerCase().includes("google español") || v.name.toLowerCase().includes("google espanol"));
+    if (googleEspanol) return googleEspanol;
+    // Fall back to Latino Spanish voices, then any Spanish voice
     const latino = voices.filter((v) => isSpanishLatino(v.lang));
     const sameGenderLatino = latino.filter((v) => v.gender === gender);
     if (sameGenderLatino.length) return sameGenderLatino[0];
@@ -75,6 +78,9 @@ function pickDefaultVoice(voices: VoiceOption[], lang: ReadAloudLang, gender: Re
     const sameGenderSpanish = allSpanish.filter((v) => v.gender === gender);
     return sameGenderSpanish[0] ?? allSpanish[0];
   }
+  // Prefer "Google US English" voice first
+  const googleUSEnglish = voices.find((v) => v.name === "Google US English");
+  if (googleUSEnglish) return googleUSEnglish;
   const enVoices = voices.filter((v) => isEnLang(v.lang));
   const sameGender = enVoices.filter((v) => v.gender === gender);
   return sameGender[0] ?? enVoices[0];
