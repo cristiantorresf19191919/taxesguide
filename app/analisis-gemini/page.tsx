@@ -7,6 +7,8 @@ import { GeminiLogo } from "../components/ModelLogos";
 import { GlossaryTerm } from "../components/GlossaryTerm";
 import { Section, Card, Table, fadeUp, stagger } from "../components/AnalysisUI";
 import { LangSwitchWrapper } from "../components/LangSwitchWrapper";
+import { AnalysisQuiz } from "../components/AnalysisQuiz";
+import { geminiQuestions } from "../data/quiz-gemini";
 
 type Lang = "en" | "es";
 
@@ -203,6 +205,8 @@ function GeminiContent({ lang }: { lang: Lang }) {
               {isEn ? "The journey to becoming an independent tax preparer in Georgia combines a low regulatory barrier at the state level with rigorous federal standards (data security, ethics, e-file suitability). Success depends on continuous education (e.g., AFSP), strategic firm management (LLC, E&O and cyber insurance, Security Six), professional-grade software with strong diagnostics, and a digital presence that builds trust. This systematic approach ensures the firm is legally compliant and positioned to deliver the high-quality, secure service modern taxpayers expect." : "El camino para ser preparador de impuestos independiente en Georgia combina una baja barrera regulatoria estatal con estándares federales rigurosos (seguridad de datos, ética, idoneidad para e-file). El éxito depende de la formación continua (p. ej. AFSP), la gestión estratégica de la firma (LLC, seguros E&O y cibernético, Security Six), software profesional con buenos diagnósticos y una presencia digital que genere confianza. Este enfoque sistemático asegura que la firma cumpla la ley y esté en condiciones de ofrecer el servicio seguro y de calidad que los contribuyentes esperan."}
             </p>
           </Section>
+
+          <AnalysisQuiz questions={geminiQuestions} lang={lang} accentColor="blue" />
         </motion.article>
   );
 }

@@ -7,6 +7,8 @@ import { ChatGPTLogo } from "../components/ModelLogos";
 import { GlossaryTerm } from "../components/GlossaryTerm";
 import { Section, Card, Table, fadeUp, stagger } from "../components/AnalysisUI";
 import { LangSwitchWrapper } from "../components/LangSwitchWrapper";
+import { AnalysisQuiz } from "../components/AnalysisQuiz";
+import { chatgptQuestions } from "../data/quiz-chatgpt";
 
 type Lang = "en" | "es";
 
@@ -486,6 +488,8 @@ function ChatGPTContent({ lang }: { lang: Lang }) {
             : "Ver la primera temporada como una inversión de aprendizaje. Apuntar a 50–75 declaraciones a precios competitivos, recopilar reseñas y avanzar hacia la credencial de Agente Inscrito para representación ilimitada ante el IRS. La industria de preparación de impuestos premia la constancia y la confianza — los clientes que confíen en Sandra volverán año tras año y traerán referidos."}
         </p>
       </Section>
+
+      <AnalysisQuiz questions={chatgptQuestions} lang={lang} accentColor="emerald" />
     </motion.article>
   );
 }

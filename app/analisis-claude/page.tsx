@@ -7,6 +7,8 @@ import { ClaudeLogo } from "../components/ModelLogos";
 import { GlossaryTerm } from "../components/GlossaryTerm";
 import { Section, Card, Table, fadeUp, stagger } from "../components/AnalysisUI";
 import { LangSwitchWrapper } from "../components/LangSwitchWrapper";
+import { AnalysisQuiz } from "../components/AnalysisQuiz";
+import { claudeQuestions } from "../data/quiz-claude";
 
 type Lang = "en" | "es";
 
@@ -256,6 +258,8 @@ function ClaudeContent({ lang }: { lang: Lang }) {
               {isEn ? "Sandra's path in Georgia is remarkably accessible: no state licensing, affordable training, and startup cost as low as $2,000–$3,000. Success factors are practical: solid training before the first season, complete AFSP for credibility and representation rights, master the software, market aggressively before tax season, and maintain rigorous data security and due diligence. View the first season as a learning investment; target 50–75 returns at competitive rates and build toward the Enrolled Agent credential. The industry rewards consistency and relationships — clients who trust Sandra will return and bring referrals." : "El camino de Sandra en Georgia es muy accesible: sin licencia estatal, formación asequible y coste de arranque desde $2,000–$3,000. Los factores de éxito son prácticos: formación sólida antes de la primera temporada, completar el AFSP para credibilidad y derechos de representación, dominar el software, promocionarse antes de la temporada y mantener seguridad de datos y debida diligencia. Considera la primera temporada una inversión de aprendizaje; apunta a 50–75 declaraciones a precios competitivos y avanza hacia la credencial de Enrolled Agent. La industria premia la constancia y las relaciones: los clientes que confíen en Sandra volverán y traerán referidos."}
             </p>
           </Section>
+
+          <AnalysisQuiz questions={claudeQuestions} lang={lang} accentColor="amber" />
         </motion.article>
   );
 }
