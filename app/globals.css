@@ -93,6 +93,7 @@
     animation: streak-fire 1.5s ease-in-out infinite;
   }
 
+  /* ── Enhanced card system ─────────────────────────────────────── */
   .glow-card {
     @apply relative overflow-hidden;
   }
@@ -116,6 +117,46 @@
   .glow-card:hover::before {
     opacity: 1;
   }
+
+  /* Modern card with subtle lift on hover */
+  .card-modern {
+    @apply rounded-2xl border bg-white shadow-sm transition-all duration-300
+      border-gray-200/80
+      dark:border-white/[0.06] dark:bg-white/[0.025];
+  }
+
+  @media (hover: hover) {
+    .card-modern:hover {
+      @apply shadow-md -translate-y-0.5
+        dark:border-white/[0.1] dark:bg-white/[0.04];
+    }
+  }
+
+  /* Game card accent stripe */
+  .game-accent {
+    @apply relative overflow-hidden rounded-2xl;
+  }
+
+  .game-accent::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 1rem 1rem 0 0;
+    pointer-events: none;
+  }
+
+  .game-accent-pink::after { background: linear-gradient(to right, #ec4899, #f43f5e); }
+  .game-accent-cyan::after { background: linear-gradient(to right, #06b6d4, #3b82f6); }
+  .game-accent-emerald::after { background: linear-gradient(to right, #10b981, #14b8a6); }
+  .game-accent-amber::after { background: linear-gradient(to right, #f59e0b, #eab308); }
+  .game-accent-indigo::after { background: linear-gradient(to right, #6366f1, #8b5cf6); }
+  .game-accent-teal::after { background: linear-gradient(to right, #14b8a6, #06b6d4); }
+  .game-accent-orange::after { background: linear-gradient(to right, #f97316, #ef4444); }
+  .game-accent-rose::after { background: linear-gradient(to right, #f43f5e, #ec4899); }
+  .game-accent-violet::after { background: linear-gradient(to right, #8b5cf6, #6366f1); }
 }
 
 @keyframes fadeIn {

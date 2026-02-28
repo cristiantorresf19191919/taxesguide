@@ -226,15 +226,15 @@ function ProgressRing({ value, size = 28, color = "#8b5cf6" }: { value: number; 
 
 /* ─── Tab definitions ─────────────────────────────────────────────── */
 
-const TABS: { id: DashboardTab; icon: string }[] = [
-  { id: "learn", icon: "📖" },
-  { id: "practice", icon: "⚡" },
-  { id: "progress", icon: "📊" },
+const TABS: { id: DashboardTab; icon: string; labelEn: string; labelEs: string }[] = [
+  { id: "learn", icon: "📖", labelEn: "Learn", labelEs: "Aprender" },
+  { id: "practice", icon: "⚡", labelEn: "Practice", labelEs: "Practicar" },
+  { id: "progress", icon: "📊", labelEn: "Progress", labelEs: "Progreso" },
 ];
 
 /* ─── Card wrapper ─────────────────────────────────────────────────── */
 
-const CARD = "glow-card rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-zinc-900 sm:p-7";
+const CARD = "card-modern glow-card p-5 sm:p-7";
 
 /* ─── Main ─────────────────────────────────────────────────────────── */
 
@@ -306,12 +306,6 @@ export default function HomePage() {
 
   const bookmarkPct = totalTerms > 0 ? Math.round((bookmarksCount / totalTerms) * 100) : 0;
 
-  const tabLabel = (tab: DashboardTab) => {
-    if (tab === "learn") return t.tabLearn;
-    if (tab === "practice") return t.tabPractice;
-    return t.tabProgress;
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 text-slate-900 transition-colors duration-300 dark:bg-zinc-950 dark:text-neutral-100">
       {/* Background */}
@@ -338,54 +332,73 @@ export default function HomePage() {
         initial={{ y: -16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-white/[0.06] dark:bg-neutral-950/80"
+        className="sticky top-0 z-50 border-b border-gray-200/60 bg-white/85 backdrop-blur-2xl transition-colors duration-300 dark:border-white/[0.06] dark:bg-neutral-950/85"
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/30 to-emerald-500/20 text-sm ring-1 ring-black/5 dark:ring-white/10"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-900 dark:text-white">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-sm shadow-lg shadow-violet-500/20">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
-            </motion.div>
+            </div>
             <div className="leading-tight">
-              <div className="text-sm font-semibold text-slate-900 dark:text-white">{t.navTitle}</div>
-              <div className="hidden text-[11px] text-slate-500 dark:text-neutral-500 sm:block">{t.navSub}</div>
+              <div className="text-[13px] font-bold text-slate-900 dark:text-white">{t.navTitle}</div>
+              <div className="hidden text-[10px] text-slate-400 dark:text-neutral-500 sm:block">{t.navSub}</div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <ThemeToggle />
             <button
               onClick={() => {
                 window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
               }}
-              className="hidden items-center gap-1.5 rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-gray-200 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-xl border border-gray-200/60 bg-gray-50 px-3 py-1.5 text-xs font-medium text-slate-500 transition-all hover:bg-gray-100 hover:text-slate-900 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-neutral-400 dark:hover:bg-white/[0.06] dark:hover:text-white sm:inline-flex"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               {t.cmdK}
-              <kbd className="ml-1 rounded border border-gray-300 bg-gray-50 px-1 py-0.5 text-[9px] font-semibold dark:border-white/10 dark:bg-white/[0.06]">⌘K</kbd>
+              <kbd className="ml-1 rounded-md border border-gray-200 bg-white px-1 py-0.5 text-[9px] font-semibold dark:border-white/[0.08] dark:bg-white/[0.04]">⌘K</kbd>
             </button>
             <Link
               href="/glossary"
-              className="rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
+              className="hidden rounded-xl border border-gray-200/60 bg-gray-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600 transition-all hover:bg-gray-100 hover:text-slate-900 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-neutral-300 dark:hover:bg-white/[0.06] dark:hover:text-white sm:inline-flex"
             >
               {lang === "en" ? "Glossary" : "Glosario"}
             </Link>
             <Link
               href="/notes"
-              className="rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
+              className="hidden rounded-xl border border-gray-200/60 bg-gray-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600 transition-all hover:bg-gray-100 hover:text-slate-900 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-neutral-300 dark:hover:bg-white/[0.06] dark:hover:text-white sm:inline-flex"
             >
               {lang === "en" ? "Notes" : "Apuntes"}
             </Link>
+            {/* Mobile nav links */}
+            <Link
+              href="/glossary"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-gray-100 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-white/[0.06] dark:hover:text-white sm:hidden"
+              aria-label="Glossary"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </Link>
+            <Link
+              href="/notes"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-gray-100 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-white/[0.06] dark:hover:text-white sm:hidden"
+              aria-label="Notes"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+            </Link>
             <button
               onClick={() => setLang((l) => (l === "en" ? "es" : "en"))}
-              className="relative overflow-hidden rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
+              className="flex h-8 items-center justify-center rounded-xl border border-gray-200/60 bg-gray-50 px-2.5 text-[11px] font-bold text-slate-600 transition-all hover:bg-gray-100 hover:text-slate-900 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-neutral-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
             >
               <motion.span
                 key={lang}
@@ -420,7 +433,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+          className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
         >
           <motion.div
             key={`quote-${quoteIndex}-${lang}`}
@@ -438,7 +451,7 @@ export default function HomePage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, type: "spring", damping: 20 }}
-            className="flex items-center gap-3 self-start rounded-2xl border border-amber-400/20 bg-amber-50 px-4 py-2.5 dark:border-amber-500/20 dark:bg-amber-500/10"
+            className="flex items-center gap-2.5 self-start rounded-xl border border-amber-400/20 bg-amber-50/80 px-3.5 py-2 dark:border-amber-500/15 dark:bg-amber-500/[0.08]"
           >
             <span className={`text-2xl ${streak.current > 0 ? "animate-streak-fire" : ""}`}>
               🔥
@@ -456,7 +469,7 @@ export default function HomePage() {
         </motion.div>
 
         {/* XP & Level Bar */}
-        <div className="mb-6">
+        <div className="mb-5">
           <XPBar lang={lang} />
         </div>
 
@@ -465,22 +478,22 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-6"
+          className="mb-8"
         >
-          <div className="flex rounded-2xl bg-white/80 p-1.5 shadow-sm border border-gray-200 backdrop-blur-sm dark:bg-zinc-900/80 dark:border-white/[0.08]">
+          <div className="flex rounded-2xl bg-white/90 p-1.5 shadow-sm border border-gray-200/60 backdrop-blur-xl dark:bg-white/[0.03] dark:border-white/[0.06]">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-all duration-200 sm:gap-2 sm:px-4 ${
                   activeTab === tab.id
-                    ? "bg-gradient-to-r from-violet-500 to-indigo-500 text-white shadow-lg shadow-violet-500/20"
-                    : "text-slate-500 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                    ? "bg-gradient-to-r from-violet-500 to-indigo-500 text-white shadow-lg shadow-violet-500/25"
+                    : "text-slate-400 hover:text-slate-700 dark:text-neutral-500 dark:hover:text-neutral-200"
                 }`}
               >
-                <span className="text-base">{tab.icon}</span>
-                <span className="hidden sm:inline">{tabLabel(tab.id)}</span>
+                <span className="text-sm sm:text-base">{tab.icon}</span>
+                <span className="text-[11px] sm:text-[13px]">{lang === "en" ? tab.labelEn : tab.labelEs}</span>
               </button>
             ))}
           </div>
@@ -498,7 +511,7 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
-              className="grid gap-5 sm:gap-6 md:grid-cols-2"
+              className="grid gap-5 sm:gap-7 md:grid-cols-2"
             >
               {/* AI Analyses Card */}
               <motion.div
@@ -680,126 +693,118 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
-              className="grid gap-5 sm:gap-6 md:grid-cols-2"
+              className="space-y-8"
             >
-              {/* Daily Challenge */}
-              <DailyChallenge lang={lang} />
-
-              {/* Speed Round */}
-              <SpeedRound lang={lang} />
+              {/* Quick Practice Row */}
+              <div className="grid gap-5 sm:gap-6 md:grid-cols-2">
+                <DailyChallenge lang={lang} />
+                <SpeedRound lang={lang} />
+              </div>
 
               {/* Games Section Header */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="md:col-span-2 flex items-center gap-3"
+                className="flex items-center gap-3"
               >
-                <span className="text-lg">🎮</span>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {lang === "en" ? "Learning Games" : "Juegos de aprendizaje"}
-                </h2>
-                <div className="h-px flex-1 bg-gray-200 dark:bg-white/[0.06]" />
-                <span className="text-[10px] text-slate-400 dark:text-neutral-500">
-                  {lang === "en" ? "8 games" : "8 juegos"}
-                </span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 dark:from-violet-500/10 dark:to-pink-500/10">
+                  <span className="text-sm">🎮</span>
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {lang === "en" ? "Learning Games" : "Juegos de aprendizaje"}
+                  </h2>
+                  <p className="text-[10px] text-slate-400 dark:text-neutral-500">
+                    {lang === "en" ? "8 games with combo XP multipliers" : "8 juegos con multiplicadores de XP"}
+                  </p>
+                </div>
+                <div className="h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent dark:from-white/[0.06]" />
               </motion.div>
 
-              {/* Term Matcher - Memory Game */}
-              <TermMatcher lang={lang} />
-
-              {/* Category Sort - Sorting Game */}
-              <CategorySort lang={lang} />
-
-              {/* Tax Climber - Climbing Game */}
-              <TaxClimber lang={lang} />
-
-              {/* Word Scramble */}
-              <WordScramble lang={lang} />
-
-              {/* True/False Blitz */}
-              <TrueFalseBlitz lang={lang} />
-
-              {/* Acronym Challenge */}
-              <AcronymChallenge lang={lang} />
-
-              {/* Tax Bingo */}
-              <TaxBingo lang={lang} />
-
-              {/* Definition Dash */}
-              <DefinitionDash lang={lang} />
+              {/* Games Grid */}
+              <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="game-accent game-accent-pink"><TermMatcher lang={lang} /></div>
+                <div className="game-accent game-accent-cyan"><CategorySort lang={lang} /></div>
+                <div className="game-accent game-accent-emerald"><TaxClimber lang={lang} /></div>
+                <div className="game-accent game-accent-amber"><WordScramble lang={lang} /></div>
+                <div className="game-accent game-accent-indigo"><TrueFalseBlitz lang={lang} /></div>
+                <div className="game-accent game-accent-teal"><AcronymChallenge lang={lang} /></div>
+                <div className="game-accent game-accent-orange"><TaxBingo lang={lang} /></div>
+                <div className="game-accent game-accent-rose"><DefinitionDash lang={lang} /></div>
+              </div>
 
               {/* Focus Timer */}
               <StudyTimer lang={lang} />
 
-              {/* More Tools Section */}
+              {/* Study Tools Section Header */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.15 }}
-                className="md:col-span-2 flex items-center gap-3"
+                className="flex items-center gap-3"
               >
-                <span className="text-lg">🛠️</span>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {lang === "en" ? "Study Tools" : "Herramientas de estudio"}
-                </h2>
-                <div className="h-px flex-1 bg-gray-200 dark:bg-white/[0.06]" />
-              </motion.div>
-
-              {/* Review Queue */}
-              <ReviewQueue lang={lang} />
-
-              {/* Exam Simulator */}
-              <ExamSimulator lang={lang} />
-
-              {/* Weak Areas */}
-              <WeakAreas lang={lang} />
-
-              {/* Flashcard Quiz (Full width) */}
-              <motion.div
-                className={`${CARD} md:col-span-2`}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-              >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-4">
-                    <motion.div
-                      animate={{ rotate: [0, 8, -8, 0] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-violet-500/20 text-2xl"
-                    >
-                      ⚡
-                    </motion.div>
-                    <div>
-                      <h2 className="text-[15px] font-semibold text-slate-900 dark:text-white">{t.quizTitle}</h2>
-                      <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">{t.quizSub}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{quizScore}%</div>
-                        <div className="text-[9px] text-slate-500 dark:text-neutral-500">{t.quizScore}</div>
-                      </div>
-                      <div className="h-8 w-px bg-gray-200 dark:bg-white/[0.06]" />
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-violet-600 dark:text-violet-400">{quizMastered}</div>
-                        <div className="text-[9px] text-slate-500 dark:text-neutral-500">{t.quizMastered}</div>
-                      </div>
-                    </div>
-                    <Link
-                      href="/quiz"
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-violet-500/20 px-5 py-2.5 text-sm font-semibold text-slate-900 transition-all hover:from-amber-500/30 hover:to-violet-500/30 hover:shadow-[0_0_20px_rgba(139,92,246,0.15)] dark:text-white"
-                    >
-                      {t.quizBtn}
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                      </svg>
-                    </Link>
-                  </div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 dark:from-emerald-500/10 dark:to-cyan-500/10">
+                  <span className="text-sm">🛠️</span>
                 </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {lang === "en" ? "Study Tools" : "Herramientas de estudio"}
+                  </h2>
+                  <p className="text-[10px] text-slate-400 dark:text-neutral-500">
+                    {lang === "en" ? "Review, practice exams & more" : "Repaso, exámenes de práctica y más"}
+                  </p>
+                </div>
+                <div className="h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent dark:from-white/[0.06]" />
               </motion.div>
+
+              <div className="grid gap-5 sm:gap-6 md:grid-cols-2">
+                <ReviewQueue lang={lang} />
+                <ExamSimulator lang={lang} />
+                <WeakAreas lang={lang} />
+
+                {/* Flashcard Quiz */}
+                <motion.div
+                  className={`${CARD}`}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                >
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-violet-500/20 text-lg">
+                        ⚡
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-[13px] font-bold text-slate-900 dark:text-white">{t.quizTitle}</h2>
+                        <p className="text-[10px] text-slate-500 dark:text-neutral-500 truncate">{t.quizSub}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-center">
+                          <div className="text-base font-bold text-emerald-600 dark:text-emerald-400">{quizScore}%</div>
+                          <div className="text-[9px] text-slate-400">{t.quizScore}</div>
+                        </div>
+                        <div className="h-6 w-px bg-gray-200 dark:bg-white/[0.06]" />
+                        <div className="text-center">
+                          <div className="text-base font-bold text-violet-600 dark:text-violet-400">{quizMastered}</div>
+                          <div className="text-[9px] text-slate-400">{t.quizMastered}</div>
+                        </div>
+                      </div>
+                      <Link
+                        href="/quiz"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-violet-500/20 transition-all hover:shadow-violet-500/30"
+                      >
+                        {t.quizBtn}
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
           )}
 
@@ -813,7 +818,7 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
-              className="grid gap-5 sm:gap-6 md:grid-cols-2"
+              className="grid gap-5 sm:gap-7 md:grid-cols-2"
             >
               {/* Progress Card */}
               <ProgressCard lang={lang} />
