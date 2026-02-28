@@ -9,6 +9,11 @@ import { ThemeToggle } from "./components/ThemeToggle";
 import { XPBar } from "./components/XPBar";
 import { DailyChallenge } from "./components/DailyChallenge";
 import { AchievementShowcase } from "./components/AchievementShowcase";
+import { StudyHeatmap } from "./components/StudyHeatmap";
+import { SpeedRound } from "./components/SpeedRound";
+import { LearningPath } from "./components/LearningPath";
+import { WeakAreas } from "./components/WeakAreas";
+import { ProgressCard } from "./components/ProgressCard";
 import { useProgress } from "./contexts/ProgressContext";
 import { TERMS } from "./data/terms";
 
@@ -818,6 +823,23 @@ export default function HomePage() {
 
           {/* ═══════ Achievements ═══════ */}
           <AchievementShowcase lang={lang} />
+
+          {/* ═══════ Speed Round ═══════ */}
+          <SpeedRound lang={lang} />
+
+          {/* ═══════ Weak Areas ═══════ */}
+          <WeakAreas lang={lang} />
+
+          {/* ═══════ Study Heatmap (Full width) ═══════ */}
+          <div className="md:col-span-2">
+            <StudyHeatmap lang={lang} />
+          </div>
+
+          {/* ═══════ Learning Path ═══════ */}
+          <LearningPath lang={lang} />
+
+          {/* ═══════ Progress Card ═══════ */}
+          <ProgressCard lang={lang} />
 
           {/* ═══════ Card 5 — Flashcard Quiz (Full width) ═══════ */}
           <motion.div

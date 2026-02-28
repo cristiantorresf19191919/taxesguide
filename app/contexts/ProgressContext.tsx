@@ -31,6 +31,10 @@ export type ProgressState = {
   quizBestStreak: number;
   perfectQuizzes: number;
   studyStreak: number;
+  dailyXPLog: Record<string, number>;
+  speedRoundBest: number;
+  speedRoundsPlayed: number;
+  learningPathComplete: string[];
 };
 
 type ProgressContextValue = {
@@ -45,6 +49,8 @@ type ProgressContextValue = {
   recordPageVisited: (page: string) => void;
   recordDailyChallenge: () => void;
   recordStudyStreak: (streak: number) => void;
+  recordSpeedRound: (score: number) => void;
+  completeLearningTask: (taskId: string) => void;
   level: LevelDef;
   nextLevel: LevelDef | null;
   levelProgress: number;
@@ -66,6 +72,10 @@ const DEFAULT_STATE: ProgressState = {
   quizBestStreak: 0,
   perfectQuizzes: 0,
   studyStreak: 0,
+  dailyXPLog: {},
+  speedRoundBest: 0,
+  speedRoundsPlayed: 0,
+  learningPathComplete: [],
 };
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
@@ -100,6 +110,8 @@ function findNewAchievements(s: ProgressState): string[] {
   if (!has("daily_5") && s.dailyChallengesCompleted >= 5) newly.push("daily_5");
   if (!has("xp_5000") && s.xp >= 5000) newly.push("xp_5000");
   if (!has("quiz_perfect") && s.perfectQuizzes >= 1) newly.push("quiz_perfect");
+  if (!has("speed_demon") && s.speedRoundBest >= 15) newly.push("speed_demon");
+  if (!has("pathfinder") && s.learningPathComplete.length >= 6) newly.push("pathfinder");
   return newly;
 }
 
@@ -136,6 +148,16 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
           const a = ACHIEVEMENTS.find((x) => x.id === id);
           if (a) addToast(`${a.icon} ${a.titleEn}`, "success");
         });
+      }
+
+      // Track daily XP
+      const xpGained = next.xp - prev.xp;
+      if (xpGained > 0) {
+        const today = new Date().toISOString().slice(0, 10);
+        next = {
+          ...next,
+          dailyXPLog: { ...next.dailyXPLog, [today]: (next.dailyXPLog[today] || 0) + xpGained },
+        };
       }
 
       // Level-up check
@@ -261,6 +283,33 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     [commit],
   );
 
+  const recordSpeedRound = useCallback(
+    (score: number) => {
+      const s = stateRef.current;
+      const isBest = score > s.speedRoundBest;
+      commit({
+        ...s,
+        speedRoundsPlayed: s.speedRoundsPlayed + 1,
+        speedRoundBest: isBest ? score : s.speedRoundBest,
+        xp: s.xp + Math.max(score * 2, 5),
+      });
+    },
+    [commit],
+  );
+
+  const completeLearningTask = useCallback(
+    (taskId: string) => {
+      const s = stateRef.current;
+      if (s.learningPathComplete.includes(taskId)) return;
+      commit({
+        ...s,
+        learningPathComplete: [...s.learningPathComplete, taskId],
+        xp: s.xp + 20,
+      });
+    },
+    [commit],
+  );
+
   const level = getLevel(state.xp);
   const nextLevel = getNextLevel(state.xp);
   const levelProgress = getLevelProgress(state.xp);
@@ -279,6 +328,8 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         recordPageVisited,
         recordDailyChallenge,
         recordStudyStreak,
+        recordSpeedRound,
+        completeLearningTask,
         level,
         nextLevel,
         levelProgress,

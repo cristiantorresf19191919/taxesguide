@@ -40,6 +40,8 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: "daily_5", icon: "📅", titleEn: "Daily Warrior", titleEs: "Guerrero diario", descEn: "Complete 5 daily challenges", descEs: "Completa 5 retos diarios" },
   { id: "xp_5000", icon: "👑", titleEn: "Legendary", titleEs: "Legendario", descEn: "Earn 5,000 XP", descEs: "Gana 5,000 XP" },
   { id: "quiz_perfect", icon: "💯", titleEn: "Perfect Score", titleEs: "Puntaje perfecto", descEn: "100% on an analysis quiz", descEs: "100% en un quiz de análisis" },
+  { id: "speed_demon", icon: "⏱️", titleEn: "Speed Demon", titleEs: "Demonio veloz", descEn: "Score 15+ in a speed round", descEs: "Obtén 15+ en ronda rápida" },
+  { id: "pathfinder", icon: "🧭", titleEn: "Pathfinder", titleEs: "Pionero", descEn: "Complete the learning path", descEs: "Completa la ruta de aprendizaje" },
 ];
 
 export function getLevel(xp: number): LevelDef {
