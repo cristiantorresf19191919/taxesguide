@@ -3,6 +3,7 @@
 import { GlossaryProvider } from "@/app/contexts/GlossaryContext";
 import { ReadAloudProvider } from "@/app/contexts/ReadAloudContext";
 import { ToastProvider } from "@/app/contexts/ToastContext";
+import { ProgressProvider } from "@/app/contexts/ProgressContext";
 import { TermPopup } from "@/app/components/TermPopup";
 import { ReadAloudBar } from "@/app/components/ReadAloudBar";
 import { Footer } from "@/app/components/Footer";
@@ -14,8 +15,9 @@ import { KeyboardShortcuts } from "@/app/components/KeyboardShortcuts";
 export function GlossaryWrapper({ children }: { children: React.ReactNode }) {
   return (
     <ToastProvider>
-      <GlossaryProvider>
-        <ReadAloudProvider>
+      <ProgressProvider>
+        <GlossaryProvider>
+          <ReadAloudProvider>
           {children}
           <ScrollToTop />
           <Footer />
@@ -24,8 +26,9 @@ export function GlossaryWrapper({ children }: { children: React.ReactNode }) {
           <ToastContainer />
           <CommandPalette />
           <KeyboardShortcuts />
-        </ReadAloudProvider>
-      </GlossaryProvider>
+          </ReadAloudProvider>
+        </GlossaryProvider>
+      </ProgressProvider>
     </ToastProvider>
   );
 }

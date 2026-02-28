@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ClaudeLogo } from "../components/ModelLogos";
@@ -10,6 +10,7 @@ import { LangSwitchWrapper } from "../components/LangSwitchWrapper";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { AnalysisQuiz } from "../components/AnalysisQuiz";
 import { claudeQuestions } from "../data/quiz-claude";
+import { useProgress } from "../contexts/ProgressContext";
 
 type Lang = "en" | "es";
 
@@ -20,6 +21,8 @@ const ui = {
 
 function ClaudeContent({ lang }: { lang: Lang }) {
   const isEn = lang === "en";
+  const { recordPageVisited } = useProgress();
+  useEffect(() => { recordPageVisited("claude"); }, [recordPageVisited]);
   return (
         <motion.article
           variants={stagger}

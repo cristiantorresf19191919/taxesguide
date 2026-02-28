@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChatGPTLogo } from "../components/ModelLogos";
@@ -10,6 +10,7 @@ import { Section, Card, Table, fadeUp, stagger } from "../components/AnalysisUI"
 import { LangSwitchWrapper } from "../components/LangSwitchWrapper";
 import { AnalysisQuiz } from "../components/AnalysisQuiz";
 import { chatgptQuestions } from "../data/quiz-chatgpt";
+import { useProgress } from "../contexts/ProgressContext";
 
 type Lang = "en" | "es";
 
@@ -20,6 +21,8 @@ const ui = {
 
 function ChatGPTContent({ lang }: { lang: Lang }) {
   const isEn = lang === "en";
+  const { recordPageVisited } = useProgress();
+  useEffect(() => { recordPageVisited("chatgpt"); }, [recordPageVisited]);
   return (
     <motion.article
       variants={stagger}

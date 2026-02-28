@@ -6,6 +6,10 @@ import { motion } from "framer-motion";
 import { ChatGPTLogo, GeminiLogo, ClaudeLogo } from "./components/ModelLogos";
 import { LangSwitchWrapper } from "./components/LangSwitchWrapper";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { XPBar } from "./components/XPBar";
+import { DailyChallenge } from "./components/DailyChallenge";
+import { AchievementShowcase } from "./components/AchievementShowcase";
+import { useProgress } from "./contexts/ProgressContext";
 import { TERMS } from "./data/terms";
 
 type Lang = "en" | "es";
@@ -359,20 +363,30 @@ export default function HomePage() {
 
   const t = copy[lang];
   const totalTerms = TERMS.length;
+  const { recordStudyStreak, recordBookmark: recordBookmarkXP, recordNoteCreated: recordNoteXP } = useProgress();
 
   useEffect(() => {
+    let nc = 0;
+    let bc = 0;
     try {
       const n = JSON.parse(localStorage.getItem("tax-guide-notes") || "[]");
-      setNotesCount(Array.isArray(n) ? n.length : 0);
+      nc = Array.isArray(n) ? n.length : 0;
+      setNotesCount(nc);
     } catch { setNotesCount(0); }
     try {
       const b = JSON.parse(localStorage.getItem("tax-guide-glossary-bookmarks") || "[]");
-      setBookmarksCount(Array.isArray(b) ? b.length : 0);
+      bc = Array.isArray(b) ? b.length : 0;
+      setBookmarksCount(bc);
     } catch { setBookmarksCount(0); }
 
     // Streak
     const s = updateStreak();
     setStreak(s);
+    recordStudyStreak(s.current);
+
+    // Sync bookmarks & notes counts to progress
+    if (bc > 0) recordBookmarkXP(bc);
+    if (nc > 0) recordNoteXP(nc);
 
     // Quote
     setQuoteIndex(Math.floor(Math.random() * QUOTES.en.length));
@@ -385,6 +399,7 @@ export default function HomePage() {
       }
       setQuizMastered(qh.mastered?.length ?? 0);
     } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const bookmarkPct = totalTerms > 0 ? Math.round((bookmarksCount / totalTerms) * 100) : 0;
@@ -526,6 +541,11 @@ export default function HomePage() {
             </div>
           </motion.div>
         </motion.div>
+
+        {/* XP & Level Bar */}
+        <div className="mb-6">
+          <XPBar lang={lang} />
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -792,6 +812,12 @@ export default function HomePage() {
               })}
             </div>
           </motion.div>
+
+          {/* ═══════ Daily Challenge ═══════ */}
+          <DailyChallenge lang={lang} />
+
+          {/* ═══════ Achievements ═══════ */}
+          <AchievementShowcase lang={lang} />
 
           {/* ═══════ Card 5 — Flashcard Quiz (Full width) ═══════ */}
           <motion.div

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProgress } from "@/app/contexts/ProgressContext";
 
 type Lang = "en" | "es";
 
@@ -117,11 +118,13 @@ export function AnalysisQuiz({
   accentColor?: "emerald" | "amber" | "blue";
 }) {
   const t = ui[lang];
+  const { recordQuizCorrect, recordQuizPerfect } = useProgress();
   const [state, setState] = useState<QuizState>("idle");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [showReview, setShowReview] = useState(false);
+  const perfectRecordedRef = useRef(false);
 
   const shuffledQuestions = useMemo(() => shuffle(questions), [questions]);
 
@@ -169,12 +172,26 @@ export function AnalysisQuiz({
   const accent = accentMap[accentColor];
   const hl = (text: string) => highlightAcronyms(text, accent.text);
 
+  // Record perfect quiz when quiz completes with 100%
+  useEffect(() => {
+    if (state === "complete" && !perfectRecordedRef.current) {
+      const finalCorrect = answers.filter(
+        (a, i) => a === shuffledQuestions[i]?.[lang].correct
+      ).length;
+      if (finalCorrect === totalQuestions && totalQuestions > 0) {
+        recordQuizPerfect();
+      }
+      perfectRecordedRef.current = true;
+    }
+  }, [state, answers, shuffledQuestions, lang, totalQuestions, recordQuizPerfect]);
+
   const startQuiz = useCallback(() => {
     setState("answering");
     setCurrentIndex(0);
     setSelected(null);
     setAnswers([]);
     setShowReview(false);
+    perfectRecordedRef.current = false;
   }, []);
 
   const handleSelect = useCallback(
@@ -184,8 +201,9 @@ export function AnalysisQuiz({
       const isCorrect = optionIndex === q?.correct;
       setAnswers((prev) => [...prev, optionIndex]);
       setState(isCorrect ? "correct" : "wrong");
+      if (isCorrect) recordQuizCorrect();
     },
-    [state, selected, q?.correct]
+    [state, selected, q?.correct, recordQuizCorrect]
   );
 
   const handleNext = useCallback(() => {
