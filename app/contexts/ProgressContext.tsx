@@ -39,6 +39,9 @@ export type ProgressState = {
   examsTaken: number;
   examBestScore: number;
   reviewsDone: number;
+  gamesPlayed: string[];
+  climberSummits: number;
+  matcherBestTime: number;
 };
 
 type ProgressContextValue = {
@@ -57,6 +60,9 @@ type ProgressContextValue = {
   completeLearningTask: (taskId: string) => void;
   recordExam: (score: number, total: number) => void;
   recordReview: () => void;
+  recordGamePlayed: (gameId: string) => void;
+  recordClimberSummit: () => void;
+  recordMatcherTime: (seconds: number) => void;
   level: LevelDef;
   nextLevel: LevelDef | null;
   levelProgress: number;
@@ -86,6 +92,9 @@ const DEFAULT_STATE: ProgressState = {
   examsTaken: 0,
   examBestScore: 0,
   reviewsDone: 0,
+  gamesPlayed: [],
+  climberSummits: 0,
+  matcherBestTime: 0,
 };
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
@@ -124,6 +133,9 @@ function findNewAchievements(s: ProgressState): string[] {
   if (!has("pathfinder") && s.learningPathComplete.length >= 6) newly.push("pathfinder");
   if (!has("exam_pass") && s.examsPassed >= 1) newly.push("exam_pass");
   if (!has("reviewer") && s.reviewsDone >= 20) newly.push("reviewer");
+  if (!has("game_explorer") && s.gamesPlayed.length >= 5) newly.push("game_explorer");
+  if (!has("climber_summit") && s.climberSummits >= 1) newly.push("climber_summit");
+  if (!has("matcher_perfect") && s.matcherBestTime > 0 && s.matcherBestTime <= 60) newly.push("matcher_perfect");
   return newly;
 }
 
@@ -347,6 +359,36 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     });
   }, [commit]);
 
+  const recordGamePlayed = useCallback(
+    (gameId: string) => {
+      const s = stateRef.current;
+      if (s.gamesPlayed.includes(gameId)) return;
+      commit({
+        ...s,
+        gamesPlayed: [...s.gamesPlayed, gameId],
+      });
+    },
+    [commit],
+  );
+
+  const recordClimberSummit = useCallback(() => {
+    const s = stateRef.current;
+    commit({
+      ...s,
+      climberSummits: s.climberSummits + 1,
+    });
+  }, [commit]);
+
+  const recordMatcherTime = useCallback(
+    (seconds: number) => {
+      const s = stateRef.current;
+      if (s.matcherBestTime === 0 || seconds < s.matcherBestTime) {
+        commit({ ...s, matcherBestTime: seconds });
+      }
+    },
+    [commit],
+  );
+
   const level = getLevel(state.xp);
   const nextLevel = getNextLevel(state.xp);
   const levelProgress = getLevelProgress(state.xp);
@@ -369,6 +411,9 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         completeLearningTask,
         recordExam,
         recordReview,
+        recordGamePlayed,
+        recordClimberSummit,
+        recordMatcherTime,
         level,
         nextLevel,
         levelProgress,

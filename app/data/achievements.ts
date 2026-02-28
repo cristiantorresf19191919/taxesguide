@@ -44,6 +44,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: "pathfinder", icon: "🧭", titleEn: "Pathfinder", titleEs: "Pionero", descEn: "Complete the learning path", descEs: "Completa la ruta de aprendizaje" },
   { id: "exam_pass", icon: "📜", titleEn: "Certified", titleEs: "Certificado", descEn: "Pass a mock exam", descEs: "Aprueba un examen simulado" },
   { id: "reviewer", icon: "🔄", titleEn: "Retention Pro", titleEs: "Experto en retención", descEn: "Complete 20 review sessions", descEs: "Completa 20 sesiones de repaso" },
+  { id: "game_explorer", icon: "🎮", titleEn: "Game Explorer", titleEs: "Explorador de juegos", descEn: "Play 5 different games", descEs: "Juega 5 juegos diferentes" },
+  { id: "climber_summit", icon: "🏔️", titleEn: "Summit Conqueror", titleEs: "Conquistador de cimas", descEn: "Reach the summit in Tax Climber", descEs: "Llega a la cima en Escalador fiscal" },
+  { id: "matcher_perfect", icon: "🃏", titleEn: "Memory Master", titleEs: "Maestro de memoria", descEn: "Complete Term Matcher in under 60s", descEs: "Completa Emparejar en menos de 60s" },
 ];
 
 export function getLevel(xp: number): LevelDef {

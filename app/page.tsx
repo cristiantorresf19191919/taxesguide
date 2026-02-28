@@ -21,6 +21,11 @@ import { ExamSimulator } from "./components/ExamSimulator";
 import { StudyRecommendations } from "./components/StudyRecommendations";
 import { OnboardingWelcome } from "./components/OnboardingWelcome";
 import { StudyTimer } from "./components/StudyTimer";
+import { TermMatcher } from "./components/TermMatcher";
+import { CategorySort } from "./components/CategorySort";
+import { TaxClimber } from "./components/TaxClimber";
+import { WordScramble } from "./components/WordScramble";
+import { TrueFalseBlitz } from "./components/TrueFalseBlitz";
 import { useProgress } from "./contexts/ProgressContext";
 import { TERMS } from "./data/terms";
 
@@ -680,8 +685,54 @@ export default function HomePage() {
               {/* Speed Round */}
               <SpeedRound lang={lang} />
 
+              {/* Games Section Header */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="md:col-span-2 flex items-center gap-3"
+              >
+                <span className="text-lg">🎮</span>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {lang === "en" ? "Learning Games" : "Juegos de aprendizaje"}
+                </h2>
+                <div className="h-px flex-1 bg-gray-200 dark:bg-white/[0.06]" />
+                <span className="text-[10px] text-slate-400 dark:text-neutral-500">
+                  {lang === "en" ? "5 games" : "5 juegos"}
+                </span>
+              </motion.div>
+
+              {/* Term Matcher - Memory Game */}
+              <TermMatcher lang={lang} />
+
+              {/* Category Sort - Sorting Game */}
+              <CategorySort lang={lang} />
+
+              {/* Tax Climber - Climbing Game */}
+              <TaxClimber lang={lang} />
+
+              {/* Word Scramble */}
+              <WordScramble lang={lang} />
+
+              {/* True/False Blitz */}
+              <TrueFalseBlitz lang={lang} />
+
               {/* Focus Timer */}
               <StudyTimer lang={lang} />
+
+              {/* More Tools Section */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.15 }}
+                className="md:col-span-2 flex items-center gap-3"
+              >
+                <span className="text-lg">🛠️</span>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {lang === "en" ? "Study Tools" : "Herramientas de estudio"}
+                </h2>
+                <div className="h-px flex-1 bg-gray-200 dark:bg-white/[0.06]" />
+              </motion.div>
 
               {/* Review Queue */}
               <ReviewQueue lang={lang} />
