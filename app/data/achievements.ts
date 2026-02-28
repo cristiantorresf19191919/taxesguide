@@ -42,6 +42,8 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: "quiz_perfect", icon: "💯", titleEn: "Perfect Score", titleEs: "Puntaje perfecto", descEn: "100% on an analysis quiz", descEs: "100% en un quiz de análisis" },
   { id: "speed_demon", icon: "⏱️", titleEn: "Speed Demon", titleEs: "Demonio veloz", descEn: "Score 15+ in a speed round", descEs: "Obtén 15+ en ronda rápida" },
   { id: "pathfinder", icon: "🧭", titleEn: "Pathfinder", titleEs: "Pionero", descEn: "Complete the learning path", descEs: "Completa la ruta de aprendizaje" },
+  { id: "exam_pass", icon: "📜", titleEn: "Certified", titleEs: "Certificado", descEn: "Pass a mock exam", descEs: "Aprueba un examen simulado" },
+  { id: "reviewer", icon: "🔄", titleEn: "Retention Pro", titleEs: "Experto en retención", descEn: "Complete 20 review sessions", descEs: "Completa 20 sesiones de repaso" },
 ];
 
 export function getLevel(xp: number): LevelDef {

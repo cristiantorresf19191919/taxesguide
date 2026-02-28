@@ -35,6 +35,10 @@ export type ProgressState = {
   speedRoundBest: number;
   speedRoundsPlayed: number;
   learningPathComplete: string[];
+  examsPassed: number;
+  examsTaken: number;
+  examBestScore: number;
+  reviewsDone: number;
 };
 
 type ProgressContextValue = {
@@ -51,6 +55,8 @@ type ProgressContextValue = {
   recordStudyStreak: (streak: number) => void;
   recordSpeedRound: (score: number) => void;
   completeLearningTask: (taskId: string) => void;
+  recordExam: (score: number, total: number) => void;
+  recordReview: () => void;
   level: LevelDef;
   nextLevel: LevelDef | null;
   levelProgress: number;
@@ -76,6 +82,10 @@ const DEFAULT_STATE: ProgressState = {
   speedRoundBest: 0,
   speedRoundsPlayed: 0,
   learningPathComplete: [],
+  examsPassed: 0,
+  examsTaken: 0,
+  examBestScore: 0,
+  reviewsDone: 0,
 };
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
@@ -112,6 +122,8 @@ function findNewAchievements(s: ProgressState): string[] {
   if (!has("quiz_perfect") && s.perfectQuizzes >= 1) newly.push("quiz_perfect");
   if (!has("speed_demon") && s.speedRoundBest >= 15) newly.push("speed_demon");
   if (!has("pathfinder") && s.learningPathComplete.length >= 6) newly.push("pathfinder");
+  if (!has("exam_pass") && s.examsPassed >= 1) newly.push("exam_pass");
+  if (!has("reviewer") && s.reviewsDone >= 20) newly.push("reviewer");
   return newly;
 }
 
@@ -310,6 +322,31 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     [commit],
   );
 
+  const recordExam = useCallback(
+    (score: number, total: number) => {
+      const s = stateRef.current;
+      const pct = Math.round((score / total) * 100);
+      const passed = pct >= 70;
+      commit({
+        ...s,
+        examsTaken: s.examsTaken + 1,
+        examsPassed: passed ? s.examsPassed + 1 : s.examsPassed,
+        examBestScore: pct > s.examBestScore ? pct : s.examBestScore,
+        xp: s.xp + (passed ? 100 : 30),
+      });
+    },
+    [commit],
+  );
+
+  const recordReview = useCallback(() => {
+    const s = stateRef.current;
+    commit({
+      ...s,
+      reviewsDone: s.reviewsDone + 1,
+      xp: s.xp + 8,
+    });
+  }, [commit]);
+
   const level = getLevel(state.xp);
   const nextLevel = getNextLevel(state.xp);
   const levelProgress = getLevelProgress(state.xp);
@@ -330,6 +367,8 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         recordStudyStreak,
         recordSpeedRound,
         completeLearningTask,
+        recordExam,
+        recordReview,
         level,
         nextLevel,
         levelProgress,

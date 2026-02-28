@@ -14,6 +14,11 @@ import { SpeedRound } from "./components/SpeedRound";
 import { LearningPath } from "./components/LearningPath";
 import { WeakAreas } from "./components/WeakAreas";
 import { ProgressCard } from "./components/ProgressCard";
+import { ReviewQueue } from "./components/ReviewQueue";
+import { StudyInsights } from "./components/StudyInsights";
+import { CategoryMastery } from "./components/CategoryMastery";
+import { ExamSimulator } from "./components/ExamSimulator";
+import { StudyRecommendations } from "./components/StudyRecommendations";
 import { useProgress } from "./contexts/ProgressContext";
 import { TERMS } from "./data/terms";
 
@@ -840,6 +845,21 @@ export default function HomePage() {
 
           {/* ═══════ Progress Card ═══════ */}
           <ProgressCard lang={lang} />
+
+          {/* ═══════ Study Recommendations ═══════ */}
+          <StudyRecommendations lang={lang} />
+
+          {/* ═══════ Review Queue ═══════ */}
+          <ReviewQueue lang={lang} />
+
+          {/* ═══════ Study Insights ═══════ */}
+          <StudyInsights lang={lang} />
+
+          {/* ═══════ Category Mastery ═══════ */}
+          <CategoryMastery lang={lang} />
+
+          {/* ═══════ Exam Simulator ═══════ */}
+          <ExamSimulator lang={lang} />
 
           {/* ═══════ Card 5 — Flashcard Quiz (Full width) ═══════ */}
           <motion.div
