@@ -37,7 +37,7 @@ export function GlossaryTerm({ id, lang = "en", children }: GlossaryTermProps) {
   if (isAbbrev) {
     return (
       <motion.span
-        className="relative cursor-help border-b border-dotted border-neutral-500/70 text-neutral-200 hover:border-emerald-400/70 hover:text-emerald-300"
+        className="relative cursor-help border-b border-dotted border-slate-400/70 text-slate-700 hover:border-emerald-500/70 hover:text-emerald-600 dark:border-neutral-500/70 dark:text-neutral-200 dark:hover:border-emerald-400/70 dark:hover:text-emerald-300"
         title={tooltip}
         onClick={handleClick}
         role="button"
@@ -66,7 +66,7 @@ export function GlossaryTerm({ id, lang = "en", children }: GlossaryTermProps) {
 
   return (
     <motion.span
-      className="relative cursor-pointer text-emerald-400 underline decoration-emerald-400/70 decoration-2 underline-offset-2 hover:text-emerald-300 hover:decoration-emerald-300/80"
+      className="relative cursor-pointer text-emerald-600 underline decoration-emerald-600/70 decoration-2 underline-offset-2 hover:text-emerald-500 hover:decoration-emerald-500/80 dark:text-emerald-400 dark:decoration-emerald-400/70 dark:hover:text-emerald-300 dark:hover:decoration-emerald-300/80"
       onClick={handleClick}
       role="button"
       tabIndex={0}

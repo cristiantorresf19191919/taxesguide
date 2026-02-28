@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export function Footer() {
   return (
-    <footer className="relative bg-neutral-950 pb-28 pt-4">
+    <footer className="relative bg-gray-50 pb-28 pt-4 transition-colors duration-300 dark:bg-neutral-950">
       {/* Gradient accent line */}
       <div className="h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
 
@@ -13,16 +13,16 @@ export function Footer() {
           href="https://agencypartner2.netlify.app"
           target="_blank"
           rel="noopener noreferrer"
-          className="group relative inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.02] px-6 py-3 text-sm transition-all duration-300 hover:border-violet-500/30 hover:bg-white/[0.05] hover:shadow-[0_0_20px_rgba(139,92,246,0.15)]"
+          className="group relative inline-flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-6 py-3 text-sm transition-all duration-300 hover:border-violet-500/30 hover:bg-gray-50 hover:shadow-[0_0_20px_rgba(139,92,246,0.1)] dark:border-white/[0.08] dark:bg-white/[0.02] dark:hover:bg-white/[0.05] dark:hover:shadow-[0_0_20px_rgba(139,92,246,0.15)]"
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.98 }}
         >
-          <span className="text-neutral-500">Made By</span>
+          <span className="text-slate-400 dark:text-neutral-500">Made By</span>
           <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-emerald-400 bg-clip-text font-bold tracking-tight text-transparent">
             cristianscript
           </span>
           <svg
-            className="h-3.5 w-3.5 text-neutral-600 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-violet-400"
+            className="h-3.5 w-3.5 text-slate-300 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-violet-500 dark:text-neutral-600 dark:group-hover:text-violet-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

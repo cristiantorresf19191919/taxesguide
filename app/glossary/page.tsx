@@ -7,6 +7,7 @@ import { useGlossary } from "../contexts/GlossaryContext";
 import { TERMS } from "../data/terms";
 import type { TermId } from "../data/terms";
 import { LangSwitchWrapper } from "../components/LangSwitchWrapper";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 type Lang = "en" | "es";
 
@@ -74,19 +75,19 @@ function TermCard({
       initial="hidden"
       animate="visible"
       whileHover={{ y: -2, transition: { duration: 0.2 } }}
-      className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 transition-colors hover:border-white/[0.14] hover:bg-white/[0.05]"
+      className="rounded-2xl border border-gray-200 bg-white p-5 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-white/[0.08] dark:bg-white/[0.03] dark:hover:border-white/[0.14] dark:hover:bg-white/[0.05]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold tracking-tight text-white">{label}</h3>
-          <p className="mt-2 text-sm leading-relaxed text-neutral-400">{def}</p>
+          <h3 className="font-bold tracking-tight text-slate-900 dark:text-white">{label}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-neutral-400">{def}</p>
         </div>
         <div className="flex shrink-0 gap-2">
           <motion.button
             onClick={() => onOpen(id)}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/15"
+            className="rounded-xl bg-gray-100 px-3 py-1.5 text-xs font-medium text-slate-900 transition-colors hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
           >
             {lang === "es" ? "Ver" : "View"}
           </motion.button>
@@ -96,8 +97,8 @@ function TermCard({
             whileTap={{ scale: 0.97 }}
             className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${
               isBookmarked
-                ? "bg-emerald-500/20 text-emerald-400"
-                : "bg-white/10 text-white hover:bg-white/15"
+                ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                : "bg-gray-100 text-slate-900 hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
             }`}
           >
             {isBookmarked ? "✓" : "+"}
@@ -129,7 +130,7 @@ export default function GlossaryPage() {
   });
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-200">
+    <div className="min-h-screen bg-gray-50 text-slate-900 transition-colors duration-300 dark:bg-neutral-950 dark:text-neutral-200">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <motion.div
           className="absolute left-1/2 top-[-200px] h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[100px]"
@@ -143,23 +144,25 @@ export default function GlossaryPage() {
         initial={{ y: -12, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="sticky top-0 z-10 border-b border-white/[0.06] bg-neutral-950/85 backdrop-blur-xl"
+        className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 backdrop-blur-xl dark:border-white/[0.06] dark:bg-neutral-950/85 dark:backdrop-blur-xl"
       >
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
           <motion.span whileHover={{ x: -2 }} whileTap={{ scale: 0.98 }}>
             <Link
               href="/"
-              className="text-sm font-medium text-neutral-400 transition-colors hover:text-white"
+              className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
             >
               ← {t.back}
             </Link>
           </motion.span>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <motion.button
               onClick={() => setLang("en")}
               whileTap={{ scale: 0.97 }}
               className={`rounded-xl px-3 py-1.5 text-sm font-medium transition-colors ${
-                lang === "en" ? "bg-white/15 text-white" : "text-neutral-500 hover:text-white"
+                lang === "en"
+                  ? "bg-white text-slate-900 shadow-sm dark:bg-white/15 dark:text-white"
+                  : "text-slate-400 hover:text-slate-900 dark:text-neutral-500 dark:hover:text-white"
               }`}
             >
               EN
@@ -168,11 +171,14 @@ export default function GlossaryPage() {
               onClick={() => setLang("es")}
               whileTap={{ scale: 0.97 }}
               className={`rounded-xl px-3 py-1.5 text-sm font-medium transition-colors ${
-                lang === "es" ? "bg-white/15 text-white" : "text-neutral-500 hover:text-white"
+                lang === "es"
+                  ? "bg-white text-slate-900 shadow-sm dark:bg-white/15 dark:text-white"
+                  : "text-slate-400 hover:text-slate-900 dark:text-neutral-500 dark:hover:text-white"
               }`}
             >
               ES
             </motion.button>
+            <ThemeToggle />
           </div>
         </div>
       </motion.header>
@@ -185,8 +191,8 @@ export default function GlossaryPage() {
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="mb-8"
         >
-          <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">{t.title}</h1>
-          <p className="mt-2 text-neutral-400">{t.subtitle}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl dark:text-white">{t.title}</h1>
+          <p className="mt-2 text-slate-500 dark:text-neutral-400">{t.subtitle}</p>
         </motion.div>
 
         {/* Search */}
@@ -197,7 +203,7 @@ export default function GlossaryPage() {
           className="relative mb-8"
         >
           <svg
-            className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
+            className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -210,7 +216,7 @@ export default function GlossaryPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t.search}
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-neutral-200 placeholder-neutral-500 outline-none transition-colors focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30"
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition-colors focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30 dark:border-white/10 dark:bg-white/5 dark:text-neutral-200 dark:placeholder-neutral-500 dark:focus:border-emerald-500/40"
           />
         </motion.div>
 
@@ -221,7 +227,7 @@ export default function GlossaryPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
           >
-            <h2 className="mb-5 text-lg font-bold tracking-tight text-white">{t.bookmarks}</h2>
+            <h2 className="mb-5 text-lg font-bold tracking-tight text-slate-900 dark:text-white">{t.bookmarks}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {bookmarkedTerms.map((term, i) => (
                 <TermCard
@@ -242,7 +248,7 @@ export default function GlossaryPage() {
           <motion.p
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-12 rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-6 text-sm text-neutral-400"
+            className="mb-12 rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-sm text-slate-500 dark:border-white/15 dark:bg-white/[0.03] dark:text-neutral-400"
           >
             {t.emptyBookmarks}
           </motion.p>
@@ -255,11 +261,11 @@ export default function GlossaryPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.15 }}
           >
-            <h2 className="text-lg font-bold tracking-tight text-white">
+            <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
               {t.allTerms}
             </h2>
             {search.trim() && (
-              <span className="text-xs text-neutral-500">
+              <span className="text-xs text-slate-400 dark:text-neutral-500">
                 {t.showing} {filteredTerms.length} {t.of} {TERMS.length} {t.terms}
               </span>
             )}
@@ -281,7 +287,7 @@ export default function GlossaryPage() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mt-8 text-center text-sm text-neutral-500"
+              className="mt-8 text-center text-sm text-slate-400 dark:text-neutral-500"
             >
               {lang === "en" ? "No terms match your search." : "Ningún término coincide con tu búsqueda."}
             </motion.p>

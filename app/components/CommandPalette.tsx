@@ -172,7 +172,7 @@ export function CommandPalette() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[9998] bg-black/30 backdrop-blur-sm dark:bg-black/60"
           />
 
           {/* Panel */}
@@ -183,10 +183,10 @@ export function CommandPalette() {
             transition={{ type: "spring", damping: 30, stiffness: 400 }}
             className="fixed left-1/2 top-[15%] z-[9999] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2"
           >
-            <div className="overflow-hidden rounded-2xl border border-white/[0.1] bg-neutral-900/95 shadow-2xl backdrop-blur-2xl">
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/[0.1] dark:bg-neutral-900/95 dark:backdrop-blur-2xl">
               {/* Search input */}
-              <div className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-3">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-neutral-500">
+              <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-3 dark:border-white/[0.06]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-slate-400 dark:text-neutral-500">
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
                 <input
@@ -195,9 +195,9 @@ export function CommandPalette() {
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Search pages, terms, or actions..."
-                  className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder-neutral-500 outline-none"
+                  className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 placeholder-slate-400 outline-none dark:text-white dark:placeholder-neutral-500"
                 />
-                <kbd className="hidden shrink-0 rounded-md border border-white/10 bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-semibold text-neutral-400 sm:inline-block">
+                <kbd className="hidden shrink-0 rounded-md border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-400 sm:inline-block">
                   ESC
                 </kbd>
               </div>
@@ -205,7 +205,7 @@ export function CommandPalette() {
               {/* Results */}
               <div ref={listRef} className="max-h-80 overflow-y-auto p-2">
                 {results.length === 0 && (
-                  <div className="px-3 py-8 text-center text-sm text-neutral-500">
+                  <div className="px-3 py-8 text-center text-sm text-slate-400 dark:text-neutral-500">
                     No results found
                   </div>
                 )}
@@ -216,23 +216,23 @@ export function CommandPalette() {
                     onMouseEnter={() => setSelectedIndex(i)}
                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${
                       i === selectedIndex
-                        ? "bg-emerald-500/15 text-white"
-                        : "text-neutral-400 hover:bg-white/[0.06]"
+                        ? "bg-emerald-50 text-slate-900 dark:bg-emerald-500/15 dark:text-white"
+                        : "text-slate-500 hover:bg-gray-50 dark:text-neutral-400 dark:hover:bg-white/[0.06]"
                     }`}
                   >
-                    <span className={`shrink-0 ${i === selectedIndex ? "text-emerald-400" : "text-neutral-500"}`}>
+                    <span className={`shrink-0 ${i === selectedIndex ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-neutral-500"}`}>
                       {ICONS[result.icon]}
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-medium">{result.title}</div>
-                      <div className="truncate text-xs text-neutral-500">{result.subtitle}</div>
+                      <div className="truncate text-xs text-slate-400 dark:text-neutral-500">{result.subtitle}</div>
                     </div>
                     <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase ${
                       result.type === "page"
-                        ? "bg-violet-500/15 text-violet-400"
+                        ? "bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400"
                         : result.type === "term"
-                          ? "bg-emerald-500/15 text-emerald-400"
-                          : "bg-blue-500/15 text-blue-400"
+                          ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400"
+                          : "bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400"
                     }`}>
                       {result.type}
                     </span>
@@ -241,14 +241,14 @@ export function CommandPalette() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between border-t border-white/[0.06] px-4 py-2.5 text-[10px] text-neutral-500">
+              <div className="flex items-center justify-between border-t border-gray-100 px-4 py-2.5 text-[10px] text-slate-400 dark:border-white/[0.06] dark:text-neutral-500">
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-white/10 bg-white/[0.06] px-1 py-0.5 font-mono">&#8593;&#8595;</kbd>
+                    <kbd className="rounded border border-gray-200 bg-gray-50 px-1 py-0.5 font-mono dark:border-white/10 dark:bg-white/[0.06]">&#8593;&#8595;</kbd>
                     navigate
                   </span>
                   <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-white/10 bg-white/[0.06] px-1 py-0.5 font-mono">&#9166;</kbd>
+                    <kbd className="rounded border border-gray-200 bg-gray-50 px-1 py-0.5 font-mono dark:border-white/10 dark:bg-white/[0.06]">&#9166;</kbd>
                     select
                   </span>
                 </div>

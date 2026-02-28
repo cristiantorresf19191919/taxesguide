@@ -72,7 +72,7 @@ export function KeyboardShortcuts() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-[9997] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[9997] bg-black/30 backdrop-blur-sm dark:bg-black/60"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -81,23 +81,23 @@ export function KeyboardShortcuts() {
             transition={{ type: "spring", damping: 30, stiffness: 400 }}
             className="fixed left-1/2 top-[20%] z-[9998] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2"
           >
-            <div className="overflow-hidden rounded-2xl border border-white/[0.1] bg-neutral-900/95 shadow-2xl backdrop-blur-2xl">
-              <div className="border-b border-white/[0.06] px-5 py-4">
-                <h2 className="text-sm font-bold text-white">Keyboard Shortcuts</h2>
-                <p className="mt-0.5 text-xs text-neutral-500">Navigate quickly with your keyboard</p>
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/[0.1] dark:bg-neutral-900/95 dark:backdrop-blur-2xl">
+              <div className="border-b border-gray-100 px-5 py-4 dark:border-white/[0.06]">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Keyboard Shortcuts</h2>
+                <p className="mt-0.5 text-xs text-slate-400 dark:text-neutral-500">Navigate quickly with your keyboard</p>
               </div>
-              <div className="divide-y divide-white/[0.04] px-5 py-2">
+              <div className="divide-y divide-gray-100 px-5 py-2 dark:divide-white/[0.04]">
                 {SHORTCUTS.map((s, i) => (
                   <div key={i} className="flex items-center justify-between py-3">
-                    <span className="text-sm text-neutral-300">{s.description}</span>
+                    <span className="text-sm text-slate-600 dark:text-neutral-300">{s.description}</span>
                     <div className="flex items-center gap-1">
                       {s.keys.map((k, j) => (
                         <span key={j}>
-                          <kbd className="inline-flex min-w-[24px] items-center justify-center rounded-md border border-white/10 bg-white/[0.06] px-1.5 py-1 text-[11px] font-semibold text-neutral-300">
+                          <kbd className="inline-flex min-w-[24px] items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-1.5 py-1 text-[11px] font-semibold text-slate-500 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-300">
                             {k}
                           </kbd>
                           {j < s.keys.length - 1 && (
-                            <span className="mx-0.5 text-[10px] text-neutral-600">+</span>
+                            <span className="mx-0.5 text-[10px] text-slate-300 dark:text-neutral-600">+</span>
                           )}
                         </span>
                       ))}
@@ -105,9 +105,9 @@ export function KeyboardShortcuts() {
                   </div>
                 ))}
               </div>
-              <div className="border-t border-white/[0.06] px-5 py-3 text-center">
-                <span className="text-[10px] text-neutral-500">
-                  Press <kbd className="rounded border border-white/10 bg-white/[0.06] px-1 py-0.5 text-[9px] font-semibold text-neutral-400">?</kbd> or <kbd className="rounded border border-white/10 bg-white/[0.06] px-1 py-0.5 text-[9px] font-semibold text-neutral-400">Esc</kbd> to close
+              <div className="border-t border-gray-100 px-5 py-3 text-center dark:border-white/[0.06]">
+                <span className="text-[10px] text-slate-400 dark:text-neutral-500">
+                  Press <kbd className="rounded border border-gray-200 bg-gray-50 px-1 py-0.5 text-[9px] font-semibold text-slate-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-400">?</kbd> or <kbd className="rounded border border-gray-200 bg-gray-50 px-1 py-0.5 text-[9px] font-semibold text-slate-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-400">Esc</kbd> to close
                 </span>
               </div>
             </div>

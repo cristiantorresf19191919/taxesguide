@@ -7,6 +7,7 @@ import { GeminiLogo } from "../components/ModelLogos";
 import { GlossaryTerm } from "../components/GlossaryTerm";
 import { Section, Card, Table, fadeUp, stagger } from "../components/AnalysisUI";
 import { LangSwitchWrapper } from "../components/LangSwitchWrapper";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { AnalysisQuiz } from "../components/AnalysisQuiz";
 import { geminiQuestions } from "../data/quiz-gemini";
 
@@ -29,19 +30,19 @@ function GeminiContent({ lang }: { lang: Lang }) {
       <motion.header variants={fadeUp} className="space-y-5">
         <div className="flex justify-center">
           <motion.div
-            className="rounded-2xl bg-gradient-to-br from-blue-500/25 to-violet-600/20 p-5 ring-1 ring-white/10"
+            className="rounded-2xl bg-gradient-to-br from-blue-500/25 to-violet-600/20 p-5 ring-1 ring-black/5 dark:ring-white/10"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
             <GeminiLogo size={64} />
           </motion.div>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
           {isEn
             ? "Comprehensive Strategic Framework for Establishing an Independent Tax Practice in Georgia"
             : "Marco estratégico para establecer una práctica de impuestos independiente en Georgia"}
         </h1>
-        <p className="text-sm leading-relaxed text-neutral-400">
+        <p className="text-sm leading-relaxed text-slate-500 dark:text-neutral-400">
           {isEn
             ? "The professional landscape for tax preparation in Georgia represents a distinct intersection of federal oversight and local administrative requirements. For an aspiring practitioner such as Sandra, entering from a non-accounting background, the path to independent business ownership is paved with specific regulatory milestones, technological necessities, and strategic marketing imperatives. Georgia does not mandate a state-level license for tax preparers who are not CPAs. This low barrier to entry creates significant opportunity, provided one navigates federal requirements and local occupational taxes."
             : "El panorama profesional de la preparación de impuestos en Georgia representa una intersección entre supervisión federal y requisitos administrativos locales. Para una profesional como Sandra, sin formación en contabilidad, el camino hacia un negocio independiente implica hitos regulatorios, necesidades tecnológicas y estrategias de marketing. Georgia no exige licencia estatal para preparadores que no son CPA. Esta baja barrera de entrada ofrece una oportunidad significativa, siempre que se cumplan los requisitos federales y los impuestos ocupacionales locales."}
@@ -52,10 +53,10 @@ function GeminiContent({ lang }: { lang: Lang }) {
             <p>
               {isEn ? "For a beginner starting from scratch, the industry offers three primary trajectories:" : "Para un principiante desde cero, la industria ofrece tres trayectorias principales:"}
             </p>
-            <ul className="list-inside list-disc space-y-2 text-neutral-300">
-              <li><strong className="text-white">{isEn ? "Institutional Apprenticeship:" : "Aprendizaje institucional:"}</strong> {isEn ? <>Seasonal employment with H&R Block or Jackson Hewitt. Jackson Hewitt&apos;s Fundamentals of Tax Preparation (FTP) is typically a 30-hour program (12 modules: filing requirements, dependents, <GlossaryTerm id="eitc" lang={lang}>EITC</GlossaryTerm>, <GlossaryTerm id="ctc" lang={lang}>CTC</GlossaryTerm>, etc.). The firm provides software, <GlossaryTerm id="efin" lang={lang}>EFIN</GlossaryTerm>, and office space—but the practitioner does not own client relationships or full revenue.</> : <>Empleo estacional con H&R Block o Jackson Hewitt. El programa Fundamentals of Tax Preparation (FTP) de Jackson Hewitt es típicamente de 30 horas (12 módulos: requisitos de presentación, dependientes, <GlossaryTerm id="eitc" lang={lang}>EITC</GlossaryTerm>, <GlossaryTerm id="ctc" lang={lang}>CTC</GlossaryTerm>, etc.). La firma provee software, <GlossaryTerm id="efin" lang={lang}>EFIN</GlossaryTerm> y espacio de oficina, pero el practicante no posee las relaciones con clientes ni los ingresos completos.</>}</li>
-              <li><strong className="text-white">{isEn ? "Independent Certification Path:" : "Ruta de certificación independiente:"}</strong> {isEn ? "Georgia Southern's Chartered Tax Professional (CTP) certificate, or Surgent's Comprehensive Tax Course (no prior accounting required). CTP requires 500 hours of qualifying experience. This path builds professional vocabulary and technical proficiency for operating without a major firm." : "Certificado de Chartered Tax Professional (CTP) de Georgia Southern, o el Curso Integral de Surgent (sin contabilidad previa requerida). El CTP requiere 500 horas de experiencia calificada. Esta ruta desarrolla vocabulario profesional y competencia técnica para operar sin una firma grande."}</li>
-              <li><strong className="text-white">{isEn ? "Digital Academy Path:" : "Ruta de academia digital:"}</strong> {isEn ? "Intuit Academy—free, self-paced, designed for TurboTax Live. Focus on 1099/W-2 scenarios and high-income taxpayers. Ideal for starting as a remote practice with digital workflows." : "Intuit Academy — gratis, a tu ritmo, diseñada para TurboTax Live. Enfocada en escenarios de 1099/W-2 y contribuyentes de altos ingresos. Ideal para iniciar una práctica remota con flujos de trabajo digitales."}</li>
+            <ul className="list-inside list-disc space-y-2 text-slate-600 dark:text-neutral-300">
+              <li><strong className="text-slate-900 dark:text-white">{isEn ? "Institutional Apprenticeship:" : "Aprendizaje institucional:"}</strong> {isEn ? <>Seasonal employment with H&R Block or Jackson Hewitt. Jackson Hewitt&apos;s Fundamentals of Tax Preparation (FTP) is typically a 30-hour program (12 modules: filing requirements, dependents, <GlossaryTerm id="eitc" lang={lang}>EITC</GlossaryTerm>, <GlossaryTerm id="ctc" lang={lang}>CTC</GlossaryTerm>, etc.). The firm provides software, <GlossaryTerm id="efin" lang={lang}>EFIN</GlossaryTerm>, and office space—but the practitioner does not own client relationships or full revenue.</> : <>Empleo estacional con H&R Block o Jackson Hewitt. El programa Fundamentals of Tax Preparation (FTP) de Jackson Hewitt es típicamente de 30 horas (12 módulos: requisitos de presentación, dependientes, <GlossaryTerm id="eitc" lang={lang}>EITC</GlossaryTerm>, <GlossaryTerm id="ctc" lang={lang}>CTC</GlossaryTerm>, etc.). La firma provee software, <GlossaryTerm id="efin" lang={lang}>EFIN</GlossaryTerm> y espacio de oficina, pero el practicante no posee las relaciones con clientes ni los ingresos completos.</>}</li>
+              <li><strong className="text-slate-900 dark:text-white">{isEn ? "Independent Certification Path:" : "Ruta de certificación independiente:"}</strong> {isEn ? "Georgia Southern's Chartered Tax Professional (CTP) certificate, or Surgent's Comprehensive Tax Course (no prior accounting required). CTP requires 500 hours of qualifying experience. This path builds professional vocabulary and technical proficiency for operating without a major firm." : "Certificado de Chartered Tax Professional (CTP) de Georgia Southern, o el Curso Integral de Surgent (sin contabilidad previa requerida). El CTP requiere 500 horas de experiencia calificada. Esta ruta desarrolla vocabulario profesional y competencia técnica para operar sin una firma grande."}</li>
+              <li><strong className="text-slate-900 dark:text-white">{isEn ? "Digital Academy Path:" : "Ruta de academia digital:"}</strong> {isEn ? "Intuit Academy—free, self-paced, designed for TurboTax Live. Focus on 1099/W-2 scenarios and high-income taxpayers. Ideal for starting as a remote practice with digital workflows." : "Intuit Academy — gratis, a tu ritmo, diseñada para TurboTax Live. Enfocada en escenarios de 1099/W-2 y contribuyentes de altos ingresos. Ideal para iniciar una práctica remota con flujos de trabajo digitales."}</li>
             </ul>
             <Table
               lang={lang}
@@ -95,7 +96,7 @@ function GeminiContent({ lang }: { lang: Lang }) {
                 : <>Georgia no exige una licencia específica para preparar impuestos, pero el <GlossaryTerm id="dor" lang={lang}>DOR</GlossaryTerm> de Georgia requiere que cualquier persona que presente declaraciones en nombre de otros se registre como <GlossaryTerm id="third-party-filer" lang={lang}>Third-Party Filer</GlossaryTerm> en el portal del <GlossaryTerm id="gtc" lang={lang}>Georgia Tax Center (GTC)</GlossaryTerm>. Esto permite administrar cuentas de clientes y enviar declaraciones con un inicio de sesión profesional (usar las credenciales personales del cliente está prohibido). El registro se puede hacer con o sin un login existente del GTC; los nuevos registros reciben un número de cuenta fiscal por correo en ~15 minutos.</>}
             </p>
             <p>
-              <strong className="text-white">{isEn ? "Single vs. Bulk Filers:" : "Presentadores individuales vs. masivos:"}</strong> {isEn ? "Standard Third-Party Filers enter transactions individually; Bulk Filers submit one electronic file for multiple clients. For a solo practitioner, standard Third-Party Filer registration is the appropriate entry point (e.g., Georgia Form 500)." : "Los Third-Party Filers estándar ingresan transacciones individualmente; los presentadores masivos envían un solo archivo electrónico para múltiples clientes. Para un practicante solo, el registro estándar de Third-Party Filer es el punto de entrada apropiado (ej. Formulario 500 de Georgia)."}
+              <strong className="text-slate-900 dark:text-white">{isEn ? "Single vs. Bulk Filers:" : "Presentadores individuales vs. masivos:"}</strong> {isEn ? "Standard Third-Party Filers enter transactions individually; Bulk Filers submit one electronic file for multiple clients. For a solo practitioner, standard Third-Party Filer registration is the appropriate entry point (e.g., Georgia Form 500)." : "Los Third-Party Filers estándar ingresan transacciones individualmente; los presentadores masivos envían un solo archivo electrónico para múltiples clientes. Para un practicante solo, el registro estándar de Third-Party Filer es el punto de entrada apropiado (ej. Formulario 500 de Georgia)."}
             </p>
           </Section>
 
@@ -131,12 +132,12 @@ function GeminiContent({ lang }: { lang: Lang }) {
 
           <Section title={isEn ? "Operational Infrastructure: Software and Technical Standards" : "Infraestructura operativa: software y estándares técnicos"}>
             <p>{isEn ? "Three primary options for a solo preparer in 2026:" : "Tres opciones principales para un preparador individual en 2026:"}</p>
-            <ul className="list-inside list-disc space-y-2 text-neutral-300">
-              <li><strong className="text-white">Drake Tax:</strong> {isEn ? "Highly rated for single-preparer firms; fast, keyboard-driven; strong diagnostics. Interface can feel dated." : "Altamente calificado para firmas de un solo preparador; rápido, orientado al teclado; diagnósticos fuertes. La interfaz puede parecer anticuada."}</li>
-              <li><strong className="text-white">TaxSlayer Pro:</strong> {isEn ? "User-friendly, good for beginners; strong cloud version for remote work." : "Fácil de usar, bueno para principiantes; versión en la nube robusta para trabajo remoto."}</li>
-              <li><strong className="text-white">Intuit ProConnect:</strong> {isEn ? "Cloud-based, integrates with QuickBooks; higher per-return cost; AI-powered deduction tools." : "Basado en la nube, se integra con QuickBooks; costo más alto por declaración; herramientas de deducción con IA."}</li>
+            <ul className="list-inside list-disc space-y-2 text-slate-600 dark:text-neutral-300">
+              <li><strong className="text-slate-900 dark:text-white">Drake Tax:</strong> {isEn ? "Highly rated for single-preparer firms; fast, keyboard-driven; strong diagnostics. Interface can feel dated." : "Altamente calificado para firmas de un solo preparador; rápido, orientado al teclado; diagnósticos fuertes. La interfaz puede parecer anticuada."}</li>
+              <li><strong className="text-slate-900 dark:text-white">TaxSlayer Pro:</strong> {isEn ? "User-friendly, good for beginners; strong cloud version for remote work." : "Fácil de usar, bueno para principiantes; versión en la nube robusta para trabajo remoto."}</li>
+              <li><strong className="text-slate-900 dark:text-white">Intuit ProConnect:</strong> {isEn ? "Cloud-based, integrates with QuickBooks; higher per-return cost; AI-powered deduction tools." : "Basado en la nube, se integra con QuickBooks; costo más alto por declaración; herramientas de deducción con IA."}</li>
             </ul>
-            <p>{isEn ? <>Professional software should provide diagnostic feedback and data validation to prevent math errors and rejected <GlossaryTerm id="e-file" lang={lang}>e-files</GlossaryTerm>. Under <strong className="text-white">IRS Publication 4557</strong> and the <GlossaryTerm id="ftc-safeguards-rule" lang={lang}>FTC Safeguards Rule</GlossaryTerm>, tax professionals are treated as financial institutions and must implement a <GlossaryTerm id="wisp" lang={lang}>Written Information Security Plan (WISP)</GlossaryTerm> and the IRS &quot;<GlossaryTerm id="security-six" lang={lang}>Security Six</GlossaryTerm>&quot;: antivirus/anti-malware, firewalls, drive encryption, <GlossaryTerm id="mfa" lang={lang}>MFA</GlossaryTerm>, backup/disaster recovery (3-2-1 rule), and <GlossaryTerm id="vpn" lang={lang}>VPN</GlossaryTerm> for remote access to client data.</> : <>El software profesional debe proporcionar retroalimentación de diagnóstico y validación de datos para prevenir errores matemáticos y <GlossaryTerm id="e-file" lang={lang}>e-files</GlossaryTerm> rechazados. Bajo la <strong className="text-white">Publicación 4557 del IRS</strong> y la <GlossaryTerm id="ftc-safeguards-rule" lang={lang}>Regla de Salvaguardas de la FTC</GlossaryTerm>, los profesionales de impuestos son tratados como instituciones financieras y deben implementar un <GlossaryTerm id="wisp" lang={lang}>Plan Escrito de Seguridad de Información (WISP)</GlossaryTerm> y los &quot;<GlossaryTerm id="security-six" lang={lang}>Security Six</GlossaryTerm>&quot; del IRS: antivirus, firewalls, cifrado de disco, <GlossaryTerm id="mfa" lang={lang}>MFA</GlossaryTerm>, respaldo/recuperación ante desastres (regla 3-2-1), y <GlossaryTerm id="vpn" lang={lang}>VPN</GlossaryTerm> para acceso remoto a datos de clientes.</>}</p>
+            <p>{isEn ? <>Professional software should provide diagnostic feedback and data validation to prevent math errors and rejected <GlossaryTerm id="e-file" lang={lang}>e-files</GlossaryTerm>. Under <strong className="text-slate-900 dark:text-white">IRS Publication 4557</strong> and the <GlossaryTerm id="ftc-safeguards-rule" lang={lang}>FTC Safeguards Rule</GlossaryTerm>, tax professionals are treated as financial institutions and must implement a <GlossaryTerm id="wisp" lang={lang}>Written Information Security Plan (WISP)</GlossaryTerm> and the IRS &quot;<GlossaryTerm id="security-six" lang={lang}>Security Six</GlossaryTerm>&quot;: antivirus/anti-malware, firewalls, drive encryption, <GlossaryTerm id="mfa" lang={lang}>MFA</GlossaryTerm>, backup/disaster recovery (3-2-1 rule), and <GlossaryTerm id="vpn" lang={lang}>VPN</GlossaryTerm> for remote access to client data.</> : <>El software profesional debe proporcionar retroalimentación de diagnóstico y validación de datos para prevenir errores matemáticos y <GlossaryTerm id="e-file" lang={lang}>e-files</GlossaryTerm> rechazados. Bajo la <strong className="text-slate-900 dark:text-white">Publicación 4557 del IRS</strong> y la <GlossaryTerm id="ftc-safeguards-rule" lang={lang}>Regla de Salvaguardas de la FTC</GlossaryTerm>, los profesionales de impuestos son tratados como instituciones financieras y deben implementar un <GlossaryTerm id="wisp" lang={lang}>Plan Escrito de Seguridad de Información (WISP)</GlossaryTerm> y los &quot;<GlossaryTerm id="security-six" lang={lang}>Security Six</GlossaryTerm>&quot; del IRS: antivirus, firewalls, cifrado de disco, <GlossaryTerm id="mfa" lang={lang}>MFA</GlossaryTerm>, respaldo/recuperación ante desastres (regla 3-2-1), y <GlossaryTerm id="vpn" lang={lang}>VPN</GlossaryTerm> para acceso remoto a datos de clientes.</>}</p>
           </Section>
 
           <Section title={isEn ? "Risk Management: Insurance" : "Gestión de riesgos: seguros"}>
@@ -161,21 +162,21 @@ function GeminiContent({ lang }: { lang: Lang }) {
           </Section>
 
           <Section title={isEn ? "Strategic Marketing and Client Acquisition" : "Marketing estratégico y captación de clientes"}>
-            <p>{isEn ? <>Establish trust by targeting a <strong className="text-white">niche</strong> (e.g., local freelancers, military families, small business owners) and engaging in relevant communities (subreddits, Facebook groups) to demonstrate expertise. Collect detailed reviews (Google My Business, Yelp) that mention specific outcomes. A <strong className="text-white">professional, mobile-friendly website</strong> with a bio highlighting training and <GlossaryTerm id="afsp" lang={lang}>AFSP</GlossaryTerm> status is the cornerstone of a modern practice. Educational content (glossary, state filing guide, client readiness checklist) builds trust and reduces repetitive questions.</> : <>Establece confianza enfocándote en un <strong className="text-white">nicho</strong> (ej. freelancers locales, familias militares, dueños de pequeños negocios) y participando en comunidades relevantes (subreddits, grupos de Facebook) para demostrar experiencia. Recopila reseñas detalladas (Google My Business, Yelp) que mencionen resultados específicos. Un <strong className="text-white">sitio web profesional y responsivo</strong> con una biografía destacando tu formación y estatus de <GlossaryTerm id="afsp" lang={lang}>AFSP</GlossaryTerm> es la piedra angular de una práctica moderna. El contenido educativo (glosario, guía de presentación estatal, lista de preparación del cliente) genera confianza y reduce preguntas repetitivas.</>}</p>
+            <p>{isEn ? <>Establish trust by targeting a <strong className="text-slate-900 dark:text-white">niche</strong> (e.g., local freelancers, military families, small business owners) and engaging in relevant communities (subreddits, Facebook groups) to demonstrate expertise. Collect detailed reviews (Google My Business, Yelp) that mention specific outcomes. A <strong className="text-slate-900 dark:text-white">professional, mobile-friendly website</strong> with a bio highlighting training and <GlossaryTerm id="afsp" lang={lang}>AFSP</GlossaryTerm> status is the cornerstone of a modern practice. Educational content (glossary, state filing guide, client readiness checklist) builds trust and reduces repetitive questions.</> : <>Establece confianza enfocándote en un <strong className="text-slate-900 dark:text-white">nicho</strong> (ej. freelancers locales, familias militares, dueños de pequeños negocios) y participando en comunidades relevantes (subreddits, grupos de Facebook) para demostrar experiencia. Recopila reseñas detalladas (Google My Business, Yelp) que mencionen resultados específicos. Un <strong className="text-slate-900 dark:text-white">sitio web profesional y responsivo</strong> con una biografía destacando tu formación y estatus de <GlossaryTerm id="afsp" lang={lang}>AFSP</GlossaryTerm> es la piedra angular de una práctica moderna. El contenido educativo (glosario, guía de presentación estatal, lista de preparación del cliente) genera confianza y reduce preguntas repetitivas.</>}</p>
           </Section>
 
           <Section title={isEn ? "Educational Content for Your Website" : "Contenido educativo para tu sitio web"}>
-            <p className="font-medium text-white">{isEn ? "Tax terminology (plain English):" : "Terminología fiscal (lenguaje sencillo):"}</p>
-            <ul className="list-inside list-disc space-y-1 text-neutral-300">
+            <p className="font-medium text-slate-800 dark:text-white">{isEn ? "Tax terminology (plain English):" : "Terminología fiscal (lenguaje sencillo):"}</p>
+            <ul className="list-inside list-disc space-y-1 text-slate-600 dark:text-neutral-300">
               <li><GlossaryTerm id="agi" lang={lang}>AGI</GlossaryTerm> — {isEn ? "Total income minus above-the-line adjustments; determines eligibility for many credits." : "Ingreso total menos ajustes above-the-line; determina la elegibilidad para muchos créditos."}</li>
               <li><GlossaryTerm id="deduction" lang={lang}>{isEn ? "Deduction" : "Deducción"}</GlossaryTerm> — {isEn ? "Reduces taxable income (e.g., Standard Deduction)." : "Reduce el ingreso gravable (ej. deducción estándar)."}</li>
               <li><GlossaryTerm id="tax-credit" lang={lang}>{isEn ? "Credit" : "Crédito"}</GlossaryTerm> — {isEn ? "Reduces tax dollar-for-dollar (more powerful than a deduction)." : "Reduce el impuesto dólar por dólar (más potente que una deducción)."}</li>
               <li><GlossaryTerm id="refundable-credit" lang={lang}>{isEn ? "Refundable vs. non-refundable credits" : "Créditos reembolsables vs. no reembolsables"}</GlossaryTerm> — {isEn ? "Non-refundable can only zero out tax; refundable can yield a refund." : "Los no reembolsables solo pueden reducir el impuesto a cero; los reembolsables pueden generar un reembolso."}</li>
               <li><GlossaryTerm id="withholding" lang={lang}>{isEn ? "Withholding" : "Retención"}</GlossaryTerm> — {isEn ? "Amount employer sends to the government; too much → refund, too little → balance due." : "Monto que el empleador envía al gobierno; demasiado → reembolso, muy poco → saldo pendiente."}</li>
             </ul>
-            <p className="mt-4 font-medium text-white">{isEn ? "Georgia Form 500:" : "Formulario 500 de Georgia:"}</p>
+            <p className="mt-4 font-medium text-slate-800 dark:text-white">{isEn ? "Georgia Form 500:" : "Formulario 500 de Georgia:"}</p>
             <p>{isEn ? <>File if you are required to file federally or if income exceeds the standard deduction ($12,000 single / $24,000 <GlossaryTerm id="mfj" lang={lang}>MFJ</GlossaryTerm> for 2024–2025). Part-year/nonresidents use Form 500NR if Georgia income exceeds $5,000. <GlossaryTerm id="e-file" lang={lang}>E-file</GlossaryTerm> and direct deposit can yield refunds in ~30 days; paper returns may take up to 12 weeks.</> : <>Presenta si estás obligado a declarar federalmente o si tu ingreso excede la deducción estándar ($12,000 soltero / $24,000 <GlossaryTerm id="mfj" lang={lang}>MFJ</GlossaryTerm> para 2024–2025). Residentes parciales/no residentes usan el Formulario 500NR si el ingreso de Georgia excede $5,000. <GlossaryTerm id="e-file" lang={lang}>E-file</GlossaryTerm> con depósito directo produce reembolsos en ~30 días; declaraciones en papel pueden tomar hasta 12 semanas.</>}</p>
-            <p className="mt-4 font-medium text-white">{isEn ? "Client readiness checklist:" : "Lista de preparación del cliente:"}</p>
+            <p className="mt-4 font-medium text-slate-800 dark:text-white">{isEn ? "Client readiness checklist:" : "Lista de preparación del cliente:"}</p>
             <p>{isEn ? <>Identity documents (<GlossaryTerm id="ssn" lang={lang}>SSN</GlossaryTerm>/<GlossaryTerm id="itin" lang={lang}>ITIN</GlossaryTerm> for taxpayer, spouse, dependents); income statements (<GlossaryTerm id="w-2" lang={lang}>W-2s</GlossaryTerm>, <GlossaryTerm id="1099" lang={lang}>1099</GlossaryTerm>-NEC/K, 1099-INT, 1099-G); expense records (1098, property taxes, charitable receipts, childcare/education); prior-year federal and state returns.</> : <>Documentos de identidad (<GlossaryTerm id="ssn" lang={lang}>SSN</GlossaryTerm>/<GlossaryTerm id="itin" lang={lang}>ITIN</GlossaryTerm> del contribuyente, cónyuge, dependientes); comprobantes de ingresos (<GlossaryTerm id="w-2" lang={lang}>W-2s</GlossaryTerm>, <GlossaryTerm id="1099" lang={lang}>1099</GlossaryTerm>-NEC/K, 1099-INT, 1099-G); registros de gastos (1098, impuestos de propiedad, recibos de donaciones, guardería/educación); declaraciones federales y estatales del año anterior.</>}</p>
           </Section>
 
@@ -215,7 +216,7 @@ export default function AnalisisGeminiPage() {
   const [lang, setLang] = useState<Lang>("en");
   const t = ui[lang];
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-gray-50 text-slate-900 transition-colors duration-300 dark:bg-neutral-950 dark:text-neutral-100">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <motion.div
           className="absolute left-1/2 top-[-180px] h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-blue-500/12 blur-[100px]"
@@ -232,17 +233,17 @@ export default function AnalisisGeminiPage() {
         initial={{ y: -12, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="sticky top-0 z-50 border-b border-white/[0.06] bg-neutral-950/80 backdrop-blur-xl"
+        className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-white/[0.06] dark:bg-neutral-950/80"
       >
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-2 px-3 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3 sm:py-2 sm:text-sm">
+              <Link href="/" className="rounded-xl border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white sm:px-3 sm:py-2 sm:text-sm">
                 ← {t.menu}
               </Link>
             </motion.span>
             <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/glossary" className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3 sm:py-2 sm:text-sm">
+              <Link href="/glossary" className="rounded-xl border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white sm:px-3 sm:py-2 sm:text-sm">
                 {lang === "en" ? "Glossary" : "Glosario"}
               </Link>
             </motion.span>
@@ -254,11 +255,12 @@ export default function AnalisisGeminiPage() {
               onClick={() => setLang((p) => (p === "en" ? "es" : "en"))}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10"
+              className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
               aria-label={lang === "en" ? "Switch to Spanish" : "Cambiar a inglés"}
             >
               {lang === "en" ? "ES" : "EN"}
             </motion.button>
+            <ThemeToggle />
           </div>
         </div>
       </motion.header>

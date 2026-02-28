@@ -90,7 +90,7 @@ export function TermPopup() {
       }}
     >
       <motion.div
-        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+        className="absolute inset-0 bg-black/30 backdrop-blur-md dark:bg-black/70"
         onClick={!isExiting ? handleClose : undefined}
         variants={backdrop}
       />
@@ -101,7 +101,7 @@ export function TermPopup() {
         initial="hidden"
         onClick={(e) => e.stopPropagation()}
       >
-          <div className="overflow-hidden rounded-3xl border border-white/[0.08] bg-neutral-900/95 shadow-2xl ring-1 ring-white/[0.06] backdrop-blur-xl">
+          <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl ring-1 ring-black/[0.04] dark:border-white/[0.08] dark:bg-neutral-900/95 dark:ring-white/[0.06] dark:backdrop-blur-xl">
             <div className="absolute -inset-px rounded-3xl bg-gradient-to-b from-emerald-500/15 via-transparent to-violet-500/10 opacity-90" />
             <motion.div
               className="relative rounded-3xl p-6"
@@ -113,7 +113,7 @@ export function TermPopup() {
                 <motion.div variants={contentItem}>
                   <h2
                     id="term-popup-title"
-                    className="text-xl font-bold tracking-tight text-white"
+                    className="text-xl font-bold tracking-tight text-slate-900 dark:text-white"
                   >
                     {isEs ? term.labelEs : term.labelEn}
                     {term.labelEn !== term.labelEs && (isEs ? term.labelEn : term.labelEs)
@@ -121,7 +121,7 @@ export function TermPopup() {
                       : ""}
                   </h2>
                   {term.isAbbreviation && (
-                    <p className="mt-1.5 text-xs text-neutral-400">
+                    <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
                       {isEs ? term.shortEs : term.shortEn}
                     </p>
                   )}
@@ -129,7 +129,7 @@ export function TermPopup() {
                 <motion.button
                   variants={contentItem}
                   onClick={handleClose}
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-gray-100 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
                   aria-label="Close"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -140,12 +140,12 @@ export function TermPopup() {
 
               <motion.div
                 variants={contentItem}
-                className="space-y-3 text-sm leading-relaxed text-neutral-300"
+                className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-neutral-300"
               >
                 <p>{definition}</p>
                 {definitionAlt && definitionAlt !== definition && (
-                  <p className="border-t border-white/10 pt-3 text-neutral-400">
-                    <span className="mr-1.5 text-xs font-medium uppercase text-neutral-500">{isEs ? "EN" : "ES"}</span>
+                  <p className="border-t border-gray-200 pt-3 text-slate-500 dark:border-white/10 dark:text-neutral-400">
+                    <span className="mr-1.5 text-xs font-medium uppercase text-slate-400 dark:text-neutral-500">{isEs ? "EN" : "ES"}</span>
                     {definitionAlt}
                   </p>
                 )}
@@ -159,8 +159,8 @@ export function TermPopup() {
                   onClick={() => toggleBookmark(term.id)}
                   className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
                     isBookmarked(term.id)
-                      ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-400/30"
-                      : "bg-white/10 text-white hover:bg-white/15"
+                      ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:ring-emerald-400/30"
+                      : "bg-gray-100 text-slate-900 hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -171,7 +171,7 @@ export function TermPopup() {
                   <Link
                     href="/glossary"
                     onClick={closeTerm}
-                    className="inline-flex rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                    className="inline-flex rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-semibold text-slate-900 transition-colors hover:bg-gray-100 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
                   >
                     {VIEW_GLOSSARY[lang]}
                   </Link>

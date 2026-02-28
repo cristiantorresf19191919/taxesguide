@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { GlossaryWrapper } from "./components/GlossaryWrapper";
+import { ThemeProvider } from "./components/ThemeProvider";
 
 const font = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
@@ -21,9 +22,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={font.variable}>
+    <html lang="en" className={font.variable} suppressHydrationWarning>
       <body className="min-h-screen font-sans antialiased">
-        <GlossaryWrapper>{children}</GlossaryWrapper>
+        <ThemeProvider>
+          <GlossaryWrapper>{children}</GlossaryWrapper>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -135,33 +135,33 @@ export function AnalysisQuiz({
 
   const accentMap = {
     emerald: {
-      bg: "bg-emerald-500/20",
-      bgHover: "hover:bg-emerald-500/30",
-      text: "text-emerald-400",
-      border: "border-emerald-500/30",
-      glow: "shadow-[0_0_20px_rgba(16,185,129,0.15)]",
-      ring: "ring-emerald-400/40",
-      gradient: "from-emerald-500/20 to-teal-600/10",
+      bg: "bg-emerald-50 dark:bg-emerald-500/20",
+      bgHover: "hover:bg-emerald-100 dark:hover:bg-emerald-500/30",
+      text: "text-emerald-600 dark:text-emerald-400",
+      border: "border-emerald-300 dark:border-emerald-500/30",
+      glow: "shadow-[0_0_20px_rgba(16,185,129,0.1)] dark:shadow-[0_0_20px_rgba(16,185,129,0.15)]",
+      ring: "ring-emerald-300/40 dark:ring-emerald-400/40",
+      gradient: "from-emerald-50 to-teal-50 dark:from-emerald-500/20 dark:to-teal-600/10",
       progressBg: "bg-emerald-500",
     },
     amber: {
-      bg: "bg-amber-500/20",
-      bgHover: "hover:bg-amber-500/30",
-      text: "text-amber-400",
-      border: "border-amber-500/30",
-      glow: "shadow-[0_0_20px_rgba(245,158,11,0.15)]",
-      ring: "ring-amber-400/40",
-      gradient: "from-amber-500/20 to-orange-600/10",
+      bg: "bg-amber-50 dark:bg-amber-500/20",
+      bgHover: "hover:bg-amber-100 dark:hover:bg-amber-500/30",
+      text: "text-amber-600 dark:text-amber-400",
+      border: "border-amber-300 dark:border-amber-500/30",
+      glow: "shadow-[0_0_20px_rgba(245,158,11,0.1)] dark:shadow-[0_0_20px_rgba(245,158,11,0.15)]",
+      ring: "ring-amber-300/40 dark:ring-amber-400/40",
+      gradient: "from-amber-50 to-orange-50 dark:from-amber-500/20 dark:to-orange-600/10",
       progressBg: "bg-amber-500",
     },
     blue: {
-      bg: "bg-blue-500/20",
-      bgHover: "hover:bg-blue-500/30",
-      text: "text-blue-400",
-      border: "border-blue-500/30",
-      glow: "shadow-[0_0_20px_rgba(59,130,246,0.15)]",
-      ring: "ring-blue-400/40",
-      gradient: "from-blue-500/20 to-violet-600/10",
+      bg: "bg-blue-50 dark:bg-blue-500/20",
+      bgHover: "hover:bg-blue-100 dark:hover:bg-blue-500/30",
+      text: "text-blue-600 dark:text-blue-400",
+      border: "border-blue-300 dark:border-blue-500/30",
+      glow: "shadow-[0_0_20px_rgba(59,130,246,0.1)] dark:shadow-[0_0_20px_rgba(59,130,246,0.15)]",
+      ring: "ring-blue-300/40 dark:ring-blue-400/40",
+      gradient: "from-blue-50 to-violet-50 dark:from-blue-500/20 dark:to-violet-600/10",
       progressBg: "bg-blue-500",
     },
   };
@@ -216,18 +216,18 @@ export function AnalysisQuiz({
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="mt-12"
       >
-        <div className={`rounded-3xl border border-white/[0.08] bg-gradient-to-br ${accent.gradient} p-8 text-center backdrop-blur-sm sm:p-12`}>
+        <div className={`rounded-3xl border border-gray-200 bg-gradient-to-br dark:border-white/[0.08] ${accent.gradient} p-8 text-center backdrop-blur-sm sm:p-12`}>
           <motion.div
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.08]">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-black/[0.04] dark:bg-white/[0.08]">
               <QuizIcon className={`h-8 w-8 ${accent.text}`} />
             </div>
-            <h2 className="text-2xl font-bold tracking-tight text-white">{t.title}</h2>
-            <p className="mt-2 text-sm text-neutral-400">{t.subtitle}</p>
-            <p className="mt-1 text-xs text-neutral-500">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t.title}</h2>
+            <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">{t.subtitle}</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-neutral-500">
               {totalQuestions} {lang === "en" ? "questions" : "preguntas"}
             </p>
             <motion.button
@@ -258,7 +258,7 @@ export function AnalysisQuiz({
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="mt-12"
       >
-        <div className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-8 text-center backdrop-blur-sm sm:p-12">
+        <div className="rounded-3xl border border-gray-200 bg-white p-8 text-center backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.03] sm:p-12">
           {/* Score circle */}
           <motion.div
             initial={{ scale: 0 }}
@@ -280,11 +280,11 @@ export function AnalysisQuiz({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <h2 className="text-2xl font-bold tracking-tight text-white">{t.score}</h2>
-            <p className="mt-2 text-neutral-400">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t.score}</h2>
+            <p className="mt-2 text-slate-500 dark:text-neutral-400">
               {correctCount}/{totalQuestions} {t.questionsRight}
             </p>
-            <p className="mt-3 text-sm text-neutral-300">{getResultMessage()}</p>
+            <p className="mt-3 text-sm text-slate-600 dark:text-neutral-300">{getResultMessage()}</p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <motion.button
@@ -301,7 +301,7 @@ export function AnalysisQuiz({
                   onClick={() => setShowReview(true)}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-white/[0.06] px-6 py-3 text-sm font-semibold text-neutral-300 transition-all duration-200 hover:bg-white/[0.1]"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-gray-100 dark:bg-white/[0.06] px-6 py-3 text-sm font-semibold text-slate-600 dark:text-neutral-300 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-white/[0.1]"
                 >
                   <ReviewIcon className="h-4 w-4" />
                   {t.reviewMistakes} ({wrongOnes.length})
@@ -328,11 +328,11 @@ export function AnalysisQuiz({
         className="mt-12 space-y-6"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">{t.reviewMistakes}</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t.reviewMistakes}</h2>
           <motion.button
             onClick={() => setShowReview(false)}
             whileTap={{ scale: 0.97 }}
-            className="rounded-xl bg-white/[0.06] px-4 py-2 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/[0.1]"
+            className="rounded-xl bg-gray-100 dark:bg-white/[0.06] px-4 py-2 text-xs font-medium text-slate-600 dark:text-neutral-300 transition-colors hover:bg-gray-200 dark:hover:bg-white/[0.1]"
           >
             {t.backToQuiz}
           </motion.button>
@@ -346,9 +346,9 @@ export function AnalysisQuiz({
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.08 }}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6"
+              className="rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/[0.08] dark:bg-white/[0.03]"
             >
-              <p className="mb-4 text-sm font-semibold text-white">{hl(questionData.question)}</p>
+              <p className="mb-4 text-sm font-semibold text-slate-900 dark:text-white">{hl(questionData.question)}</p>
               <div className="space-y-2">
                 {questionData.options.map((opt, oi) => {
                   const isCorrectOpt = oi === questionData.correct;
@@ -358,10 +358,10 @@ export function AnalysisQuiz({
                       key={oi}
                       className={`rounded-xl px-4 py-2.5 text-sm ${
                         isCorrectOpt
-                          ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                          ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
                           : isUserAnswer
-                          ? "border border-red-500/30 bg-red-500/10 text-red-300"
-                          : "border border-white/[0.06] text-neutral-500"
+                          ? "border border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300"
+                          : "border border-gray-200 text-slate-400 dark:border-white/[0.06] dark:text-neutral-500"
                       }`}
                     >
                       <span className="flex items-center gap-2">
@@ -373,9 +373,9 @@ export function AnalysisQuiz({
                   );
                 })}
               </div>
-              <div className="mt-4 rounded-xl bg-white/[0.04] p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">{t.explanation}</p>
-                <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">{hl(questionData.explanation)}</p>
+              <div className="mt-4 rounded-xl bg-gray-50 p-4 dark:bg-white/[0.04]">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-neutral-500">{t.explanation}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-neutral-300">{hl(questionData.explanation)}</p>
               </div>
             </motion.div>
           );
@@ -409,18 +409,18 @@ export function AnalysisQuiz({
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="mt-12"
     >
-      <div className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-sm sm:p-8">
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.03] sm:p-8">
         {/* Progress bar */}
         <div className="mb-6">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-medium text-neutral-500">
+            <span className="text-xs font-medium text-slate-400 dark:text-neutral-500">
               {t.question} {currentIndex + 1} {t.of} {totalQuestions}
             </span>
             <span className={`text-xs font-semibold ${accent.text}`}>
               {correctCount}/{currentIndex + (answered ? 1 : 0)}
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
             <motion.div
               className={`h-full rounded-full ${accent.progressBg}`}
               initial={{ width: 0 }}
@@ -439,7 +439,7 @@ export function AnalysisQuiz({
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h3 className="mb-6 text-base font-semibold leading-relaxed text-white sm:text-lg">
+            <h3 className="mb-6 text-base font-semibold leading-relaxed text-slate-900 dark:text-white sm:text-lg">
               {hl(q.question)}
             </h3>
 
@@ -455,14 +455,14 @@ export function AnalysisQuiz({
                   "relative w-full rounded-2xl border px-5 py-4 text-left text-sm transition-all duration-200";
 
                 if (showCorrect) {
-                  optionClasses += " border-emerald-500/40 bg-emerald-500/10 text-emerald-300";
+                  optionClasses += " border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
                 } else if (showWrong) {
-                  optionClasses += " border-red-500/40 bg-red-500/10 text-red-300";
+                  optionClasses += " border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300";
                 } else if (answered) {
-                  optionClasses += " border-white/[0.06] text-neutral-500 opacity-50";
+                  optionClasses += " border-gray-200 text-slate-400 opacity-50 dark:border-white/[0.06] dark:text-neutral-500";
                 } else {
                   optionClasses +=
-                    " border-white/[0.08] text-neutral-300 hover:border-white/[0.15] hover:bg-white/[0.06] cursor-pointer";
+                    " border-gray-200 text-slate-700 hover:border-gray-300 hover:bg-gray-50 cursor-pointer dark:border-white/[0.08] dark:text-neutral-300 dark:hover:border-white/[0.15] dark:hover:bg-white/[0.06]";
                 }
 
                 return (
@@ -479,10 +479,10 @@ export function AnalysisQuiz({
                       <span
                         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
                           showCorrect
-                            ? "bg-emerald-500/30 text-emerald-300"
+                            ? "bg-emerald-500/30 text-emerald-700 dark:text-emerald-300"
                             : showWrong
-                            ? "bg-red-500/30 text-red-300"
-                            : "bg-white/[0.08] text-neutral-400"
+                            ? "bg-red-500/30 text-red-700 dark:text-red-300"
+                            : "bg-gray-100 text-slate-400 dark:bg-white/[0.08] dark:text-neutral-400"
                         }`}
                       >
                         {showCorrect ? (
@@ -513,8 +513,8 @@ export function AnalysisQuiz({
                   <div
                     className={`rounded-2xl p-5 ${
                       state === "correct"
-                        ? "border border-emerald-500/20 bg-emerald-500/[0.07]"
-                        : "border border-red-500/20 bg-red-500/[0.07]"
+                        ? "border border-emerald-200 bg-emerald-50 dark:border-emerald-500/20 dark:bg-emerald-500/[0.07]"
+                        : "border border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-500/[0.07]"
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -525,13 +525,13 @@ export function AnalysisQuiz({
                       )}
                       <span
                         className={`text-sm font-semibold ${
-                          state === "correct" ? "text-emerald-300" : "text-red-300"
+                          state === "correct" ? "text-emerald-600 dark:text-emerald-300" : "text-red-600 dark:text-red-300"
                         }`}
                       >
                         {state === "correct" ? t.correct : t.incorrect}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed text-neutral-300">
+                    <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-neutral-300">
                       {hl(q.explanation)}
                     </p>
                   </div>

@@ -31,20 +31,20 @@ export function Section({
     <motion.section variants={fadeUp} className="mt-12 first:mt-0">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="group flex w-full items-center gap-3 rounded-xl px-1 py-2.5 text-left transition-colors hover:bg-white/[0.02]"
+        className="group flex w-full items-center gap-3 rounded-xl px-1 py-2.5 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.02]"
         aria-expanded={expanded}
       >
         <span
           className="h-6 w-1 shrink-0 rounded-full transition-all duration-300"
-          style={{ backgroundColor: "rgba(255,255,255,0.2)", opacity: expanded ? 1 : 0.4 }}
+          style={{ backgroundColor: expanded ? "rgba(var(--accent), 0.5)" : "rgba(var(--muted), 0.3)", opacity: expanded ? 1 : 0.4 }}
         />
-        <h2 className="flex-1 text-lg font-bold tracking-tight text-white md:text-xl">
+        <h2 className="flex-1 text-lg font-bold tracking-tight text-slate-900 dark:text-white md:text-xl">
           {title}
         </h2>
         <motion.span
           animate={{ rotate: expanded ? 180 : 0 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-neutral-500 transition-colors group-hover:bg-white/[0.08] group-hover:text-neutral-300"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-slate-400 transition-colors group-hover:bg-gray-200 group-hover:text-slate-600 dark:bg-white/[0.04] dark:text-neutral-500 dark:group-hover:bg-white/[0.08] dark:group-hover:text-neutral-300"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 9l6 6 6-6" />
@@ -60,7 +60,7 @@ export function Section({
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <div className="mt-4 space-y-4 border-l-2 border-white/[0.05] pl-5 text-[15px] leading-[1.75] text-neutral-300">
+            <div className="mt-4 space-y-4 border-l-2 border-gray-200 pl-5 text-[15px] leading-relaxed text-slate-700 dark:border-white/[0.05] dark:text-neutral-300">
               {children}
             </div>
           </motion.div>
@@ -74,7 +74,7 @@ export function Card({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
       variants={fadeUp}
-      className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 transition-colors hover:border-white/[0.14] hover:bg-white/[0.05]"
+      className="rounded-2xl border border-gray-200 bg-white p-5 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-white/[0.08] dark:bg-white/[0.03] dark:hover:border-white/[0.14] dark:hover:bg-white/[0.05]"
     >
       {children}
     </motion.div>
@@ -91,15 +91,15 @@ export function Table({
   lang?: Lang;
 }) {
   return (
-    <motion.div variants={fadeUp} className="relative overflow-hidden rounded-2xl border border-white/[0.08]">
+    <motion.div variants={fadeUp} className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/[0.08]">
       <div className="-mb-px overflow-x-auto">
         <table className="w-full min-w-[480px] text-left text-sm">
           <thead>
-            <tr className="border-b border-white/[0.08] bg-white/[0.04]">
+            <tr className="border-b border-gray-200 bg-gray-50 dark:border-white/[0.08] dark:bg-white/[0.04]">
               {headers.map((h) => (
                 <th
                   key={h}
-                  className="whitespace-nowrap px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-neutral-400 sm:px-4"
+                  className="whitespace-nowrap px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-neutral-400 sm:px-4"
                 >
                   {h}
                 </th>
@@ -110,8 +110,8 @@ export function Table({
             {rows.map((row, i) => (
               <motion.tr
                 key={i}
-                className={`border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.04] ${
-                  i % 2 === 1 ? "bg-white/[0.02]" : ""
+                className={`border-b border-gray-100 last:border-0 transition-colors hover:bg-gray-50 dark:border-white/[0.04] dark:hover:bg-white/[0.04] ${
+                  i % 2 === 1 ? "bg-gray-50/50 dark:bg-white/[0.02]" : ""
                 }`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -120,7 +120,7 @@ export function Table({
                 {row.map((cell, j) => (
                   <td
                     key={j}
-                    className={`px-3 py-3 sm:px-4 ${j === 0 ? "font-medium text-white/90" : "text-neutral-300"}`}
+                    className={`px-3 py-3 sm:px-4 ${j === 0 ? "font-medium text-slate-900 dark:text-white/90" : "text-slate-600 dark:text-neutral-300"}`}
                   >
                     <AutoGlossary text={cell} lang={lang} />
                   </td>
@@ -131,7 +131,7 @@ export function Table({
         </table>
       </div>
       {/* Mobile scroll hint */}
-      <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-6 bg-gradient-to-l from-neutral-950/60 to-transparent sm:hidden" />
+      <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-6 bg-gradient-to-l from-white/60 to-transparent dark:from-neutral-950/60 sm:hidden" />
     </motion.div>
   );
 }

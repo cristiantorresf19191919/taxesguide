@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { TERMS } from "@/app/data/terms";
 import type { TermRecord } from "@/app/data/terms";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 
 type Lang = "en" | "es";
 
@@ -23,12 +24,12 @@ type Note = {
 };
 
 const CATEGORIES: Record<Category, { icon: string; colorClass: string; bgClass: string; borderClass: string }> = {
-  forms:       { icon: "📋", colorClass: "text-emerald-400",  bgClass: "bg-emerald-500/15", borderClass: "border-emerald-500/30" },
-  definitions: { icon: "📖", colorClass: "text-violet-400",   bgClass: "bg-violet-500/15",  borderClass: "border-violet-500/30" },
-  study:       { icon: "📝", colorClass: "text-blue-400",     bgClass: "bg-blue-500/15",    borderClass: "border-blue-500/30" },
-  dates:       { icon: "📅", colorClass: "text-amber-400",    bgClass: "bg-amber-500/15",   borderClass: "border-amber-500/30" },
-  tips:        { icon: "💡", colorClass: "text-rose-400",     bgClass: "bg-rose-500/15",    borderClass: "border-rose-500/30" },
-  general:     { icon: "📌", colorClass: "text-neutral-400",  bgClass: "bg-white/10",       borderClass: "border-white/20" },
+  forms:       { icon: "📋", colorClass: "text-emerald-400",  bgClass: "bg-emerald-100 dark:bg-emerald-500/15",  borderClass: "border-emerald-500/30" },
+  definitions: { icon: "📖", colorClass: "text-violet-400",   bgClass: "bg-violet-100 dark:bg-violet-500/15",   borderClass: "border-violet-500/30" },
+  study:       { icon: "📝", colorClass: "text-blue-400",     bgClass: "bg-blue-100 dark:bg-blue-500/15",       borderClass: "border-blue-500/30" },
+  dates:       { icon: "📅", colorClass: "text-amber-400",    bgClass: "bg-amber-100 dark:bg-amber-500/15",     borderClass: "border-amber-500/30" },
+  tips:        { icon: "💡", colorClass: "text-rose-400",     bgClass: "bg-rose-100 dark:bg-rose-500/15",       borderClass: "border-rose-500/30" },
+  general:     { icon: "📌", colorClass: "text-neutral-400",  bgClass: "bg-gray-200 dark:bg-white/10",          borderClass: "border-white/20" },
 };
 
 function loadNotes(): Note[] {
@@ -348,7 +349,7 @@ export default function NotesPage() {
   const allCats = Object.keys(CATEGORIES) as Category[];
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-gray-50 text-slate-900 transition-colors duration-300 dark:bg-neutral-950 dark:text-neutral-100">
       {/* Background effects */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <motion.div
@@ -369,27 +370,27 @@ export default function NotesPage() {
         initial={{ y: -12, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="sticky top-0 z-50 border-b border-white/[0.06] bg-neutral-950/80 backdrop-blur-xl"
+        className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-xl dark:border-white/[0.06] dark:bg-neutral-950/80 dark:backdrop-blur-xl"
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <motion.span whileHover={{ x: -2 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/"
-                className="text-sm font-medium text-neutral-400 transition-colors hover:text-white"
+                className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white"
               >
                 ← {t.back}
               </Link>
             </motion.span>
-            <span className="hidden sm:inline text-neutral-600">|</span>
-            <span className="hidden sm:inline text-sm font-semibold text-white">{t.title}</span>
+            <span className="hidden sm:inline text-slate-300 dark:text-neutral-600">|</span>
+            <span className="hidden sm:inline text-sm font-semibold text-slate-900 dark:text-white">{t.title}</span>
           </div>
           <div className="flex items-center gap-2">
             {/* Mobile sidebar toggle */}
             <motion.button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               whileTap={{ scale: 0.97 }}
-              className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10 lg:hidden"
+              className="rounded-xl border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 lg:hidden"
               aria-label={t.sidebarToggle}
             >
               {sidebarOpen ? "✕" : "☰"}
@@ -397,15 +398,16 @@ export default function NotesPage() {
             <motion.button
               onClick={() => setLang((l) => (l === "en" ? "es" : "en"))}
               whileTap={{ scale: 0.97 }}
-              className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10"
+              className="rounded-xl border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
             >
               {lang === "en" ? "ES" : "EN"}
             </motion.button>
+            <ThemeToggle />
             <motion.button
               onClick={createNote}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="rounded-xl bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/30"
+              className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30"
             >
               + {t.newNote}
             </motion.button>
@@ -420,8 +422,8 @@ export default function NotesPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-5"
         >
-          <h1 className="text-xl font-bold tracking-tight text-white">{t.title}</h1>
-          <p className="mt-1 text-sm text-neutral-500">{t.subtitle}</p>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{t.title}</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-500">{t.subtitle}</p>
         </motion.div>
 
         <div className="flex gap-5 relative">
@@ -436,7 +438,7 @@ export default function NotesPage() {
                 w-64 shrink-0 flex-col gap-3
                 lg:flex
                 ${sidebarOpen
-                  ? "fixed inset-0 top-[57px] z-40 flex bg-neutral-950/95 backdrop-blur-xl p-4 overflow-y-auto"
+                  ? "fixed inset-0 top-[57px] z-40 flex bg-gray-50/95 p-4 overflow-y-auto dark:bg-neutral-950/95 dark:backdrop-blur-xl"
                   : "hidden"
                 }
               `}
@@ -444,7 +446,7 @@ export default function NotesPage() {
               {/* Search */}
               <div className="relative">
                 <svg
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 dark:text-neutral-500"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -457,7 +459,7 @@ export default function NotesPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t.search}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-8 pr-3 text-xs text-neutral-200 placeholder-neutral-500 outline-none transition-colors focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-xs text-slate-900 placeholder-slate-400 outline-none transition-colors focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30 dark:border-white/10 dark:bg-white/5 dark:text-neutral-200 dark:placeholder-neutral-500"
                 />
               </div>
 
@@ -467,8 +469,8 @@ export default function NotesPage() {
                   onClick={() => setFilterCat("all")}
                   className={`rounded-lg px-2 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
                     filterCat === "all"
-                      ? "bg-white/15 text-white"
-                      : "text-neutral-500 hover:bg-white/5 hover:text-neutral-300"
+                      ? "bg-gray-200 text-slate-900 dark:bg-white/15 dark:text-white"
+                      : "text-slate-400 hover:bg-gray-100 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-white/5 dark:hover:text-neutral-300"
                   }`}
                 >
                   {t.all}
@@ -482,7 +484,7 @@ export default function NotesPage() {
                       className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
                         filterCat === c
                           ? `${meta.bgClass} ${meta.colorClass}`
-                          : "text-neutral-500 hover:bg-white/5 hover:text-neutral-300"
+                          : "text-slate-400 hover:bg-gray-100 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-white/5 dark:hover:text-neutral-300"
                       }`}
                     >
                       <span>{meta.icon}</span>
@@ -493,12 +495,12 @@ export default function NotesPage() {
               </div>
 
               {/* Divider */}
-              <div className="h-px bg-white/[0.06]" />
+              <div className="h-px bg-gray-200 dark:bg-white/[0.06]" />
 
               {/* Notes list */}
               <div className="flex-1 space-y-1 overflow-y-auto pr-1 lg:max-h-[calc(100vh-280px)]">
                 {filteredNotes.length === 0 && (
-                  <p className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-4 text-center text-xs text-neutral-500">
+                  <p className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-4 text-center text-xs text-slate-400 dark:border-white/10 dark:bg-white/[0.02] dark:text-neutral-500">
                     {search.trim() ? t.noResults : t.noNotes}
                   </p>
                 )}
@@ -512,8 +514,8 @@ export default function NotesPage() {
                       whileTap={{ scale: 0.99 }}
                       className={`group relative w-full rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${
                         n.id === activeId
-                          ? "bg-white/[0.12] text-white"
-                          : "text-neutral-400 hover:bg-white/[0.06] hover:text-white"
+                          ? "bg-gray-100 text-slate-900 dark:bg-white/[0.12] dark:text-white"
+                          : "text-slate-500 hover:bg-gray-50 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
                       }`}
                     >
                       <div className="flex items-center gap-1.5">
@@ -525,7 +527,7 @@ export default function NotesPage() {
                           {n.title || t.newNote}
                         </span>
                       </div>
-                      <div className="mt-0.5 flex items-center gap-2 text-[10px] text-neutral-500">
+                      <div className="mt-0.5 flex items-center gap-2 text-[10px] text-slate-400 dark:text-neutral-500">
                         <span>{new Date(n.updatedAt).toLocaleDateString()}</span>
                         <span className={`rounded px-1 py-0.5 ${cMeta.bgClass} ${cMeta.colorClass} text-[9px] font-bold uppercase`}>
                           {t.categories[n.category]}
@@ -535,7 +537,7 @@ export default function NotesPage() {
                       <span
                         className={`absolute left-0 top-2 bottom-2 w-[3px] rounded-full transition-opacity ${
                           n.id === activeId ? "opacity-100" : "opacity-0 group-hover:opacity-50"
-                        } ${cMeta.bgClass.replace("/15", "/60").replace("/10", "/40")}`}
+                        }`}
                         style={{
                           backgroundColor:
                             n.category === "forms" ? "rgb(52,211,153)" :
@@ -557,7 +559,7 @@ export default function NotesPage() {
           {/* Click-away overlay for mobile sidebar */}
           {sidebarOpen && (
             <div
-              className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+              className="fixed inset-0 z-30 bg-black/20 dark:bg-black/40 lg:hidden"
               onClick={() => setSidebarOpen(false)}
             />
           )}
@@ -576,12 +578,12 @@ export default function NotesPage() {
                 >
                   {/* Editor card */}
                   <div
-                    className={`rounded-2xl border bg-white/[0.03] p-5 transition-colors ${catMeta.borderClass.replace("/30", "/20")}`}
+                    className={`rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:bg-white/[0.03] ${catMeta.borderClass.replace("/30", "/20")}`}
                     data-readaloud-content
                   >
                     {/* Category selector row */}
                     <div className="mb-4 flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-neutral-500">
                         {lang === "en" ? "Section" : "Sección"}:
                       </span>
                       {allCats.map((c) => {
@@ -595,7 +597,7 @@ export default function NotesPage() {
                             className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-semibold transition-all ${
                               selected
                                 ? `${m.bgClass} ${m.colorClass} ${m.borderClass}`
-                                : "border-white/[0.06] text-neutral-500 hover:border-white/15 hover:text-neutral-300"
+                                : "border-gray-200 text-slate-400 hover:border-gray-300 hover:text-slate-600 dark:border-white/[0.06] dark:text-neutral-500 dark:hover:border-white/15 dark:hover:text-neutral-300"
                             }`}
                           >
                             <span className="text-xs">{m.icon}</span>
@@ -611,7 +613,7 @@ export default function NotesPage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder={t.noteTitle}
-                      className="mb-3 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-semibold text-white placeholder-neutral-500 outline-none transition-colors focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30"
+                      className="mb-3 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-semibold text-slate-900 placeholder-slate-400 outline-none transition-colors focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-neutral-500"
                     />
 
                     {/* Textarea with autocomplete */}
@@ -627,7 +629,7 @@ export default function NotesPage() {
                         onKeyDown={handleKeyDown}
                         placeholder={t.placeholder}
                         rows={16}
-                        className="w-full resize-y rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm leading-relaxed text-neutral-200 placeholder-neutral-500 outline-none transition-colors focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30"
+                        className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm leading-relaxed text-slate-900 placeholder-slate-400 outline-none transition-colors focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30 dark:border-white/10 dark:bg-white/5 dark:text-neutral-200 dark:placeholder-neutral-500"
                       />
                       <AnimatePresence>
                         {showSuggestions && suggestions.length > 0 && (
@@ -635,7 +637,7 @@ export default function NotesPage() {
                             initial={{ opacity: 0, y: -4 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -4 }}
-                            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-52 overflow-y-auto rounded-xl border border-white/10 bg-neutral-900/95 shadow-2xl ring-1 ring-white/10 backdrop-blur-xl"
+                            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-52 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-neutral-900/95 dark:ring-1 dark:ring-white/10 dark:backdrop-blur-xl"
                           >
                             {suggestions.map((term, i) => {
                               const label = lang === "es" ? term.labelEs : term.labelEn;
@@ -647,13 +649,13 @@ export default function NotesPage() {
                                     onMouseEnter={() => setSuggestionIndex(i)}
                                     className={`flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm transition-colors ${
                                       i === suggestionIndex
-                                        ? "bg-emerald-500/20 text-emerald-300"
-                                        : "text-neutral-300 hover:bg-white/10"
+                                        ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300"
+                                        : "text-slate-600 hover:bg-gray-50 dark:text-neutral-300 dark:hover:bg-white/10"
                                     }`}
                                   >
                                     <span className="font-medium">{label}</span>
                                     {term.shortEn && (
-                                      <span className="max-w-[60%] truncate text-xs text-neutral-500">
+                                      <span className="max-w-[60%] truncate text-xs text-slate-400 dark:text-neutral-500">
                                         {term.shortEn.slice(0, 50)}…
                                       </span>
                                     )}
@@ -667,7 +669,7 @@ export default function NotesPage() {
                     </div>
 
                     {/* Footer: word count + stats */}
-                    <div className="mt-2 flex items-center justify-between text-[10px] text-neutral-500">
+                    <div className="mt-2 flex items-center justify-between text-[10px] text-slate-400 dark:text-neutral-500">
                       <div className="flex items-center gap-3">
                         <span>{wordCount(content)} {t.words}</span>
                         <span>{content.length} {t.chars}</span>
@@ -685,7 +687,7 @@ export default function NotesPage() {
                       onClick={saveCurrent}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="rounded-xl bg-emerald-500/20 px-4 py-2 text-sm font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/30"
+                      className="rounded-xl bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30"
                     >
                       {t.save}
                     </motion.button>
@@ -697,8 +699,8 @@ export default function NotesPage() {
                           whileTap={{ scale: 0.98 }}
                           className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
                             activeNote.pinned
-                              ? "border-amber-500/30 bg-amber-500/15 text-amber-400"
-                              : "border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10"
+                              ? "border-amber-300 bg-amber-50 text-amber-600 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400"
+                              : "border-gray-200 bg-gray-100 text-slate-600 hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400 dark:hover:bg-white/10"
                           }`}
                         >
                           📌 {activeNote.pinned ? t.unpin : t.pin}
@@ -707,7 +709,7 @@ export default function NotesPage() {
                         <motion.button
                           onClick={copyToClipboard}
                           whileTap={{ scale: 0.98 }}
-                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-neutral-400 transition-colors hover:bg-white/10"
+                          className="rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400 dark:hover:bg-white/10"
                         >
                           {copied ? `✓ ${t.copied}` : `📋 ${t.copy}`}
                         </motion.button>
@@ -715,7 +717,7 @@ export default function NotesPage() {
                         <motion.button
                           onClick={() => setShowDeleteConfirm(true)}
                           whileTap={{ scale: 0.98 }}
-                          className="rounded-xl bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400/70 transition-colors hover:bg-red-500/20 hover:text-red-400"
+                          className="rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400/70 dark:hover:bg-red-500/20 dark:hover:text-red-400"
                         >
                           {t.delete}
                         </motion.button>
@@ -730,18 +732,18 @@ export default function NotesPage() {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 6 }}
-                        className="mt-3 inline-flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5"
+                        className="mt-3 inline-flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 dark:border-red-500/20 dark:bg-red-500/10"
                       >
-                        <span className="text-sm text-red-300">{t.confirmDelete}</span>
+                        <span className="text-sm text-red-600 dark:text-red-300">{t.confirmDelete}</span>
                         <button
                           onClick={deleteCurrent}
-                          className="rounded-lg bg-red-500/30 px-3 py-1 text-xs font-bold text-red-300 transition-colors hover:bg-red-500/50"
+                          className="rounded-lg bg-red-500/30 px-3 py-1 text-xs font-bold text-red-600 transition-colors hover:bg-red-500/50 dark:text-red-300"
                         >
                           {t.confirmYes}
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(false)}
-                          className="rounded-lg bg-white/10 px-3 py-1 text-xs font-bold text-neutral-300 transition-colors hover:bg-white/20"
+                          className="rounded-lg bg-gray-200 px-3 py-1 text-xs font-bold text-slate-600 transition-colors hover:bg-gray-300 dark:bg-white/10 dark:text-neutral-300 dark:hover:bg-white/20"
                         >
                           {t.confirmNo}
                         </button>
@@ -756,7 +758,7 @@ export default function NotesPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex flex-col items-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-16 text-center"
+                  className="flex flex-col items-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 py-16 text-center dark:border-white/10 dark:bg-white/[0.02]"
                 >
                   <div className="mb-4 flex gap-2 text-3xl">
                     {allCats.map((c) => (
@@ -770,12 +772,12 @@ export default function NotesPage() {
                       </motion.span>
                     ))}
                   </div>
-                  <p className="text-neutral-500">{t.noNotes}</p>
+                  <p className="text-slate-400 dark:text-neutral-500">{t.noNotes}</p>
                   <motion.button
                     onClick={createNote}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="mt-4 rounded-xl bg-emerald-500/20 px-5 py-2.5 text-sm font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/30"
+                    className="mt-4 rounded-xl bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30"
                   >
                     + {t.newNote}
                   </motion.button>

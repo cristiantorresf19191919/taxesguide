@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { TERMS } from "@/app/data/terms";
 import type { TermRecord } from "@/app/data/terms";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 
 type Lang = "en" | "es";
 type Mode = "flashcard" | "quiz";
@@ -225,7 +226,7 @@ export default function QuizPage() {
   const termShort = lang === "es" ? currentCard.shortEs : currentCard.shortEn;
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-gray-50 text-slate-900 transition-colors duration-300 dark:bg-neutral-950 dark:text-neutral-100">
       {/* Background */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <motion.div
@@ -245,35 +246,36 @@ export default function QuizPage() {
         initial={{ y: -12, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="sticky top-0 z-50 border-b border-white/[0.06] bg-neutral-950/80 backdrop-blur-xl"
+        className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-xl dark:border-white/[0.06] dark:bg-neutral-950/80 dark:backdrop-blur-xl"
       >
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
           <motion.span whileHover={{ x: -2 }} whileTap={{ scale: 0.98 }}>
-            <Link href="/" className="text-sm font-medium text-neutral-400 transition-colors hover:text-white">
+            <Link href="/" className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white">
               ← {t.back}
             </Link>
           </motion.span>
           <div className="flex items-center gap-2">
-            <div className="flex rounded-xl bg-white/[0.06] p-0.5">
+            <div className="flex rounded-xl bg-gray-100 p-0.5 dark:bg-white/[0.06]">
               <button
                 onClick={() => setMode("flashcard")}
-                className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${mode === "flashcard" ? "bg-white/15 text-white" : "text-neutral-500 hover:text-neutral-300"}`}
+                className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${mode === "flashcard" ? "bg-white text-slate-900 shadow-sm dark:bg-white/15 dark:text-white" : "text-slate-400 hover:text-slate-600 dark:text-neutral-500 dark:hover:text-neutral-300"}`}
               >
                 {t.flashcard}
               </button>
               <button
                 onClick={() => setMode("quiz")}
-                className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${mode === "quiz" ? "bg-white/15 text-white" : "text-neutral-500 hover:text-neutral-300"}`}
+                className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${mode === "quiz" ? "bg-white text-slate-900 shadow-sm dark:bg-white/15 dark:text-white" : "text-slate-400 hover:text-slate-600 dark:text-neutral-500 dark:hover:text-neutral-300"}`}
               >
                 {t.quiz}
               </button>
             </div>
             <button
               onClick={() => setLang((l) => (l === "en" ? "es" : "en"))}
-              className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/10"
+              className="rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
             >
               {lang === "en" ? "ES" : "EN"}
             </button>
+            <ThemeToggle />
           </div>
         </div>
       </motion.header>
@@ -285,8 +287,8 @@ export default function QuizPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-6 text-center"
         >
-          <h1 className="text-2xl font-bold tracking-tight text-white">{t.title}</h1>
-          <p className="mt-1 text-sm text-neutral-500">{t.subtitle}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t.title}</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-500">{t.subtitle}</p>
         </motion.div>
 
         {/* Stats bar */}
@@ -297,25 +299,25 @@ export default function QuizPage() {
           className="mb-6 grid grid-cols-4 gap-3"
         >
           {[
-            { label: t.score, value: `${accuracy}%`, color: "text-emerald-400" },
-            { label: t.streak, value: history.streak.toString(), color: "text-amber-400" },
-            { label: t.best, value: history.bestStreak.toString(), color: "text-violet-400" },
-            { label: t.mastered, value: `${history.mastered.length}/${TERMS.length}`, color: "text-blue-400" },
+            { label: t.score, value: `${accuracy}%`, color: "text-emerald-600 dark:text-emerald-400" },
+            { label: t.streak, value: history.streak.toString(), color: "text-amber-600 dark:text-amber-400" },
+            { label: t.best, value: history.bestStreak.toString(), color: "text-violet-600 dark:text-violet-400" },
+            { label: t.mastered, value: `${history.mastered.length}/${TERMS.length}`, color: "text-blue-600 dark:text-blue-400" },
           ].map((stat, i) => (
-            <div key={i} className="rounded-xl border border-white/[0.07] bg-[#141417] p-3 text-center">
+            <div key={i} className="rounded-xl border border-gray-200 bg-white p-3 text-center dark:border-white/[0.07] dark:bg-[#141417]">
               <div className={`text-lg font-bold ${stat.color}`}>{stat.value}</div>
-              <div className="text-[10px] text-neutral-500">{stat.label}</div>
+              <div className="text-[10px] text-slate-400 dark:text-neutral-500">{stat.label}</div>
             </div>
           ))}
         </motion.div>
 
         {/* Progress bar */}
         <div className="mb-6">
-          <div className="mb-1 flex items-center justify-between text-[10px] text-neutral-500">
+          <div className="mb-1 flex items-center justify-between text-[10px] text-slate-400 dark:text-neutral-500">
             <span>{currentIndex + 1} {t.of} {cards.length}</span>
             <span>{progressPct}%</span>
           </div>
-          <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="h-1 overflow-hidden rounded-full bg-gray-200 dark:bg-white/[0.06]">
             <motion.div
               className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400"
               initial={{ width: 0 }}
@@ -338,7 +340,7 @@ export default function QuizPage() {
             >
               <div
                 onClick={() => setFlipped((f) => !f)}
-                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/[0.08] bg-[#141417] transition-all duration-300 hover:border-white/[0.15] hover:shadow-[0_0_40px_rgba(139,92,246,0.08)]"
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:border-gray-300 hover:shadow-lg dark:border-white/[0.08] dark:bg-[#141417] dark:hover:border-white/[0.15] dark:hover:shadow-[0_0_40px_rgba(139,92,246,0.08)]"
                 style={{ minHeight: 280, perspective: 1000 }}
               >
                 {/* Shimmer effect */}
@@ -359,9 +361,9 @@ export default function QuizPage() {
                       <div className="mb-2 rounded-lg bg-emerald-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
                         {currentCard.isAbbreviation ? "Abbreviation" : "Term"}
                       </div>
-                      <h2 className="text-3xl font-bold tracking-tight text-white">{termLabel}</h2>
-                      <p className="mt-4 text-sm leading-relaxed text-neutral-400">{termShort}</p>
-                      <p className="mt-6 text-xs text-neutral-600">{t.flip}</p>
+                      <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{termLabel}</h2>
+                      <p className="mt-4 text-sm leading-relaxed text-slate-500 dark:text-neutral-400">{termShort}</p>
+                      <p className="mt-6 text-xs text-slate-300 dark:text-neutral-600">{t.flip}</p>
                     </motion.div>
                   ) : (
                     <motion.div
@@ -375,9 +377,9 @@ export default function QuizPage() {
                       <div className="mb-3 rounded-lg bg-violet-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-400 inline-flex self-start">
                         Full Definition
                       </div>
-                      <h3 className="mb-3 text-xl font-bold text-white">{termLabel}</h3>
-                      <p className="text-sm leading-relaxed text-neutral-300">{termDef}</p>
-                      <p className="mt-6 text-xs text-neutral-600">{t.flip}</p>
+                      <h3 className="mb-3 text-xl font-bold text-slate-900 dark:text-white">{termLabel}</h3>
+                      <p className="text-sm leading-relaxed text-slate-500 dark:text-neutral-300">{termDef}</p>
+                      <p className="mt-6 text-xs text-slate-300 dark:text-neutral-600">{t.flip}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -402,9 +404,9 @@ export default function QuizPage() {
                 </div>
               )}
 
-              <div className="rounded-2xl border border-white/[0.08] bg-[#141417] p-6">
-                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-neutral-500">{t.checkAnswer}</p>
-                <p className="mb-6 text-sm leading-relaxed text-neutral-300">
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/[0.08] dark:bg-[#141417]">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-neutral-500">{t.checkAnswer}</p>
+                <p className="mb-6 text-sm leading-relaxed text-slate-500 dark:text-neutral-300">
                   {answerRevealed ? termDef : termShort}
                 </p>
 
@@ -422,7 +424,7 @@ export default function QuizPage() {
                     const label = lang === "es" ? option.labelEs : option.labelEn;
                     const isCorrectOption = option.id === currentCard.id;
                     const isSelected = selectedAnswer === option.id;
-                    let cls = "border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.06] hover:border-white/[0.15]";
+                    let cls = "border-gray-200 bg-gray-50 text-slate-700 hover:bg-gray-100 hover:border-gray-300 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-neutral-300 dark:hover:bg-white/[0.06] dark:hover:border-white/[0.15]";
 
                     if (selectedAnswer) {
                       if (isCorrectOption) {
@@ -430,7 +432,7 @@ export default function QuizPage() {
                       } else if (isSelected && !isCorrectOption) {
                         cls = "border-red-500/40 bg-red-500/15 text-red-300";
                       } else {
-                        cls = "border-white/[0.05] bg-white/[0.02] text-neutral-500";
+                        cls = "border-gray-100 bg-gray-50 text-slate-300 dark:border-white/[0.05] dark:bg-white/[0.02] dark:text-neutral-500";
                       }
                     }
 
@@ -483,7 +485,7 @@ export default function QuizPage() {
             onClick={goPrev}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/10"
+            className="rounded-xl border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
           >
             ← {t.prev}
           </motion.button>
@@ -491,7 +493,7 @@ export default function QuizPage() {
             onClick={reshuffleCards}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/10"
+            className="rounded-xl border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
           >
             {t.shuffleCards}
           </motion.button>
@@ -499,7 +501,7 @@ export default function QuizPage() {
             onClick={goNext}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="rounded-xl bg-emerald-500/20 px-4 py-2.5 text-sm font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/30"
+            className="rounded-xl bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30"
           >
             {t.next} →
           </motion.button>
@@ -511,21 +513,21 @@ export default function QuizPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mx-auto mt-10 max-w-xl rounded-2xl border border-white/[0.07] bg-[#141417] p-5"
+            className="mx-auto mt-10 max-w-xl rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/[0.07] dark:bg-[#141417]"
           >
-            <h3 className="mb-4 text-sm font-bold text-white">{t.stats}</h3>
+            <h3 className="mb-4 text-sm font-bold text-slate-900 dark:text-white">{t.stats}</h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <div className="text-2xl font-bold text-white">{history.totalAttempted}</div>
-                <div className="text-[10px] text-neutral-500">{t.totalAnswered}</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">{history.totalAttempted}</div>
+                <div className="text-[10px] text-slate-400 dark:text-neutral-500">{t.totalAnswered}</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-emerald-400">{accuracy}%</div>
-                <div className="text-[10px] text-neutral-500">{t.accuracy}</div>
+                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{accuracy}%</div>
+                <div className="text-[10px] text-slate-400 dark:text-neutral-500">{t.accuracy}</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-violet-400">{history.mastered.length}</div>
-                <div className="text-[10px] text-neutral-500">{t.termsMastered}</div>
+                <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">{history.mastered.length}</div>
+                <div className="text-[10px] text-slate-400 dark:text-neutral-500">{t.termsMastered}</div>
               </div>
             </div>
           </motion.div>
