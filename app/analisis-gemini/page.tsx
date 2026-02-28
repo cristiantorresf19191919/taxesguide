@@ -25,7 +25,7 @@ function GeminiContent({ lang }: { lang: Lang }) {
       variants={stagger}
       initial="hidden"
       animate="show"
-      className="space-y-10"
+      className="space-y-12"
     >
       <motion.header variants={fadeUp} className="space-y-5">
         <div className="flex justify-center">
@@ -255,7 +255,7 @@ export default function AnalisisGeminiPage() {
               onClick={() => setLang((p) => (p === "en" ? "es" : "en"))}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
+              className="rounded-xl border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
               aria-label={lang === "en" ? "Switch to Spanish" : "Cambiar a inglés"}
             >
               {lang === "en" ? "ES" : "EN"}
@@ -264,7 +264,7 @@ export default function AnalisisGeminiPage() {
           </div>
         </div>
       </motion.header>
-      <main className="mx-auto max-w-4xl px-4 pb-36 pt-8 sm:px-6 sm:pb-28 sm:pt-10" data-readaloud-content>
+      <main className="mx-auto max-w-4xl px-4 pb-36 pt-10 sm:px-6 sm:pb-28 sm:pt-12" data-readaloud-content>
         <LangSwitchWrapper lang={lang}>
           <GeminiContent lang={lang} />
         </LangSwitchWrapper>

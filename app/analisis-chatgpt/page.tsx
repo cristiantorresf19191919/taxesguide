@@ -25,7 +25,7 @@ function ChatGPTContent({ lang }: { lang: Lang }) {
       variants={stagger}
       initial="hidden"
       animate="show"
-      className="space-y-10"
+      className="space-y-12"
     >
       <motion.header variants={fadeUp} className="space-y-5">
         <div className="flex justify-center">
@@ -45,11 +45,11 @@ function ChatGPTContent({ lang }: { lang: Lang }) {
         <p className="text-sm leading-relaxed text-slate-500 dark:text-neutral-400">
           {isEn ? (
             <>
-              <strong className="text-slate-900 dark:text-white">Georgia is one of the most accessible states in the U.S. to start a tax preparation business.</strong> There is no state license required — only a federal <GlossaryTerm id="ptin" lang={lang}>PTIN</GlossaryTerm>. This guide walks Sandra through every step: from understanding the industry landscape, to obtaining credentials, to setting up a profitable practice. With focused effort over <strong className="text-emerald-600 dark:text-emerald-300">3–5 months</strong>, she can go from zero experience to filing her first paid return for as little as <strong className="text-emerald-600 dark:text-emerald-300">$2,000–$4,000</strong> in startup costs. Below is the complete playbook — training options, IRS credentials, Georgia business requirements, software comparisons, pricing strategies, and a month-by-month timeline.
+              <strong className="text-slate-900 dark:text-white">Georgia is one of the most accessible states in the U.S. to start a tax preparation business.</strong> There is no state license required — only a federal <GlossaryTerm id="ptin" lang={lang}>PTIN</GlossaryTerm>. This guide walks Sandra through every step: from understanding the industry landscape, to obtaining credentials, to setting up a profitable practice. With focused effort over <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">3–5 months</strong>, she can go from zero experience to filing her first paid return for as little as <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">$2,000–$4,000</strong> in startup costs. Below is the complete playbook — training options, IRS credentials, Georgia business requirements, software comparisons, pricing strategies, and a month-by-month timeline.
             </>
           ) : (
             <>
-              <strong className="text-slate-900 dark:text-white">Georgia es uno de los estados más accesibles en EE.UU. para iniciar un negocio de preparación de impuestos.</strong> No se requiere licencia estatal — solo un <GlossaryTerm id="ptin" lang={lang}>PTIN</GlossaryTerm> federal. Esta guía lleva a Sandra paso a paso: desde entender la industria, obtener credenciales, hasta montar una práctica rentable. Con esfuerzo enfocado durante <strong className="text-emerald-600 dark:text-emerald-300">3–5 meses</strong>, puede pasar de cero experiencia a presentar su primera declaración pagada con tan solo <strong className="text-emerald-600 dark:text-emerald-300">$2,000–$4,000</strong> de inversión inicial. Abajo está el plan completo: opciones de formación, credenciales del IRS, requisitos de negocio en Georgia, comparación de software, estrategias de precios y un cronograma mes a mes.
+              <strong className="text-slate-900 dark:text-white">Georgia es uno de los estados más accesibles en EE.UU. para iniciar un negocio de preparación de impuestos.</strong> No se requiere licencia estatal — solo un <GlossaryTerm id="ptin" lang={lang}>PTIN</GlossaryTerm> federal. Esta guía lleva a Sandra paso a paso: desde entender la industria, obtener credenciales, hasta montar una práctica rentable. Con esfuerzo enfocado durante <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">3–5 meses</strong>, puede pasar de cero experiencia a presentar su primera declaración pagada con tan solo <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">$2,000–$4,000</strong> de inversión inicial. Abajo está el plan completo: opciones de formación, credenciales del IRS, requisitos de negocio en Georgia, comparación de software, estrategias de precios y un cronograma mes a mes.
             </>
           )}
         </p>
@@ -226,8 +226,8 @@ function ChatGPTContent({ lang }: { lang: Lang }) {
 
         <p className="mt-4 font-medium text-emerald-600 dark:text-emerald-300">{isEn ? "Georgia DOR registration" : "Registro en el DOR de Georgia"}</p>
         <p>{isEn
-          ? <>Register through the Georgia Tax Center (gtc.dor.ga.gov) — free; receive your state tax ID by email within ~15 minutes. Register as a <GlossaryTerm id="third-party-filer" lang={lang}>third-party filer</GlossaryTerm> if you will e-file state returns for clients. <strong className="text-emerald-600 dark:text-emerald-300">Tax preparation services are not subject to Georgia sales tax.</strong></>
-          : <>Registrarse a través del Georgia Tax Center (gtc.dor.ga.gov) — gratis; recibes tu ID fiscal estatal por correo en ~15 minutos. Registrarse como <GlossaryTerm id="third-party-filer" lang={lang}>presentador de terceros</GlossaryTerm> si vas a presentar declaraciones estatales electrónicamente para clientes. <strong className="text-emerald-600 dark:text-emerald-300">Los servicios de preparación de impuestos no están sujetos al impuesto de ventas de Georgia.</strong></>}
+          ? <>Register through the Georgia Tax Center (gtc.dor.ga.gov) — free; receive your state tax ID by email within ~15 minutes. Register as a <GlossaryTerm id="third-party-filer" lang={lang}>third-party filer</GlossaryTerm> if you will e-file state returns for clients. <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Tax preparation services are not subject to Georgia sales tax.</strong></>
+          : <>Registrarse a través del Georgia Tax Center (gtc.dor.ga.gov) — gratis; recibes tu ID fiscal estatal por correo en ~15 minutos. Registrarse como <GlossaryTerm id="third-party-filer" lang={lang}>presentador de terceros</GlossaryTerm> si vas a presentar declaraciones estatales electrónicamente para clientes. <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Los servicios de preparación de impuestos no están sujetos al impuesto de ventas de Georgia.</strong></>}
         </p>
 
         <p className="mt-4 font-medium text-emerald-600 dark:text-emerald-300">{isEn ? "Local occupation tax certificate" : "Certificado de impuesto ocupacional local"}</p>
@@ -313,8 +313,8 @@ function ChatGPTContent({ lang }: { lang: Lang }) {
       <Section title={isEn ? "Due diligence: avoiding the biggest penalties" : "Debida diligencia: evitar las multas más grandes"}>
         <p>
           {isEn
-            ? <>The IRS imposes strict <GlossaryTerm id="due-diligence" lang={lang}>due diligence</GlossaryTerm> requirements for four credits: <GlossaryTerm id="eitc" lang={lang}>Earned Income Tax Credit (EITC)</GlossaryTerm>, <GlossaryTerm id="ctc" lang={lang}>Child Tax Credit (CTC)</GlossaryTerm>, American Opportunity Tax Credit (AOTC), and Head of Household filing status. Each failure is a <strong className="text-slate-900 dark:text-white">$650 penalty per credit per return</strong> (2026). A single return claiming all four credits with inadequate documentation = <strong className="text-emerald-600 dark:text-emerald-300">$2,600 in penalties</strong> to the preparer.</>
-            : <>El IRS impone requisitos estrictos de <GlossaryTerm id="due-diligence" lang={lang}>debida diligencia</GlossaryTerm> para cuatro créditos: <GlossaryTerm id="eitc" lang={lang}>Crédito por Ingreso del Trabajo (EITC)</GlossaryTerm>, <GlossaryTerm id="ctc" lang={lang}>Crédito Tributario por Hijos (CTC)</GlossaryTerm>, Crédito de Oportunidad Americana (AOTC) y estatus de Cabeza de Familia. Cada falla es una <strong className="text-slate-900 dark:text-white">multa de $650 por crédito por declaración</strong> (2026). Una sola declaración reclamando los cuatro créditos sin documentación adecuada = <strong className="text-emerald-600 dark:text-emerald-300">$2,600 en multas</strong> para el preparador.</>}
+            ? <>The IRS imposes strict <GlossaryTerm id="due-diligence" lang={lang}>due diligence</GlossaryTerm> requirements for four credits: <GlossaryTerm id="eitc" lang={lang}>Earned Income Tax Credit (EITC)</GlossaryTerm>, <GlossaryTerm id="ctc" lang={lang}>Child Tax Credit (CTC)</GlossaryTerm>, American Opportunity Tax Credit (AOTC), and Head of Household filing status. Each failure is a <strong className="text-slate-900 dark:text-white">$650 penalty per credit per return</strong> (2026). A single return claiming all four credits with inadequate documentation = <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">$2,600 in penalties</strong> to the preparer.</>
+            : <>El IRS impone requisitos estrictos de <GlossaryTerm id="due-diligence" lang={lang}>debida diligencia</GlossaryTerm> para cuatro créditos: <GlossaryTerm id="eitc" lang={lang}>Crédito por Ingreso del Trabajo (EITC)</GlossaryTerm>, <GlossaryTerm id="ctc" lang={lang}>Crédito Tributario por Hijos (CTC)</GlossaryTerm>, Crédito de Oportunidad Americana (AOTC) y estatus de Cabeza de Familia. Cada falla es una <strong className="text-slate-900 dark:text-white">multa de $650 por crédito por declaración</strong> (2026). Una sola declaración reclamando los cuatro créditos sin documentación adecuada = <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">$2,600 en multas</strong> para el preparador.</>}
         </p>
         <p className="font-medium text-slate-800 dark:text-white">{isEn ? "What due diligence requires:" : "Qué requiere la debida diligencia:"}</p>
         <ul className="list-inside list-disc space-y-1 text-slate-600 dark:text-neutral-300">
@@ -353,8 +353,8 @@ function ChatGPTContent({ lang }: { lang: Lang }) {
         </p>
         <p>
           {isEn
-            ? <><strong className="text-slate-900 dark:text-white">Realistic first season (part-time solo):</strong> 30–75 returns. At $250 average, 75 returns = <strong className="text-emerald-600 dark:text-emerald-300">~$18,750</strong>. Second season: 75–150 returns. By season 3, experienced full-time preparers handle 200–350 returns.</>
-            : <><strong className="text-slate-900 dark:text-white">Primera temporada realista (tiempo parcial solo):</strong> 30–75 declaraciones. A $250 promedio, 75 declaraciones = <strong className="text-emerald-600 dark:text-emerald-300">~$18,750</strong>. Segunda temporada: 75–150 declaraciones. Para la temporada 3, preparadores experimentados a tiempo completo manejan 200–350 declaraciones.</>}
+            ? <><strong className="text-slate-900 dark:text-white">Realistic first season (part-time solo):</strong> 30–75 returns. At $250 average, 75 returns = <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">~$18,750</strong>. Second season: 75–150 returns. By season 3, experienced full-time preparers handle 200–350 returns.</>
+            : <><strong className="text-slate-900 dark:text-white">Primera temporada realista (tiempo parcial solo):</strong> 30–75 declaraciones. A $250 promedio, 75 declaraciones = <strong className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">~$18,750</strong>. Segunda temporada: 75–150 declaraciones. Para la temporada 3, preparadores experimentados a tiempo completo manejan 200–350 declaraciones.</>}
         </p>
       </Section>
 
@@ -538,7 +538,7 @@ export default function AnalisisChatGPTPage() {
               onClick={() => setLang((p) => (p === "en" ? "es" : "en"))}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
+              className="rounded-xl border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
               aria-label={lang === "en" ? "Switch to Spanish" : "Cambiar a inglés"}
             >
               {lang === "en" ? "ES" : "EN"}
@@ -547,7 +547,7 @@ export default function AnalisisChatGPTPage() {
           </div>
         </div>
       </motion.header>
-      <main className="mx-auto max-w-4xl px-4 pb-36 pt-8 sm:px-6 sm:pb-28 sm:pt-10" data-readaloud-content>
+      <main className="mx-auto max-w-4xl px-4 pb-36 pt-10 sm:px-6 sm:pb-28 sm:pt-12" data-readaloud-content>
         <LangSwitchWrapper lang={lang}>
           <ChatGPTContent lang={lang} />
         </LangSwitchWrapper>
