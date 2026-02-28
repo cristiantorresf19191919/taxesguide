@@ -28,6 +28,20 @@ function pickOptions(correctIdx: number): number[] {
   return shuffle([correctIdx, ...others]);
 }
 
+function getComboMultiplier(combo: number): number {
+  if (combo >= 10) return 4;
+  if (combo >= 6) return 3;
+  if (combo >= 3) return 2;
+  return 1;
+}
+
+function getComboColor(combo: number): string {
+  if (combo >= 10) return "text-red-500";
+  if (combo >= 6) return "text-orange-500";
+  if (combo >= 3) return "text-amber-500";
+  return "text-slate-400";
+}
+
 export function SpeedRound({ lang }: { lang: Lang }) {
   const { state, recordSpeedRound } = useProgress();
   const isEn = lang === "en";
@@ -39,6 +53,10 @@ export function SpeedRound({ lang }: { lang: Lang }) {
   const [options, setOptions] = useState<number[]>([]);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [answered, setAnswered] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
+  const [totalXP, setTotalXP] = useState(0);
+  const [beatingRecord, setBeatingRecord] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const order = useMemo(
@@ -92,6 +110,10 @@ export function SpeedRound({ lang }: { lang: Lang }) {
     setAnswered(0);
     setCurrentIdx(0);
     setFeedback(null);
+    setCombo(0);
+    setBestCombo(0);
+    setTotalXP(0);
+    setBeatingRecord(false);
   }, []);
 
   const handleAnswer = useCallback(
@@ -100,13 +122,30 @@ export function SpeedRound({ lang }: { lang: Lang }) {
       const correct = optionTermIdx === currentTermIdx;
       setFeedback(correct ? "correct" : "wrong");
       setAnswered((a) => a + 1);
-      if (correct) setScore((s) => s + 1);
+
+      if (correct) {
+        const newCombo = combo + 1;
+        const mult = getComboMultiplier(newCombo);
+        const earned = 2 * mult;
+        setScore((s) => {
+          const newScore = s + 1;
+          if (newScore > state.speedRoundBest && state.speedRoundBest > 0) {
+            setBeatingRecord(true);
+          }
+          return newScore;
+        });
+        setCombo(newCombo);
+        setTotalXP((x) => x + earned);
+        if (newCombo > bestCombo) setBestCombo(newCombo);
+      } else {
+        setCombo(0);
+      }
 
       setTimeout(() => {
         setCurrentIdx((i) => i + 1);
       }, 400);
     },
-    [feedback, currentTermIdx]
+    [feedback, currentTermIdx, combo, bestCombo, state.speedRoundBest]
   );
 
   const timerPercent = (timeLeft / ROUND_SECONDS) * 100;
@@ -114,8 +153,10 @@ export function SpeedRound({ lang }: { lang: Lang }) {
     timeLeft > 30
       ? "bg-emerald-500"
       : timeLeft > 10
-      ? "bg-amber-500"
-      : "bg-red-500";
+        ? "bg-amber-500"
+        : "bg-red-500";
+
+  const mult = getComboMultiplier(combo);
 
   // Idle state
   if (phase === "idle") {
@@ -134,8 +175,8 @@ export function SpeedRound({ lang }: { lang: Lang }) {
         </div>
         <p className="mb-4 text-[11px] text-slate-500 dark:text-neutral-400">
           {isEn
-            ? `${ROUND_SECONDS}s to answer as many terms as you can. Your best: ${state.speedRoundBest}`
-            : `${ROUND_SECONDS}s para responder todos los términos que puedas. Tu mejor: ${state.speedRoundBest}`}
+            ? `${ROUND_SECONDS}s to answer as many as you can. Build combos for x2, x3, x4 XP! Best: ${state.speedRoundBest}`
+            : `${ROUND_SECONDS}s para responder todos los que puedas. ¡Combos para x2, x3, x4 XP! Mejor: ${state.speedRoundBest}`}
         </p>
         <motion.button
           type="button"
@@ -176,18 +217,27 @@ export function SpeedRound({ lang }: { lang: Lang }) {
               ? `${score}/${answered} correct in ${ROUND_SECONDS}s`
               : `${score}/${answered} correctas en ${ROUND_SECONDS}s`}
           </p>
+          <div className="mt-2 flex justify-center gap-4 text-center">
+            <div>
+              <p className="text-sm font-bold text-amber-500">{bestCombo}x</p>
+              <p className="text-[9px] text-slate-400">
+                {isEn ? "best combo" : "mejor combo"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-violet-500">+{totalXP}</p>
+              <p className="text-[9px] text-slate-400">XP</p>
+            </div>
+          </div>
           {isBest && (
             <motion.p
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-1 text-[10px] font-bold text-amber-500"
+              className="mt-2 text-[10px] font-bold text-amber-500"
             >
               {isEn ? "New personal best!" : "¡Nuevo récord personal!"}
             </motion.p>
           )}
-          <p className="mt-1 text-[10px] text-violet-500 dark:text-violet-400">
-            +{Math.max(score * 2, 5)} XP
-          </p>
         </div>
         <motion.button
           type="button"
@@ -217,6 +267,35 @@ export function SpeedRound({ lang }: { lang: Lang }) {
           <span className="text-[10px] text-slate-400 dark:text-neutral-500">
             {isEn ? "Score:" : "Puntos:"} {score}
           </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {combo >= 3 && (
+            <motion.div
+              key={combo}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className={`flex items-center gap-1 rounded-full px-2 py-0.5 ${
+                mult >= 4
+                  ? "bg-red-100 dark:bg-red-500/20"
+                  : mult >= 3
+                    ? "bg-orange-100 dark:bg-orange-500/20"
+                    : "bg-amber-100 dark:bg-amber-500/20"
+              }`}
+            >
+              <span className={`text-[10px] font-black ${getComboColor(combo)}`}>
+                x{mult}
+              </span>
+            </motion.div>
+          )}
+          {beatingRecord && (
+            <motion.span
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="text-[9px] font-bold text-amber-500"
+            >
+              {isEn ? "BEST!" : "¡RÉCORD!"}
+            </motion.span>
+          )}
         </div>
       </div>
       <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
@@ -260,8 +339,8 @@ export function SpeedRound({ lang }: { lang: Lang }) {
                     showCorrect
                       ? "border border-emerald-400/40 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
                       : showWrong
-                      ? "border border-gray-200 text-slate-300 dark:border-white/[0.04] dark:text-neutral-600"
-                      : "border border-gray-200 text-slate-600 hover:border-gray-300 hover:bg-gray-50 dark:border-white/[0.08] dark:text-neutral-300 dark:hover:bg-white/[0.04]"
+                        ? "border border-gray-200 text-slate-300 dark:border-white/[0.04] dark:text-neutral-600"
+                        : "border border-gray-200 text-slate-600 hover:border-gray-300 hover:bg-gray-50 dark:border-white/[0.08] dark:text-neutral-300 dark:hover:bg-white/[0.04]"
                   }`}
                 >
                   {isEn ? opt.shortEn : opt.shortEs}

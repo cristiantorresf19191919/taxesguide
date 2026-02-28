@@ -42,6 +42,9 @@ export type ProgressState = {
   gamesPlayed: string[];
   climberSummits: number;
   matcherBestTime: number;
+  bestCombo: number;
+  bingoWins: number;
+  dashBest: number;
 };
 
 type ProgressContextValue = {
@@ -63,6 +66,9 @@ type ProgressContextValue = {
   recordGamePlayed: (gameId: string) => void;
   recordClimberSummit: () => void;
   recordMatcherTime: (seconds: number) => void;
+  recordCombo: (combo: number) => void;
+  recordBingoWin: () => void;
+  recordDashScore: (score: number) => void;
   level: LevelDef;
   nextLevel: LevelDef | null;
   levelProgress: number;
@@ -95,6 +101,9 @@ const DEFAULT_STATE: ProgressState = {
   gamesPlayed: [],
   climberSummits: 0,
   matcherBestTime: 0,
+  bestCombo: 0,
+  bingoWins: 0,
+  dashBest: 0,
 };
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
@@ -136,6 +145,9 @@ function findNewAchievements(s: ProgressState): string[] {
   if (!has("game_explorer") && s.gamesPlayed.length >= 5) newly.push("game_explorer");
   if (!has("climber_summit") && s.climberSummits >= 1) newly.push("climber_summit");
   if (!has("matcher_perfect") && s.matcherBestTime > 0 && s.matcherBestTime <= 60) newly.push("matcher_perfect");
+  if (!has("combo_master") && s.bestCombo >= 10) newly.push("combo_master");
+  if (!has("bingo_winner") && s.bingoWins >= 1) newly.push("bingo_winner");
+  if (!has("dash_20") && s.dashBest >= 20) newly.push("dash_20");
   return newly;
 }
 
@@ -389,6 +401,31 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     [commit],
   );
 
+  const recordCombo = useCallback(
+    (combo: number) => {
+      const s = stateRef.current;
+      if (combo > s.bestCombo) {
+        commit({ ...s, bestCombo: combo });
+      }
+    },
+    [commit],
+  );
+
+  const recordBingoWin = useCallback(() => {
+    const s = stateRef.current;
+    commit({ ...s, bingoWins: s.bingoWins + 1 });
+  }, [commit]);
+
+  const recordDashScore = useCallback(
+    (score: number) => {
+      const s = stateRef.current;
+      if (score > s.dashBest) {
+        commit({ ...s, dashBest: score });
+      }
+    },
+    [commit],
+  );
+
   const level = getLevel(state.xp);
   const nextLevel = getNextLevel(state.xp);
   const levelProgress = getLevelProgress(state.xp);
@@ -414,6 +451,9 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         recordGamePlayed,
         recordClimberSummit,
         recordMatcherTime,
+        recordCombo,
+        recordBingoWin,
+        recordDashScore,
         level,
         nextLevel,
         levelProgress,

@@ -26,6 +26,9 @@ import { CategorySort } from "./components/CategorySort";
 import { TaxClimber } from "./components/TaxClimber";
 import { WordScramble } from "./components/WordScramble";
 import { TrueFalseBlitz } from "./components/TrueFalseBlitz";
+import { AcronymChallenge } from "./components/AcronymChallenge";
+import { TaxBingo } from "./components/TaxBingo";
+import { DefinitionDash } from "./components/DefinitionDash";
 import { useProgress } from "./contexts/ProgressContext";
 import { TERMS } from "./data/terms";
 
@@ -698,7 +701,7 @@ export default function HomePage() {
                 </h2>
                 <div className="h-px flex-1 bg-gray-200 dark:bg-white/[0.06]" />
                 <span className="text-[10px] text-slate-400 dark:text-neutral-500">
-                  {lang === "en" ? "5 games" : "5 juegos"}
+                  {lang === "en" ? "8 games" : "8 juegos"}
                 </span>
               </motion.div>
 
@@ -716,6 +719,15 @@ export default function HomePage() {
 
               {/* True/False Blitz */}
               <TrueFalseBlitz lang={lang} />
+
+              {/* Acronym Challenge */}
+              <AcronymChallenge lang={lang} />
+
+              {/* Tax Bingo */}
+              <TaxBingo lang={lang} />
+
+              {/* Definition Dash */}
+              <DefinitionDash lang={lang} />
 
               {/* Focus Timer */}
               <StudyTimer lang={lang} />

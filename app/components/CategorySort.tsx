@@ -20,6 +20,14 @@ function shuffle<T>(arr: T[]): T[] {
 
 const ROUND_SIZE = 10;
 const TIME_LIMIT = 45;
+const BASE_XP = 5;
+const TIME_BONUS_PER_CORRECT = 2; // +2s per correct
+
+function getComboMultiplier(combo: number): number {
+  if (combo >= 8) return 3;
+  if (combo >= 4) return 2;
+  return 1;
+}
 
 export function CategorySort({ lang }: { lang: Lang }) {
   const isEn = lang === "en";
@@ -33,7 +41,12 @@ export function CategorySort({ lang }: { lang: Lang }) {
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [bestScore, setBestScore] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
+  const [totalXP, setTotalXP] = useState(0);
+  const [timeBonusFlash, setTimeBonusFlash] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const xpAwarded = useRef(false);
 
   useEffect(() => {
     try {
@@ -62,6 +75,11 @@ export function CategorySort({ lang }: { lang: Lang }) {
     setWrong(0);
     setTimeLeft(TIME_LIMIT);
     setFeedback(null);
+    setCombo(0);
+    setBestCombo(0);
+    setTotalXP(0);
+    setTimeBonusFlash(false);
+    xpAwarded.current = false;
     setPhase("playing");
   }, []);
 
@@ -78,25 +96,28 @@ export function CategorySort({ lang }: { lang: Lang }) {
         return t - 1;
       });
     }, 1000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [phase]);
 
-  const finishGame = useCallback(
-    (finalCorrect: number) => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      setPhase("results");
-
-      const xp = finalCorrect * 5 + (finalCorrect === ROUND_SIZE ? 20 : 0);
-      addXP(xp);
+  // Award XP on results
+  useEffect(() => {
+    if (phase === "results" && !xpAwarded.current) {
+      xpAwarded.current = true;
+      const perfectBonus = correct === ROUND_SIZE ? 20 : 0;
+      const finalXP = totalXP + perfectBonus;
+      if (finalXP > 0) addXP(finalXP);
       recordGamePlayed("category_sort");
-
-      if (finalCorrect > bestScore) {
-        setBestScore(finalCorrect);
-        try { localStorage.setItem("tax-guide-catsort-best", String(finalCorrect)); } catch {}
+      if (correct > bestScore) {
+        setBestScore(correct);
+        try {
+          localStorage.setItem("tax-guide-catsort-best", String(correct));
+        } catch {}
       }
-    },
-    [addXP, bestScore]
-  );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   const handleSelect = useCallback(
     (catId: string) => {
@@ -106,26 +127,41 @@ export function CategorySort({ lang }: { lang: Lang }) {
       const isCorrect = correctCat?.id === catId;
 
       if (isCorrect) {
+        const newCombo = combo + 1;
+        const mult = getComboMultiplier(newCombo);
+        const earned = BASE_XP * mult;
+
         setCorrect((c) => c + 1);
+        setCombo(newCombo);
+        setTotalXP((x) => x + earned);
+        if (newCombo > bestCombo) setBestCombo(newCombo);
         setFeedback("correct");
+
+        // Time bonus
+        setTimeLeft((t) => t + TIME_BONUS_PER_CORRECT);
+        setTimeBonusFlash(true);
+        setTimeout(() => setTimeBonusFlash(false), 600);
       } else {
         setWrong((w) => w + 1);
+        setCombo(0);
         setFeedback("wrong");
       }
 
       setTimeout(() => {
         setFeedback(null);
         if (currentIdx + 1 >= ROUND_SIZE) {
-          finishGame(isCorrect ? correct + 1 : correct);
+          if (timerRef.current) clearInterval(timerRef.current);
+          setPhase("results");
         } else {
           setCurrentIdx((i) => i + 1);
         }
       }, 600);
     },
-    [feedback, terms, currentIdx, correct, finishGame]
+    [feedback, terms, currentIdx, combo, bestCombo]
   );
 
   const currentTerm = terms[currentIdx];
+  const mult = getComboMultiplier(combo);
 
   // Idle
   if (phase === "idle") {
@@ -143,12 +179,14 @@ export function CategorySort({ lang }: { lang: Lang }) {
         </div>
         <p className="mb-2 text-[11px] text-slate-500 dark:text-neutral-400">
           {isEn
-            ? `Sort ${ROUND_SIZE} terms into their correct categories in ${TIME_LIMIT} seconds!`
-            : `¡Clasifica ${ROUND_SIZE} términos en sus categorías en ${TIME_LIMIT} segundos!`}
+            ? `Sort ${ROUND_SIZE} terms into categories in ${TIME_LIMIT}s! Correct answers add +${TIME_BONUS_PER_CORRECT}s. Combos multiply XP!`
+            : `¡Clasifica ${ROUND_SIZE} términos en ${TIME_LIMIT}s! Aciertos dan +${TIME_BONUS_PER_CORRECT}s. ¡Combos multiplican XP!`}
         </p>
         {bestScore > 0 && (
           <p className="mb-3 text-[10px] text-emerald-500">
-            {isEn ? `Best: ${bestScore}/${ROUND_SIZE}` : `Mejor: ${bestScore}/${ROUND_SIZE}`}
+            {isEn
+              ? `Best: ${bestScore}/${ROUND_SIZE}`
+              : `Mejor: ${bestScore}/${ROUND_SIZE}`}
           </p>
         )}
         <motion.button
@@ -166,7 +204,8 @@ export function CategorySort({ lang }: { lang: Lang }) {
 
   // Results
   if (phase === "results") {
-    const xp = correct * 5 + (correct === ROUND_SIZE ? 20 : 0);
+    const perfectBonus = correct === ROUND_SIZE ? 20 : 0;
+    const finalXP = totalXP + perfectBonus;
     const pct = Math.round((correct / ROUND_SIZE) * 100);
 
     return (
@@ -183,13 +222,28 @@ export function CategorySort({ lang }: { lang: Lang }) {
         >
           {pct >= 80 ? "🏆" : pct >= 50 ? "👍" : "📖"}
         </motion.div>
-        <p className={`text-3xl font-black ${pct >= 70 ? "text-emerald-500" : "text-amber-500"}`}>
+        <p
+          className={`text-3xl font-black ${
+            pct >= 70 ? "text-emerald-500" : "text-amber-500"
+          }`}
+        >
           {correct}/{ROUND_SIZE}
         </p>
         <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
           {isEn ? "correctly sorted" : "clasificados correctamente"}
         </p>
-        <p className="mt-2 text-xs font-bold text-violet-500">+{xp} XP</p>
+        <div className="mt-2 flex gap-4 text-center">
+          <div>
+            <p className="text-sm font-bold text-amber-500">{bestCombo}x</p>
+            <p className="text-[9px] text-slate-400">
+              {isEn ? "best combo" : "mejor combo"}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-violet-500">+{finalXP}</p>
+            <p className="text-[9px] text-slate-400">XP</p>
+          </div>
+        </div>
         <motion.button
           type="button"
           onClick={startGame}
@@ -217,10 +271,38 @@ export function CategorySort({ lang }: { lang: Lang }) {
           {currentIdx + 1}/{ROUND_SIZE}
         </span>
         <div className="flex items-center gap-3">
+          {combo >= 4 && (
+            <motion.div
+              key={combo}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 dark:bg-amber-500/20"
+            >
+              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400">
+                x{mult}
+              </span>
+            </motion.div>
+          )}
           <span className="text-[10px] text-emerald-500">{correct}✓</span>
           <span className="text-[10px] text-red-400">{wrong}✗</span>
-          <span className={`text-xs font-bold tabular-nums ${timeLeft < 10 ? "text-red-500" : "text-slate-700 dark:text-neutral-200"}`}>
+          <span
+            className={`relative text-xs font-bold tabular-nums ${
+              timeLeft < 10
+                ? "text-red-500"
+                : "text-slate-700 dark:text-neutral-200"
+            }`}
+          >
             {timeLeft}s
+            {timeBonusFlash && (
+              <motion.span
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.6 }}
+                className="absolute -right-1 -top-3 text-[10px] text-emerald-500 font-bold"
+              >
+                +{TIME_BONUS_PER_CORRECT}s
+              </motion.span>
+            )}
           </span>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TERMS } from "@/app/data/terms";
 import { useProgress } from "@/app/contexts/ProgressContext";
@@ -38,6 +38,9 @@ export function TermMatcher({ lang }: { lang: Lang }) {
   const [attempts, setAttempts] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [bestTime, setBestTime] = useState<number | null>(null);
+  const [matchStreak, setMatchStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [lastMatchFlash, setLastMatchFlash] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lockRef = useRef(false);
 
@@ -71,6 +74,9 @@ export function TermMatcher({ lang }: { lang: Lang }) {
     setMatched([]);
     setAttempts(0);
     setElapsed(0);
+    setMatchStreak(0);
+    setBestStreak(0);
+    setLastMatchFlash(false);
     setPhase("playing");
     lockRef.current = false;
   }, [isEn]);
@@ -79,7 +85,9 @@ export function TermMatcher({ lang }: { lang: Lang }) {
   useEffect(() => {
     if (phase === "playing") {
       timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
-      return () => { if (timerRef.current) clearInterval(timerRef.current); };
+      return () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+      };
     }
     if (timerRef.current) clearInterval(timerRef.current);
   }, [phase]);
@@ -108,14 +116,24 @@ export function TermMatcher({ lang }: { lang: Lang }) {
           setFlipped([]);
           lockRef.current = false;
 
+          const newStreak = matchStreak + 1;
+          setMatchStreak(newStreak);
+          if (newStreak > bestStreak) setBestStreak(newStreak);
+
+          // Flash effect
+          setLastMatchFlash(true);
+          setTimeout(() => setLastMatchFlash(false), 400);
+
           if (newMatched.length === PAIRS) {
             // Won!
             if (timerRef.current) clearInterval(timerRef.current);
             setPhase("won");
 
-            const bonus = Math.max(0, 20 - attempts);
-            const speedBonus = Math.max(0, Math.floor((120 - elapsed) / 10));
-            const totalXP = XP_BASE + bonus + speedBonus;
+            // Improved XP calculation: smoother scaling
+            const attemptBonus = Math.max(0, 20 - Math.max(0, attempts - PAIRS));
+            const speedBonus = Math.max(0, Math.floor((180 - elapsed) / 8));
+            const streakBonus = newStreak >= 3 ? 10 : 0;
+            const totalXP = XP_BASE + attemptBonus + speedBonus + streakBonus;
             addXP(totalXP);
             recordGamePlayed("term_matcher");
             recordMatcherTime(elapsed);
@@ -124,11 +142,17 @@ export function TermMatcher({ lang }: { lang: Lang }) {
             const finalTime = elapsed;
             if (bestTime === null || finalTime < bestTime) {
               setBestTime(finalTime);
-              try { localStorage.setItem("tax-guide-matcher-best", String(finalTime)); } catch {}
+              try {
+                localStorage.setItem(
+                  "tax-guide-matcher-best",
+                  String(finalTime)
+                );
+              } catch {}
             }
           }
         } else {
           // No match — flip back
+          setMatchStreak(0);
           setTimeout(() => {
             setFlipped([]);
             lockRef.current = false;
@@ -136,7 +160,18 @@ export function TermMatcher({ lang }: { lang: Lang }) {
         }
       }
     },
-    [phase, flipped, matched, cards, attempts, elapsed, addXP, bestTime]
+    [
+      phase,
+      flipped,
+      matched,
+      cards,
+      attempts,
+      elapsed,
+      addXP,
+      bestTime,
+      matchStreak,
+      bestStreak,
+    ]
   );
 
   const mins = Math.floor(elapsed / 60);
@@ -158,12 +193,14 @@ export function TermMatcher({ lang }: { lang: Lang }) {
         </div>
         <p className="mb-2 text-[11px] text-slate-500 dark:text-neutral-400">
           {isEn
-            ? "Flip cards to match tax terms with their definitions. Fewer attempts = more XP!"
-            : "Voltea cartas para emparejar términos fiscales con sus definiciones. ¡Menos intentos = más XP!"}
+            ? "Flip cards to match tax terms with definitions. Consecutive matches = streak bonus XP!"
+            : "Voltea cartas para emparejar términos con definiciones. ¡Emparejamientos consecutivos = XP de racha!"}
         </p>
         {bestTime !== null && (
           <p className="mb-3 text-[10px] text-violet-500 dark:text-violet-400">
-            {isEn ? `Best time: ${Math.floor(bestTime / 60)}:${(bestTime % 60).toString().padStart(2, "0")}` : `Mejor tiempo: ${Math.floor(bestTime / 60)}:${(bestTime % 60).toString().padStart(2, "0")}`}
+            {isEn
+              ? `Best time: ${Math.floor(bestTime / 60)}:${(bestTime % 60).toString().padStart(2, "0")}`
+              : `Mejor tiempo: ${Math.floor(bestTime / 60)}:${(bestTime % 60).toString().padStart(2, "0")}`}
           </p>
         )}
         <motion.button
@@ -181,9 +218,10 @@ export function TermMatcher({ lang }: { lang: Lang }) {
 
   // Won
   if (phase === "won") {
-    const bonus = Math.max(0, 20 - attempts);
-    const speedBonus = Math.max(0, Math.floor((120 - elapsed) / 10));
-    const totalXP = XP_BASE + bonus + speedBonus;
+    const attemptBonus = Math.max(0, 20 - Math.max(0, attempts - PAIRS));
+    const speedBonus = Math.max(0, Math.floor((180 - elapsed) / 8));
+    const streakBonus = bestStreak >= 3 ? 10 : 0;
+    const totalXP = XP_BASE + attemptBonus + speedBonus + streakBonus;
 
     return (
       <motion.div
@@ -205,19 +243,30 @@ export function TermMatcher({ lang }: { lang: Lang }) {
         <div className="mt-3 flex gap-4 text-center">
           <div>
             <p className="text-xl font-bold text-pink-500">{attempts}</p>
-            <p className="text-[9px] text-slate-400">{isEn ? "attempts" : "intentos"}</p>
+            <p className="text-[9px] text-slate-400">
+              {isEn ? "attempts" : "intentos"}
+            </p>
           </div>
           <div>
             <p className="text-xl font-bold text-slate-700 dark:text-neutral-200 tabular-nums">
               {mins}:{secs.toString().padStart(2, "0")}
             </p>
-            <p className="text-[9px] text-slate-400">{isEn ? "time" : "tiempo"}</p>
+            <p className="text-[9px] text-slate-400">
+              {isEn ? "time" : "tiempo"}
+            </p>
           </div>
           <div>
             <p className="text-xl font-bold text-violet-500">+{totalXP}</p>
             <p className="text-[9px] text-slate-400">XP</p>
           </div>
         </div>
+        {bestStreak >= 3 && (
+          <p className="mt-2 text-[10px] text-amber-500">
+            {isEn
+              ? `${bestStreak} consecutive matches! +10 streak bonus`
+              : `¡${bestStreak} emparejamientos consecutivos! +10 bonus`}
+          </p>
+        )}
         <motion.button
           type="button"
           onClick={startGame}
@@ -246,6 +295,16 @@ export function TermMatcher({ lang }: { lang: Lang }) {
           </h3>
         </div>
         <div className="flex items-center gap-3 text-[11px]">
+          {matchStreak >= 2 && (
+            <motion.span
+              key={matchStreak}
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              className="text-[10px] font-bold text-amber-500"
+            >
+              {matchStreak}x
+            </motion.span>
+          )}
           <span className="text-slate-500 dark:text-neutral-400">
             {matched.length}/{PAIRS}
           </span>
@@ -268,6 +327,11 @@ export function TermMatcher({ lang }: { lang: Lang }) {
               type="button"
               onClick={() => handleFlip(idx)}
               whileTap={!showFace ? { scale: 0.95 } : undefined}
+              animate={
+                isMatched && lastMatchFlash
+                  ? { scale: [1, 1.05, 1] }
+                  : undefined
+              }
               className={`relative flex min-h-[72px] items-center justify-center rounded-xl border p-2 text-center transition-all duration-200 ${
                 isMatched
                   ? "border-emerald-400/40 bg-emerald-50 dark:border-emerald-500/20 dark:bg-emerald-500/10"

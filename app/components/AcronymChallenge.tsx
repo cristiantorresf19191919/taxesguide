@@ -17,97 +17,88 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function scrambleWord(word: string): string {
-  if (word.length <= 2) {
-    // For very short words, just reverse
-    return word.split("").reverse().join("");
-  }
-  const letters = word.split("");
-  let scrambled = shuffle(letters).join("");
-  let attempts = 0;
-  while (scrambled === word && attempts < 20) {
-    scrambled = shuffle(letters).join("");
-    attempts++;
-  }
-  // Final fallback: swap first and last characters
-  if (scrambled === word && word.length >= 2) {
-    const arr = word.split("");
-    [arr[0], arr[arr.length - 1]] = [arr[arr.length - 1], arr[0]];
-    scrambled = arr.join("");
-  }
-  return scrambled;
-}
-
-const ROUND_SIZE = 8;
+const ABBREVIATION_TERMS = TERMS.filter((t) => t.isAbbreviation);
+const ROUND_SIZE = Math.min(12, ABBREVIATION_TERMS.length);
 const TIME_LIMIT = 60;
-const BASE_XP = 6;
-const TIME_BONUS_PER_CORRECT = 3; // +3s per correct answer
+const BASE_XP = 5;
+
+type Round = {
+  term: (typeof TERMS)[0];
+  options: string[];
+  correctIdx: number;
+};
 
 function getComboMultiplier(combo: number): number {
+  if (combo >= 10) return 4;
   if (combo >= 6) return 3;
   if (combo >= 3) return 2;
   return 1;
 }
 
-type RoundTerm = {
-  term: (typeof TERMS)[0];
-  scrambled: string;
-  options: string[];
-  correctIdx: number;
-};
+function getComboLabel(combo: number): string {
+  const mult = getComboMultiplier(combo);
+  if (mult >= 4) return "UNSTOPPABLE";
+  if (mult >= 3) return "ON FIRE";
+  if (mult >= 2) return "COMBO";
+  return "";
+}
 
-export function WordScramble({ lang }: { lang: Lang }) {
+export function AcronymChallenge({ lang }: { lang: Lang }) {
   const isEn = lang === "en";
-  const { addXP, recordGamePlayed } = useProgress();
+  const { addXP, recordGamePlayed, recordCombo } = useProgress();
 
   const [phase, setPhase] = useState<Phase>("idle");
-  const [rounds, setRounds] = useState<RoundTerm[]>([]);
+  const [rounds, setRounds] = useState<Round[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [correct, setCorrect] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
-  const [bestScore, setBestScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
   const [totalXP, setTotalXP] = useState(0);
-  const [timeBonusFlash, setTimeBonusFlash] = useState(false);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
+  const [bestScore, setBestScore] = useState(0);
+  const [showCombo, setShowCombo] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const xpAwarded = useRef(false);
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("tax-guide-scramble-best");
+      const raw = localStorage.getItem("tax-guide-acronym-best");
       if (raw) setBestScore(Number(raw));
     } catch {}
   }, []);
 
   const startGame = useCallback(() => {
-    const selected = shuffle(TERMS).slice(0, ROUND_SIZE);
-    const newRounds: RoundTerm[] = selected.map((term) => {
-      const label = isEn ? term.labelEn : term.labelEs;
-      const scrambled = scrambleWord(label.toUpperCase());
-      const wrongTerms = shuffle(TERMS.filter((t) => t.id !== term.id)).slice(
-        0,
-        3
-      );
-      const allOptions = shuffle([term, ...wrongTerms]);
-      const correctIdx = allOptions.findIndex((t) => t.id === term.id);
-      return {
-        term,
-        scrambled,
-        options: allOptions.map((t) => (isEn ? t.labelEn : t.labelEs)),
-        correctIdx,
-      };
+    const selectedTerms = shuffle(ABBREVIATION_TERMS).slice(0, ROUND_SIZE);
+    const newRounds: Round[] = selectedTerms.map((term) => {
+      const correctLabel = isEn ? term.labelEn : term.labelEs;
+      const correctDef = isEn ? term.shortEn : term.shortEs;
+      // Extract just the expansion (before the dash)
+      const expansion = correctDef.split("—")[0]?.trim() || correctDef;
+
+      const wrongTerms = shuffle(
+        ABBREVIATION_TERMS.filter((t) => t.id !== term.id)
+      ).slice(0, 3);
+      const wrongExpansions = wrongTerms.map((t) => {
+        const def = isEn ? t.shortEn : t.shortEs;
+        return def.split("—")[0]?.trim() || def;
+      });
+
+      const allOptions = shuffle([expansion, ...wrongExpansions]);
+      const correctIdx = allOptions.indexOf(expansion);
+
+      return { term, options: allOptions, correctIdx };
     });
+
     setRounds(newRounds);
     setCurrentIdx(0);
     setCorrect(0);
-    setSelected(null);
-    setTimeLeft(TIME_LIMIT);
     setCombo(0);
     setBestCombo(0);
     setTotalXP(0);
-    setTimeBonusFlash(false);
+    setSelected(null);
+    setTimeLeft(TIME_LIMIT);
+    setShowCombo(false);
     xpAwarded.current = false;
     setPhase("playing");
   }, [isEn]);
@@ -134,14 +125,13 @@ export function WordScramble({ lang }: { lang: Lang }) {
   useEffect(() => {
     if (phase === "results" && !xpAwarded.current) {
       xpAwarded.current = true;
-      const perfectBonus = correct === ROUND_SIZE ? 25 : 0;
-      const finalXP = totalXP + perfectBonus;
-      if (finalXP > 0) addXP(finalXP);
-      recordGamePlayed("word_scramble");
+      if (totalXP > 0) addXP(totalXP);
+      recordGamePlayed("acronym_challenge");
+      if (bestCombo >= 3) recordCombo(bestCombo);
       if (correct > bestScore) {
         setBestScore(correct);
         try {
-          localStorage.setItem("tax-guide-scramble-best", String(correct));
+          localStorage.setItem("tax-guide-acronym-best", String(correct));
         } catch {}
       }
     }
@@ -160,16 +150,14 @@ export function WordScramble({ lang }: { lang: Lang }) {
         const newCombo = combo + 1;
         const mult = getComboMultiplier(newCombo);
         const earned = BASE_XP * mult;
-
         setCorrect((c) => c + 1);
         setCombo(newCombo);
         setTotalXP((x) => x + earned);
         if (newCombo > bestCombo) setBestCombo(newCombo);
-
-        // Time bonus: add seconds for correct answers
-        setTimeLeft((t) => t + TIME_BONUS_PER_CORRECT);
-        setTimeBonusFlash(true);
-        setTimeout(() => setTimeBonusFlash(false), 600);
+        if (mult >= 2) {
+          setShowCombo(true);
+          setTimeout(() => setShowCombo(false), 600);
+        }
       } else {
         setCombo(0);
       }
@@ -188,7 +176,6 @@ export function WordScramble({ lang }: { lang: Lang }) {
   );
 
   const round = rounds[currentIdx];
-  const mult = getComboMultiplier(combo);
 
   // Idle
   if (phase === "idle") {
@@ -199,18 +186,18 @@ export function WordScramble({ lang }: { lang: Lang }) {
         className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
       >
         <div className="mb-3 flex items-center gap-2">
-          <span className="text-lg">🔤</span>
+          <span className="text-lg">🔠</span>
           <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            {isEn ? "Word Scramble" : "Letras revueltas"}
+            {isEn ? "Acronym Challenge" : "Reto de siglas"}
           </h3>
         </div>
         <p className="mb-2 text-[11px] text-slate-500 dark:text-neutral-400">
           {isEn
-            ? `Unscramble ${ROUND_SIZE} tax terms! Correct answers add +${TIME_BONUS_PER_CORRECT}s. Build combos for multiplied XP!`
-            : `¡Descifra ${ROUND_SIZE} términos! Aciertos dan +${TIME_BONUS_PER_CORRECT}s. ¡Haz combos para multiplicar XP!`}
+            ? `Do you know what ${ROUND_SIZE} tax acronyms stand for? Build combos for multiplied XP!`
+            : `¿Sabes qué significan ${ROUND_SIZE} siglas fiscales? ¡Haz combos para multiplicar XP!`}
         </p>
         {bestScore > 0 && (
-          <p className="mb-3 text-[10px] text-amber-500">
+          <p className="mb-3 text-[10px] text-teal-500">
             {isEn
               ? `Best: ${bestScore}/${ROUND_SIZE}`
               : `Mejor: ${bestScore}/${ROUND_SIZE}`}
@@ -221,9 +208,9 @@ export function WordScramble({ lang }: { lang: Lang }) {
           onClick={startGame}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 py-3 text-xs font-bold text-white shadow-lg shadow-amber-500/20"
+          className="w-full rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 py-3 text-xs font-bold text-white shadow-lg shadow-teal-500/20"
         >
-          {isEn ? "Start Scramble" : "Comenzar a descifrar"}
+          {isEn ? "Start Challenge" : "Comenzar reto"}
         </motion.button>
       </motion.div>
     );
@@ -231,7 +218,7 @@ export function WordScramble({ lang }: { lang: Lang }) {
 
   // Results
   if (phase === "results") {
-    const perfectBonus = correct === ROUND_SIZE ? 25 : 0;
+    const perfectBonus = correct === ROUND_SIZE ? 30 : 0;
     const finalXP = totalXP + perfectBonus;
 
     return (
@@ -246,17 +233,17 @@ export function WordScramble({ lang }: { lang: Lang }) {
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
           className="mb-2 text-4xl"
         >
-          {correct >= ROUND_SIZE ? "🧠" : correct >= ROUND_SIZE / 2 ? "💪" : "📖"}
+          {correct >= ROUND_SIZE ? "🏅" : correct >= ROUND_SIZE / 2 ? "🔠" : "📖"}
         </motion.div>
         <p
           className={`text-3xl font-black ${
-            correct >= ROUND_SIZE / 2 ? "text-amber-500" : "text-slate-500"
+            correct >= ROUND_SIZE / 2 ? "text-teal-500" : "text-slate-500"
           }`}
         >
           {correct}/{ROUND_SIZE}
         </p>
         <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-          {isEn ? "unscrambled" : "descifrados"}
+          {isEn ? "acronyms decoded" : "siglas decodificadas"}
         </p>
         <div className="mt-2 flex gap-4 text-center">
           <div>
@@ -274,7 +261,7 @@ export function WordScramble({ lang }: { lang: Lang }) {
           type="button"
           onClick={startGame}
           whileTap={{ scale: 0.97 }}
-          className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 py-3 text-xs font-bold text-white shadow-lg shadow-amber-500/20"
+          className="mt-4 w-full rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 py-3 text-xs font-bold text-white shadow-lg shadow-teal-500/20"
         >
           {isEn ? "Play Again" : "Jugar de nuevo"}
         </motion.button>
@@ -284,6 +271,8 @@ export function WordScramble({ lang }: { lang: Lang }) {
 
   // Playing
   if (!round) return null;
+  const mult = getComboMultiplier(combo);
+  const comboLabel = getComboLabel(combo);
 
   return (
     <motion.div
@@ -294,24 +283,24 @@ export function WordScramble({ lang }: { lang: Lang }) {
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🔤</span>
+          <span className="text-lg">🔠</span>
           <span className="text-[10px] font-medium text-slate-400 dark:text-neutral-500">
             {currentIdx + 1}/{ROUND_SIZE}
           </span>
         </div>
         <div className="flex items-center gap-3">
           {combo >= 3 && (
-            <motion.div
-              key={combo}
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 dark:bg-amber-500/20"
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="text-[10px] font-black text-amber-500"
             >
-              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400">
-                x{mult}
-              </span>
-            </motion.div>
+              {comboLabel} x{mult}
+            </motion.span>
           )}
+          <span className="text-emerald-500 text-[10px] font-bold">
+            {correct}✓
+          </span>
           <span
             className={`text-xs font-bold tabular-nums ${
               timeLeft < 15
@@ -320,16 +309,6 @@ export function WordScramble({ lang }: { lang: Lang }) {
             }`}
           >
             {timeLeft}s
-            {timeBonusFlash && (
-              <motion.span
-                initial={{ opacity: 1, y: 0 }}
-                animate={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.6 }}
-                className="absolute ml-1 text-[10px] text-emerald-500 font-bold"
-              >
-                +{TIME_BONUS_PER_CORRECT}s
-              </motion.span>
-            )}
           </span>
         </div>
       </div>
@@ -337,11 +316,27 @@ export function WordScramble({ lang }: { lang: Lang }) {
       {/* Progress */}
       <div className="mb-4 h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
         <motion.div
-          className="h-full rounded-full bg-amber-500"
+          className="h-full rounded-full bg-teal-500"
           animate={{ width: `${((currentIdx + 1) / ROUND_SIZE) * 100}%` }}
           transition={{ duration: 0.3 }}
         />
       </div>
+
+      {/* Combo flash overlay */}
+      <AnimatePresence>
+        {showCombo && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.5 }}
+            className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
+          >
+            <span className="text-5xl font-black text-amber-500/30">
+              x{mult}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -351,21 +346,15 @@ export function WordScramble({ lang }: { lang: Lang }) {
           exit={{ opacity: 0, x: -12 }}
           transition={{ duration: 0.2 }}
         >
-          {/* Scrambled word */}
-          <div className="mb-3 rounded-xl bg-amber-50 p-4 text-center dark:bg-amber-500/10">
-            <p className="text-[10px] font-medium text-amber-600/60 dark:text-amber-400/60 mb-1">
-              {isEn ? "Unscramble this:" : "Descifra esto:"}
+          {/* Acronym display */}
+          <div className="mb-4 rounded-xl bg-teal-50 p-5 text-center dark:bg-teal-500/10">
+            <p className="text-[10px] font-medium text-teal-600/60 dark:text-teal-400/60 mb-1">
+              {isEn ? "What does this stand for?" : "¿Qué significa esta sigla?"}
             </p>
-            <p className="text-xl font-black tracking-[0.2em] text-amber-700 dark:text-amber-300">
-              {round.scrambled}
+            <p className="text-3xl font-black tracking-wider text-teal-700 dark:text-teal-300">
+              {isEn ? round.term.labelEn : round.term.labelEs}
             </p>
           </div>
-
-          {/* Definition hint */}
-          <p className="mb-4 text-[11px] italic text-slate-500 dark:text-neutral-400">
-            {isEn ? "Hint: " : "Pista: "}
-            {isEn ? round.term.shortEn : round.term.shortEs}
-          </p>
 
           {/* Options */}
           <div className="space-y-2">

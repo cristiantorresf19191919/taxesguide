@@ -47,6 +47,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: "game_explorer", icon: "🎮", titleEn: "Game Explorer", titleEs: "Explorador de juegos", descEn: "Play 5 different games", descEs: "Juega 5 juegos diferentes" },
   { id: "climber_summit", icon: "🏔️", titleEn: "Summit Conqueror", titleEs: "Conquistador de cimas", descEn: "Reach the summit in Tax Climber", descEs: "Llega a la cima en Escalador fiscal" },
   { id: "matcher_perfect", icon: "🃏", titleEn: "Memory Master", titleEs: "Maestro de memoria", descEn: "Complete Term Matcher in under 60s", descEs: "Completa Emparejar en menos de 60s" },
+  { id: "combo_master", icon: "💥", titleEn: "Combo Master", titleEs: "Maestro del combo", descEn: "Reach a 10x combo in any game", descEs: "Logra un combo x10 en cualquier juego" },
+  { id: "bingo_winner", icon: "🎱", titleEn: "Bingo!", titleEs: "¡Bingo!", descEn: "Get a BINGO in Tax Bingo", descEs: "Haz un BINGO en Bingo fiscal" },
+  { id: "dash_20", icon: "🏃", titleEn: "Speed Runner", titleEs: "Corredor veloz", descEn: "Score 20+ in Definition Dash", descEs: "Obtén 20+ en Carrera de definiciones" },
 ];
 
 export function getLevel(xp: number): LevelDef {
