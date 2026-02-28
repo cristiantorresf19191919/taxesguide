@@ -1,214 +1,221 @@
 import type { QuizQuestion } from "@/app/components/AnalysisQuiz";
 
+/**
+ * Claude analysis page quiz — 15 unique questions focused on:
+ * Georgia-specific regulations (§ 48-2-62), three federal credentials in detail,
+ * PTIN-only vs. AFSP representation, VITA/AFSP exemption, EA career path,
+ * Georgia sales tax exemption, third-party filer, DBA process, occupation tax examples,
+ * due diligence penalties, WISP daily penalties, recommended learning timeline
+ */
 export const claudeQuestions: QuizQuestion[] = [
   {
     en: {
-      question: "Does Georgia require a state license to prepare taxes for pay?",
-      options: ["Yes, a state exam is required", "Yes, bonding and registration are required", "No — only a federal PTIN is required", "Yes, but only for self-employed preparers"],
-      correct: 2,
-      explanation: "Georgia does not require a state license, exam, certification, or registration to work as a paid tax preparer. The only legal requirement is a valid PTIN from the IRS. This makes Georgia one of the easiest states to launch a tax preparation business.",
-    },
-    es: {
-      question: "¿Georgia requiere una licencia estatal para preparar impuestos por pago?",
-      options: ["Sí, se requiere un examen estatal", "Sí, se requiere fianza y registro", "No — solo se requiere un PTIN federal", "Sí, pero solo para preparadores autónomos"],
-      correct: 2,
-      explanation: "Georgia no requiere licencia estatal, examen, certificación ni registro para trabajar como preparador de impuestos pagado. El único requisito legal es un PTIN válido del IRS. Esto hace de Georgia uno de los estados más fáciles para iniciar un negocio de preparación de impuestos.",
-    },
-  },
-  {
-    en: {
-      question: "What penalty does Georgia Code § 48-2-62 impose on preparers who fraudulently endorse refund checks?",
+      question: "What penalty does Georgia Code § 48-2-62 impose for fraudulently endorsing a client's refund check?",
       options: ["$100 per check", "$250 per check", "$500 per check", "$1,000 per check"],
       correct: 2,
-      explanation: "Georgia Code § 48-2-62 imposes a $500 penalty per check for fraudulently endorsing refund checks. The state can also seek injunctions barring dishonest preparers from practicing.",
+      explanation: "Georgia Code § 48-2-62 imposes a $500 penalty per check for fraudulently endorsing refund checks. The state can also seek injunctions barring dishonest preparers from practicing. There is no state-mandated bonding or insurance requirement, though both are strongly recommended.",
     },
     es: {
-      question: "¿Qué multa impone el Código de Georgia § 48-2-62 a los preparadores que endosan fraudulentamente cheques de reembolso?",
+      question: "¿Qué multa impone el Código de Georgia § 48-2-62 por endosar fraudulentamente el cheque de reembolso de un cliente?",
       options: ["$100 por cheque", "$250 por cheque", "$500 por cheque", "$1,000 por cheque"],
       correct: 2,
-      explanation: "El Código de Georgia § 48-2-62 impone una multa de $500 por cheque por endosar fraudulentamente cheques de reembolso. El estado también puede solicitar órdenes judiciales contra preparadores deshonestos.",
+      explanation: "El Código de Georgia § 48-2-62 impone una multa de $500 por cheque por endosar fraudulentamente cheques de reembolso. El estado también puede solicitar órdenes judiciales contra preparadores deshonestos. No hay requisito estatal de fianza o seguro, aunque ambos se recomiendan encarecidamente.",
     },
   },
   {
     en: {
-      question: "What are the three federal credentials Sandra must obtain to operate independently?",
-      options: ["CPA, EA, and state license", "PTIN, EFIN, and AFSP (recommended)", "SSN, EIN, and DBA", "LLC, WISP, and E&O insurance"],
-      correct: 1,
-      explanation: "The three key federal credentials are: (1) PTIN — mandatory for all paid preparers, (2) EFIN — required for e-filing, and (3) AFSP — strongly recommended for credibility and limited representation rights before the IRS.",
-    },
-    es: {
-      question: "¿Cuáles son las tres credenciales federales que Sandra debe obtener para operar independientemente?",
-      options: ["CPA, EA y licencia estatal", "PTIN, EFIN y AFSP (recomendado)", "SSN, EIN y DBA", "LLC, WISP y seguro E&O"],
-      correct: 1,
-      explanation: "Las tres credenciales federales clave son: (1) PTIN — obligatorio para todos los preparadores pagados, (2) EFIN — requerido para e-file, y (3) AFSP — muy recomendado para credibilidad y derechos de representación limitados ante el IRS.",
-    },
-  },
-  {
-    en: {
-      question: "What representation rights does a PTIN-only holder (without AFSP) have before the IRS?",
-      options: ["Full representation rights", "Limited representation rights", "Zero representation rights", "Rights only for audit cases"],
+      question: "What representation rights does a PTIN-only holder have vs. an AFSP holder?",
+      options: ["Both have full representation rights", "PTIN-only has limited rights; AFSP has unlimited rights", "PTIN-only has zero rights; AFSP has limited rights for returns they prepared", "Neither has any representation rights"],
       correct: 2,
-      explanation: "A PTIN-only holder has zero representation rights and is not listed in the IRS public directory. AFSP provides limited representation rights (for returns you prepared) and directory listing. The Enrolled Agent designation provides unlimited representation.",
+      explanation: "A PTIN-only holder has zero representation rights and is not listed in the IRS public directory. An AFSP holder has limited representation rights — they can represent clients for returns they prepared before IRS revenue agents and customer service, and they appear in the IRS directory.",
     },
     es: {
-      question: "¿Qué derechos de representación tiene un titular solo de PTIN (sin AFSP) ante el IRS?",
-      options: ["Derechos de representación completos", "Derechos de representación limitados", "Cero derechos de representación", "Derechos solo para casos de auditoría"],
+      question: "¿Qué derechos de representación tiene un titular solo de PTIN vs. un titular de AFSP?",
+      options: ["Ambos tienen derechos de representación completos", "Solo PTIN tiene derechos limitados; AFSP tiene derechos ilimitados", "Solo PTIN tiene cero derechos; AFSP tiene derechos limitados para declaraciones que preparó", "Ninguno tiene derechos de representación"],
       correct: 2,
-      explanation: "Un titular solo de PTIN tiene cero derechos de representación y no aparece en el directorio público del IRS. El AFSP proporciona derechos limitados de representación (para declaraciones que preparaste) y listado en el directorio. La designación EA proporciona representación ilimitada.",
+      explanation: "Un titular solo de PTIN tiene cero derechos de representación y no aparece en el directorio público del IRS. Un titular de AFSP tiene derechos de representación limitados — puede representar clientes por declaraciones que preparó ante agentes del IRS y servicio al contribuyente, y aparece en el directorio del IRS.",
     },
   },
   {
     en: {
-      question: "How much does the Enrolled Agent (EA) SEE exam cost in total?",
-      options: ["$100 total", "$267 total", "$534 total", "$801 total (3 parts × $267)"],
-      correct: 3,
-      explanation: "The EA requires passing a three-part SEE exam at $267 per part, totaling $801. It has no education prerequisites — anyone with a PTIN can sit for it. EAs have unlimited representation rights before the IRS.",
+      question: "What special benefit do VITA volunteers with a PTIN get when completing AFSP?",
+      options: ["Free PTIN renewal for life", "Exemption from the AFTR course requirement", "Automatic Enrolled Agent status", "50% discount on tax software"],
+      correct: 1,
+      explanation: "VITA volunteers with a PTIN who pass the advanced exam are exempt from the AFTR (Annual Federal Tax Refresher) course when completing AFSP. This saves both time and money, making VITA an excellent strategic choice for new preparers.",
     },
     es: {
-      question: "¿Cuánto cuesta en total el examen SEE de Agente Inscrito (EA)?",
-      options: ["$100 total", "$267 total", "$534 total", "$801 total (3 partes × $267)"],
-      correct: 3,
-      explanation: "El EA requiere aprobar un examen SEE de tres partes a $267 por parte, totalizando $801. No tiene requisitos de educación previa — cualquier persona con PTIN puede presentarlo. Los EAs tienen derechos de representación ilimitados ante el IRS.",
+      question: "¿Qué beneficio especial obtienen los voluntarios de VITA con PTIN al completar el AFSP?",
+      options: ["Renovación gratuita del PTIN de por vida", "Exención del requisito del curso AFTR", "Estatus automático de Agente Inscrito", "50% de descuento en software de impuestos"],
+      correct: 1,
+      explanation: "Los voluntarios de VITA con PTIN que aprueban el examen avanzado están exentos del curso AFTR (Repaso Federal Anual de Impuestos) al completar el AFSP. Esto ahorra tiempo y dinero, haciendo de VITA una excelente opción estratégica para preparadores nuevos.",
     },
   },
   {
     en: {
-      question: "What is the VITA program, and what special benefit does it provide for AFSP?",
-      options: ["A paid internship program at the IRS", "A volunteer program where passing the advanced exam exempts you from the AFTR course", "A software training certification", "A required state registration program"],
-      correct: 1,
-      explanation: "VITA (Volunteer Income Tax Assistance) is a free IRS program for preparing returns for low-income taxpayers. VITA volunteers with a PTIN who pass the advanced exam are exempt from the AFTR course when completing AFSP, saving time and money.",
-    },
-    es: {
-      question: "¿Qué es el programa VITA y qué beneficio especial proporciona para el AFSP?",
-      options: ["Un programa de pasantía pagada en el IRS", "Un programa de voluntariado donde aprobar el examen avanzado te exime del curso AFTR", "Una certificación de capacitación en software", "Un programa de registro estatal obligatorio"],
-      correct: 1,
-      explanation: "VITA (Asistencia Voluntaria de Impuestos) es un programa gratuito del IRS para preparar declaraciones para contribuyentes de bajos ingresos. Los voluntarios VITA con PTIN que aprueban el examen avanzado están exentos del curso AFTR al completar el AFSP, ahorrando tiempo y dinero.",
-    },
-  },
-  {
-    en: {
-      question: "What is the recommended LLC annual renewal fee in Georgia, and when is it due?",
-      options: ["$25, due January 1", "$50, due April 1", "$100, due December 31", "$200, due June 30"],
-      correct: 1,
-      explanation: "The LLC annual renewal in Georgia costs $50 and is due April 1. There is a $25 late fee after the deadline. The initial LLC formation filing costs $100 with the Georgia Secretary of State.",
-    },
-    es: {
-      question: "¿Cuál es la tarifa de renovación anual de LLC en Georgia y cuándo vence?",
-      options: ["$25, vence el 1 de enero", "$50, vence el 1 de abril", "$100, vence el 31 de diciembre", "$200, vence el 30 de junio"],
-      correct: 1,
-      explanation: "La renovación anual de LLC en Georgia cuesta $50 y vence el 1 de abril. Hay un recargo de $25 después de la fecha límite. La presentación inicial de formación de LLC cuesta $100 con el Secretario de Estado de Georgia.",
-    },
-  },
-  {
-    en: {
-      question: "What must Sandra register as with the Georgia Department of Revenue if she e-files for clients?",
-      options: ["Certified Public Accountant", "Licensed Tax Agent", "Third-party filer", "State Tax Auditor"],
+      question: "How much does the three-part SEE exam cost in total to become an Enrolled Agent?",
+      options: ["$267 (one part only)", "$534 (two parts)", "$801 (three parts at $267 each)", "$1,200 (three parts at $400 each)"],
       correct: 2,
-      explanation: "Sandra must register as a third-party filer with the Georgia Department of Revenue through the Georgia Tax Center (gtc.dor.ga.gov). This is a free registration that allows her to file electronic returns on behalf of clients.",
+      explanation: "The EA designation requires passing a three-part SEE (Special Enrollment Examination) at $267 per part, totaling $801. Importantly, it has no education prerequisites — anyone with a PTIN can sit for it. EAs have unlimited representation rights before the IRS for all matters and all clients.",
     },
     es: {
-      question: "¿Cómo debe registrarse Sandra en el Departamento de Ingresos de Georgia si hace e-file para clientes?",
-      options: ["Contadora Pública Certificada", "Agente Fiscal Licenciada", "Presentadora de terceros", "Auditora Fiscal Estatal"],
+      question: "¿Cuánto cuesta en total el examen SEE de tres partes para ser Agente Inscrito?",
+      options: ["$267 (una sola parte)", "$534 (dos partes)", "$801 (tres partes a $267 cada una)", "$1,200 (tres partes a $400 cada una)"],
       correct: 2,
-      explanation: "Sandra debe registrarse como presentadora de terceros en el Departamento de Ingresos de Georgia a través del Georgia Tax Center (gtc.dor.ga.gov). Este es un registro gratuito que le permite presentar declaraciones electrónicas en nombre de clientes.",
+      explanation: "La designación de EA requiere aprobar un examen SEE (Examen Especial de Inscripción) de tres partes a $267 por parte, totalizando $801. Importante: no tiene requisitos de educación previa — cualquier persona con PTIN puede presentarlo. Los EAs tienen derechos de representación ilimitados ante el IRS.",
+    },
+  },
+  {
+    en: {
+      question: "What is the AFTR comprehension test format within the AFSP program?",
+      options: ["50 questions, 60% to pass", "75 questions, 75% to pass", "100 questions, 70% to pass", "200 questions, 80% to pass"],
+      correct: 2,
+      explanation: "The AFTR (Annual Federal Tax Refresher) includes a comprehension test with 100 questions requiring 70% to pass. It is a 6-hour course that is part of the 18 total hours of CE required for AFSP (plus 10 hours federal tax law and 2 hours ethics).",
+    },
+    es: {
+      question: "¿Cuál es el formato de la prueba de comprensión AFTR dentro del programa AFSP?",
+      options: ["50 preguntas, 60% para aprobar", "75 preguntas, 75% para aprobar", "100 preguntas, 70% para aprobar", "200 preguntas, 80% para aprobar"],
+      correct: 2,
+      explanation: "El AFTR (Repaso Federal Anual de Impuestos) incluye una prueba de comprensión con 100 preguntas que requiere 70% para aprobar. Es un curso de 6 horas que forma parte de las 18 horas totales de CE requeridas para el AFSP (más 10 horas de ley tributaria federal y 2 horas de ética).",
     },
   },
   {
     en: {
       question: "Are tax preparation services subject to Georgia sales tax?",
-      options: ["Yes, at 4% state rate", "Yes, at 7% combined rate", "No, they are exempt", "Only if earning over $50,000"],
+      options: ["Yes, at the standard state rate", "Yes, but at a reduced rate", "No, they are fully exempt", "Only if the preparer earns over $50,000"],
       correct: 2,
-      explanation: "Tax preparation services are not subject to Georgia sales tax. This is an important advantage for new preparers as it simplifies pricing and reduces the compliance burden.",
+      explanation: "Tax preparation services are not subject to Georgia sales tax. This is an important advantage that simplifies pricing and reduces the compliance burden for new preparers in Georgia.",
     },
     es: {
       question: "¿Los servicios de preparación de impuestos están sujetos al impuesto de ventas de Georgia?",
-      options: ["Sí, a la tasa estatal del 4%", "Sí, a la tasa combinada del 7%", "No, están exentos", "Solo si se gana más de $50,000"],
+      options: ["Sí, a la tasa estatal estándar", "Sí, pero a una tasa reducida", "No, están completamente exentos", "Solo si el preparador gana más de $50,000"],
       correct: 2,
-      explanation: "Los servicios de preparación de impuestos no están sujetos al impuesto de ventas de Georgia. Esta es una ventaja importante para preparadores nuevos ya que simplifica los precios y reduce la carga de cumplimiento.",
+      explanation: "Los servicios de preparación de impuestos no están sujetos al impuesto de ventas de Georgia. Esta es una ventaja importante que simplifica los precios y reduce la carga de cumplimiento para preparadores nuevos en Georgia.",
     },
   },
   {
     en: {
-      question: "What is the maximum daily penalty for non-compliance with the WISP/FTC Safeguards Rule?",
-      options: ["$1,000 per violation per day", "$5,000 per violation per day", "$46,517 per violation per day", "$100,000 flat fine"],
+      question: "What is the LLC annual renewal fee in Georgia and when is it due?",
+      options: ["$25, due January 1", "$50, due April 1 (with $25 late fee)", "$100, due December 31", "$150, due June 30"],
+      correct: 1,
+      explanation: "The Georgia LLC annual renewal costs $50 and is due April 1 each year. There is a $25 late fee if filed after the deadline. The initial LLC formation costs $100, and the name must include 'LLC' or 'Limited Liability Company.'",
+    },
+    es: {
+      question: "¿Cuál es la tarifa de renovación anual de LLC en Georgia y cuándo vence?",
+      options: ["$25, vence el 1 de enero", "$50, vence el 1 de abril (con $25 de recargo)", "$100, vence el 31 de diciembre", "$150, vence el 30 de junio"],
+      correct: 1,
+      explanation: "La renovación anual de LLC en Georgia cuesta $50 y vence el 1 de abril de cada año. Hay un recargo de $25 si se presenta después de la fecha límite. La formación inicial de LLC cuesta $100, y el nombre debe incluir 'LLC' o 'Limited Liability Company.'",
+    },
+  },
+  {
+    en: {
+      question: "How much does a DBA filing cost in Georgia and where is it filed?",
+      options: ["Free at the Secretary of State", "~$160 at the Clerk of Superior Court plus $40–$60 newspaper publication", "$500 at the Georgia DOR", "$50 online through the GTC"],
+      correct: 1,
+      explanation: "A DBA (Doing Business As) in Georgia costs approximately $160 filed with the Clerk of Superior Court, plus $40–$60 for required newspaper publication. A DBA is needed only if operating under a trade name different from the legal business name.",
+    },
+    es: {
+      question: "¿Cuánto cuesta un registro de DBA en Georgia y dónde se presenta?",
+      options: ["Gratis en el Secretario de Estado", "~$160 en el Clerk of Superior Court más $40–$60 de publicación en periódico", "$500 en el DOR de Georgia", "$50 en línea a través del GTC"],
+      correct: 1,
+      explanation: "Un DBA (Doing Business As) en Georgia cuesta aproximadamente $160 presentado ante el Clerk of Superior Court, más $40–$60 por publicación requerida en periódico. El DBA solo es necesario si operas bajo un nombre comercial diferente al nombre legal del negocio.",
+    },
+  },
+  {
+    en: {
+      question: "What happens when Sandra registers through the Georgia Tax Center — how quickly does she get her state tax ID?",
+      options: ["2–4 weeks by mail", "Within ~15 minutes by email", "3–5 business days", "Immediately at a physical office only"],
+      correct: 1,
+      explanation: "Registration through the Georgia Tax Center (gtc.dor.ga.gov) is free, and Sandra receives her state tax ID by email within approximately 15 minutes. She must also register as a third-party filer if she will e-file state returns for clients.",
+    },
+    es: {
+      question: "¿Qué pasa cuando Sandra se registra en el Georgia Tax Center — qué tan rápido obtiene su ID fiscal estatal?",
+      options: ["2–4 semanas por correo postal", "En ~15 minutos por correo electrónico", "3–5 días hábiles", "Inmediatamente solo en oficina física"],
+      correct: 1,
+      explanation: "El registro a través del Georgia Tax Center (gtc.dor.ga.gov) es gratuito y Sandra recibe su ID fiscal estatal por correo electrónico en aproximadamente 15 minutos. También debe registrarse como presentadora de terceros si va a hacer e-file de declaraciones estatales para clientes.",
+    },
+  },
+  {
+    en: {
+      question: "What is the maximum daily penalty per violation for failing to comply with the WISP under the FTC Safeguards Rule?",
+      options: ["$1,000", "$10,000", "$46,517", "$100,000"],
       correct: 2,
-      explanation: "Penalties for WISP/FTC Safeguards Rule non-compliance can reach up to $46,517 per violation per day. Since 2023, preparers must certify WISP compliance when renewing their PTIN. This makes data security legally mandatory.",
+      explanation: "Penalties for WISP/FTC Safeguards Rule non-compliance can reach up to $46,517 per violation per day. Since 2023, preparers must certify WISP compliance when renewing their PTIN. The WISP must be created before preparing a single return.",
     },
     es: {
-      question: "¿Cuál es la multa máxima diaria por incumplimiento de la Regla de Salvaguardas WISP/FTC?",
-      options: ["$1,000 por violación por día", "$5,000 por violación por día", "$46,517 por violación por día", "$100,000 multa fija"],
+      question: "¿Cuál es la multa máxima diaria por violación por no cumplir con el WISP bajo la Regla de Salvaguardas de la FTC?",
+      options: ["$1,000", "$10,000", "$46,517", "$100,000"],
       correct: 2,
-      explanation: "Las multas por incumplimiento de la Regla de Salvaguardas WISP/FTC pueden alcanzar hasta $46,517 por violación por día. Desde 2023, los preparadores deben certificar el cumplimiento del WISP al renovar su PTIN. Esto hace la seguridad de datos legalmente obligatoria.",
+      explanation: "Las multas por incumplimiento de la Regla de Salvaguardas WISP/FTC pueden alcanzar hasta $46,517 por violación por día. Desde 2023, los preparadores deben certificar cumplimiento del WISP al renovar su PTIN. El WISP debe crearse antes de preparar una sola declaración.",
     },
   },
   {
     en: {
-      question: "What is Sandra's recommended learning path timing for getting trained and ready?",
-      options: ["Start in January, ready by April", "Start in June, ready by January", "Start in March, ready by December", "Start in October, ready by February"],
-      correct: 1,
-      explanation: "The recommended path starts in June-July with self-study, then structured training in August-September, credentialing in October-November, AFSP completion by December 31, and first returns prepared in January.",
-    },
-    es: {
-      question: "¿Cuál es el cronograma recomendado de la ruta de aprendizaje de Sandra para prepararse?",
-      options: ["Comenzar en enero, lista para abril", "Comenzar en junio, lista para enero", "Comenzar en marzo, lista para diciembre", "Comenzar en octubre, lista para febrero"],
-      correct: 1,
-      explanation: "La ruta recomendada comienza en junio-julio con autoestudio, luego formación estructurada en agosto-septiembre, acreditación en octubre-noviembre, completar AFSP antes del 31 de diciembre, y primeras declaraciones preparadas en enero.",
-    },
-  },
-  {
-    en: {
-      question: "What is the realistic first-year budget for Sandra to launch her practice?",
-      options: ["$500–$1,000", "$3,000–$5,000", "$10,000–$15,000", "$20,000+"],
-      correct: 1,
-      explanation: "The most realistic first-year budget is $3,000–$5,000, covering essentials (PTIN, LLC, training) plus adequate software and marketing. A minimal start is possible for $1,800–$2,500, while a well-equipped practice costs $6,500–$7,500.",
-    },
-    es: {
-      question: "¿Cuál es el presupuesto realista del primer año para que Sandra lance su práctica?",
-      options: ["$500–$1,000", "$3,000–$5,000", "$10,000–$15,000", "$20,000+"],
-      correct: 1,
-      explanation: "El presupuesto más realista para el primer año es $3,000–$5,000, cubriendo lo esencial (PTIN, LLC, formación) más software y marketing adecuados. Un inicio mínimo es posible con $1,800–$2,500, mientras que una práctica bien equipada cuesta $6,500–$7,500.",
-    },
-  },
-  {
-    en: {
-      question: "Which four credits/statuses trigger IRS due diligence requirements and Form 8867?",
-      options: ["Standard Deduction, AMT, Capital Gains, Social Security", "EITC, CTC, AOTC, and Head of Household", "Mortgage Interest, Charity, State Taxes, Medical", "Self-Employment, Rental Income, Dividends, Interest"],
-      correct: 1,
-      explanation: "The four credits/statuses requiring due diligence are: EITC (Earned Income Tax Credit), CTC (Child Tax Credit), AOTC (American Opportunity Tax Credit), and Head of Household filing status. Form 8867 must be completed for each applicable return and records retained for 3 years.",
-    },
-    es: {
-      question: "¿Cuáles cuatro créditos/estatus activan los requisitos de debida diligencia del IRS y el Formulario 8867?",
-      options: ["Deducción Estándar, AMT, Ganancias de Capital, Seguro Social", "EITC, CTC, AOTC y Cabeza de Familia", "Interés Hipotecario, Caridad, Impuestos Estatales, Médicos", "Autoempleo, Ingresos de Alquiler, Dividendos, Intereses"],
-      correct: 1,
-      explanation: "Los cuatro créditos/estatus que requieren debida diligencia son: EITC (Crédito por Ingreso del Trabajo), CTC (Crédito por Hijos), AOTC (Crédito de Oportunidad Americana) y estatus Cabeza de Familia. El Formulario 8867 debe completarse para cada declaración aplicable y los registros deben conservarse 3 años.",
-    },
-  },
-  {
-    en: {
-      question: "How much can Sandra expect to earn preparing 75 returns at the average fee?",
-      options: ["$7,500", "$12,500", "$18,750", "$25,000"],
+      question: "How much is the due diligence penalty for a single return claiming EITC, CTC, AOTC, and Head of Household with inadequate documentation?",
+      options: ["$650 total", "$1,300 total", "$2,600 total ($650 × 4 credits/statuses)", "$5,000 total"],
       correct: 2,
-      explanation: "At $250/return average, 75 returns would generate approximately $18,750 in revenue for Sandra's first season. This is a realistic target for a part-time solo preparer in their first year.",
+      explanation: "The penalty is $650 per credit per return (2026). A single return claiming all four credits/statuses (EITC, CTC, AOTC, Head of Household) with inadequate documentation results in $2,600 in penalties ($650 × 4). Preparers must complete Form 8867 and retain records for 3 years.",
     },
     es: {
-      question: "¿Cuánto puede esperar ganar Sandra preparando 75 declaraciones a la tarifa promedio?",
-      options: ["$7,500", "$12,500", "$18,750", "$25,000"],
+      question: "¿Cuánto es la multa de debida diligencia por una sola declaración que reclama EITC, CTC, AOTC y Cabeza de Familia sin documentación adecuada?",
+      options: ["$650 total", "$1,300 total", "$2,600 total ($650 × 4 créditos/estatus)", "$5,000 total"],
       correct: 2,
-      explanation: "A $250/declaración promedio, 75 declaraciones generarían aproximadamente $18,750 en ingresos para la primera temporada de Sandra. Este es un objetivo realista para un preparador individual a tiempo parcial en su primer año.",
+      explanation: "La multa es de $650 por crédito por declaración (2026). Una sola declaración reclamando los cuatro créditos/estatus (EITC, CTC, AOTC, Cabeza de Familia) sin documentación adecuada resulta en $2,600 en multas ($650 × 4). Los preparadores deben completar el Formulario 8867 y conservar registros por 3 años.",
     },
   },
   {
     en: {
-      question: "What credential should Sandra pursue after her first season for unlimited IRS representation?",
-      options: ["CPA (Certified Public Accountant)", "Enrolled Agent (EA)", "Certified Financial Planner", "AFSP Advanced Level"],
-      correct: 1,
-      explanation: "Sandra should consider the Enrolled Agent (EA) designation after her first season. The EA requires passing a three-part SEE exam ($801 total) but has no education prerequisites. EAs have unlimited representation rights before the IRS for all matters and all clients.",
+      question: "During which months should Sandra complete training, AFSP, and EFIN application according to Claude's timeline?",
+      options: ["January–March", "April–June", "June–August", "October–December"],
+      correct: 3,
+      explanation: "According to Claude's recommended timeline: October is for applying for EFIN (45-day processing) and registering the LLC; November for completing training and setting up the business; December for completing AFSP (18 hrs CE by Dec 31), renewing PTIN, and launching marketing.",
     },
     es: {
-      question: "¿Qué credencial debería buscar Sandra después de su primera temporada para representación ilimitada ante el IRS?",
-      options: ["CPA (Contador Público Certificado)", "Agente Inscrito (EA)", "Planificador Financiero Certificado", "Nivel Avanzado de AFSP"],
+      question: "¿Durante qué meses debería Sandra completar su formación, AFSP y solicitud de EFIN según el cronograma de Claude?",
+      options: ["Enero–Marzo", "Abril–Junio", "Junio–Agosto", "Octubre–Diciembre"],
+      correct: 3,
+      explanation: "Según el cronograma recomendado de Claude: octubre es para solicitar EFIN (45 días de procesamiento) y registrar la LLC; noviembre para completar formación y preparar el negocio; diciembre para completar AFSP (18 hrs CE antes del 31 dic), renovar PTIN y lanzar marketing.",
+    },
+  },
+  {
+    en: {
+      question: "Which professional associations does Claude recommend Sandra join for education and fee studies?",
+      options: ["American Bar Association and AICPA", "NATP (National Association of Tax Professionals) and NSA (National Society of Accountants)", "IRS Stakeholder Liaison and State Bar", "BNI and local Chamber of Commerce"],
       correct: 1,
-      explanation: "Sandra debería considerar la designación de Agente Inscrito (EA) después de su primera temporada. El EA requiere aprobar un examen SEE de tres partes ($801 total) pero no tiene requisitos de educación previa. Los EAs tienen derechos de representación ilimitados ante el IRS para todos los asuntos y clientes.",
+      explanation: "Claude recommends joining NATP (National Association of Tax Professionals — 23,000+ members) for education, fee studies, and insurance/CE discounts. NSA (National Society of Accountants) is another strong option. These organizations provide ongoing professional support.",
+    },
+    es: {
+      question: "¿Qué asociaciones profesionales recomienda Claude que Sandra se una para educación y estudios de tarifas?",
+      options: ["Colegio de Abogados y AICPA", "NATP (Asociación Nacional de Profesionales de Impuestos) y NSA (Sociedad Nacional de Contadores)", "Enlace del IRS y Colegio Estatal", "BNI y Cámara de Comercio local"],
+      correct: 1,
+      explanation: "Claude recomienda unirse a NATP (Asociación Nacional de Profesionales de Impuestos — 23,000+ miembros) para educación, estudios de tarifas y descuentos en seguros/CE. NSA (Sociedad Nacional de Contadores) es otra excelente opción. Estas organizaciones proporcionan apoyo profesional continuo.",
+    },
+  },
+  {
+    en: {
+      question: "What is the recommended first-year budget range according to Claude's analysis?",
+      options: ["$500–$1,000", "$1,000–$2,000", "$3,000–$5,000", "$10,000–$15,000"],
+      correct: 2,
+      explanation: "Claude recommends a realistic first-year budget of $3,000–$5,000, covering essentials plus adequate software and marketing. The bare minimum is $1,800–$2,500, while a well-equipped start runs $6,500–$7,500.",
+    },
+    es: {
+      question: "¿Cuál es el rango de presupuesto recomendado para el primer año según el análisis de Claude?",
+      options: ["$500–$1,000", "$1,000–$2,000", "$3,000–$5,000", "$10,000–$15,000"],
+      correct: 2,
+      explanation: "Claude recomienda un presupuesto realista para el primer año de $3,000–$5,000, cubriendo lo esencial más software y marketing adecuados. El mínimo absoluto es $1,800–$2,500, mientras que un inicio bien equipado cuesta $6,500–$7,500.",
+    },
+  },
+  {
+    en: {
+      question: "What credential does Claude recommend Sandra pursue after her first season for unlimited IRS representation?",
+      options: ["CPA license", "Enrolled Agent (EA) via the SEE exam", "AFSP Advanced Level", "State tax preparer license"],
+      correct: 1,
+      explanation: "Claude recommends Sandra pursue the Enrolled Agent (EA) designation after her first season. EAs have unlimited representation rights before the IRS for all matters and all clients. The SEE exam has no education prerequisites — anyone with a PTIN can sit for it.",
+    },
+    es: {
+      question: "¿Qué credencial recomienda Claude que Sandra busque después de su primera temporada para representación ilimitada ante el IRS?",
+      options: ["Licencia de CPA", "Agente Inscrito (EA) vía el examen SEE", "Nivel Avanzado del AFSP", "Licencia estatal de preparador de impuestos"],
+      correct: 1,
+      explanation: "Claude recomienda que Sandra busque la designación de Agente Inscrito (EA) después de su primera temporada. Los EAs tienen derechos de representación ilimitados ante el IRS para todos los asuntos y clientes. El examen SEE no tiene requisitos de educación previa — cualquier persona con PTIN puede presentarlo.",
     },
   },
 ];

@@ -1,9 +1,40 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Lang = "en" | "es";
+
+/* ---------- Acronym highlighter ---------- */
+const ACRONYMS = [
+  "PTIN", "EFIN", "AFSP", "AFTR", "LLC", "WISP", "EIN", "CPA", "EA",
+  "EITC", "CTC", "AOTC", "MFA", "VPN", "E&O", "DBA", "SSN", "IRS",
+  "AGI", "VITA", "TCE", "ITIN", "MFJ", "SEE", "CE", "GTC", "DOR",
+  "NASBA", "CTEC", "ERO", "FTC", "FTP", "CTP", "BNI", "NATP", "NSA",
+  "W-2", "W-12", "1099", "1040", "1120S", "1065",
+];
+
+// Sort longest-first so "E&O" matches before "E" would
+const ACRONYM_PATTERN = new RegExp(
+  `\\b(${ACRONYMS.sort((a, b) => b.length - a.length)
+    .map((a) => a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("|")})\\b`,
+  "g"
+);
+
+function highlightAcronyms(text: string, accentClass: string): React.ReactNode {
+  const parts = text.split(ACRONYM_PATTERN);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    ACRONYMS.includes(part) ? (
+      <span key={i} className={`font-bold ${accentClass}`}>
+        {part}
+      </span>
+    ) : (
+      <React.Fragment key={i}>{part}</React.Fragment>
+    )
+  );
+}
 
 export type QuizQuestion = {
   en: {
@@ -136,6 +167,7 @@ export function AnalysisQuiz({
   };
 
   const accent = accentMap[accentColor];
+  const hl = (text: string) => highlightAcronyms(text, accent.text);
 
   const startQuiz = useCallback(() => {
     setState("answering");
@@ -316,7 +348,7 @@ export function AnalysisQuiz({
               transition={{ delay: idx * 0.08 }}
               className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6"
             >
-              <p className="mb-4 text-sm font-semibold text-white">{questionData.question}</p>
+              <p className="mb-4 text-sm font-semibold text-white">{hl(questionData.question)}</p>
               <div className="space-y-2">
                 {questionData.options.map((opt, oi) => {
                   const isCorrectOpt = oi === questionData.correct;
@@ -335,7 +367,7 @@ export function AnalysisQuiz({
                       <span className="flex items-center gap-2">
                         {isCorrectOpt && <CheckIcon className="h-4 w-4 shrink-0 text-emerald-400" />}
                         {isUserAnswer && !isCorrectOpt && <XIcon className="h-4 w-4 shrink-0 text-red-400" />}
-                        {opt}
+                        {hl(opt)}
                       </span>
                     </div>
                   );
@@ -343,7 +375,7 @@ export function AnalysisQuiz({
               </div>
               <div className="mt-4 rounded-xl bg-white/[0.04] p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">{t.explanation}</p>
-                <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">{questionData.explanation}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">{hl(questionData.explanation)}</p>
               </div>
             </motion.div>
           );
@@ -408,7 +440,7 @@ export function AnalysisQuiz({
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             <h3 className="mb-6 text-base font-semibold leading-relaxed text-white sm:text-lg">
-              {q.question}
+              {hl(q.question)}
             </h3>
 
             {/* Options */}
@@ -461,7 +493,7 @@ export function AnalysisQuiz({
                           String.fromCharCode(65 + i)
                         )}
                       </span>
-                      <span className="flex-1">{option}</span>
+                      <span className="flex-1">{hl(option)}</span>
                     </span>
                   </motion.button>
                 );
@@ -500,7 +532,7 @@ export function AnalysisQuiz({
                       </span>
                     </div>
                     <p className="mt-3 text-sm leading-relaxed text-neutral-300">
-                      {q.explanation}
+                      {hl(q.explanation)}
                     </p>
                   </div>
 
