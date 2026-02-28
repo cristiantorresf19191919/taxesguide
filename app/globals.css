@@ -132,31 +132,96 @@
     }
   }
 
-  /* Game card accent stripe */
-  .game-accent {
-    @apply relative overflow-hidden rounded-2xl;
+  /* ── Game card accent system ────────────────────────────────────── */
+  .game-card {
+    @apply relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300
+      border-gray-200/80
+      dark:border-white/[0.06] dark:bg-white/[0.025];
   }
 
-  .game-accent::after {
+  .game-card::before {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    border-radius: 1rem 1rem 0 0;
+    height: 4px;
+    z-index: 1;
     pointer-events: none;
   }
 
-  .game-accent-pink::after { background: linear-gradient(to right, #ec4899, #f43f5e); }
-  .game-accent-cyan::after { background: linear-gradient(to right, #06b6d4, #3b82f6); }
-  .game-accent-emerald::after { background: linear-gradient(to right, #10b981, #14b8a6); }
-  .game-accent-amber::after { background: linear-gradient(to right, #f59e0b, #eab308); }
-  .game-accent-indigo::after { background: linear-gradient(to right, #6366f1, #8b5cf6); }
-  .game-accent-teal::after { background: linear-gradient(to right, #14b8a6, #06b6d4); }
-  .game-accent-orange::after { background: linear-gradient(to right, #f97316, #ef4444); }
-  .game-accent-rose::after { background: linear-gradient(to right, #f43f5e, #ec4899); }
-  .game-accent-violet::after { background: linear-gradient(to right, #8b5cf6, #6366f1); }
+  /* Subtle color tint on each game card */
+  .game-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  @media (hover: hover) {
+    .game-card:hover {
+      @apply -translate-y-1 shadow-lg;
+    }
+    .game-card:hover::after {
+      opacity: 1;
+    }
+  }
+
+  .game-card-pink::before { background: linear-gradient(to right, #ec4899, #f43f5e); }
+  .game-card-pink::after { background: linear-gradient(135deg, rgba(236, 72, 153, 0.04), transparent 60%); }
+  .game-card-pink:hover { box-shadow: 0 10px 40px -10px rgba(236, 72, 153, 0.15); }
+
+  .game-card-cyan::before { background: linear-gradient(to right, #06b6d4, #3b82f6); }
+  .game-card-cyan::after { background: linear-gradient(135deg, rgba(6, 182, 212, 0.04), transparent 60%); }
+  .game-card-cyan:hover { box-shadow: 0 10px 40px -10px rgba(6, 182, 212, 0.15); }
+
+  .game-card-emerald::before { background: linear-gradient(to right, #10b981, #14b8a6); }
+  .game-card-emerald::after { background: linear-gradient(135deg, rgba(16, 185, 129, 0.04), transparent 60%); }
+  .game-card-emerald:hover { box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.15); }
+
+  .game-card-amber::before { background: linear-gradient(to right, #f59e0b, #eab308); }
+  .game-card-amber::after { background: linear-gradient(135deg, rgba(245, 158, 11, 0.04), transparent 60%); }
+  .game-card-amber:hover { box-shadow: 0 10px 40px -10px rgba(245, 158, 11, 0.15); }
+
+  .game-card-indigo::before { background: linear-gradient(to right, #6366f1, #8b5cf6); }
+  .game-card-indigo::after { background: linear-gradient(135deg, rgba(99, 102, 241, 0.04), transparent 60%); }
+  .game-card-indigo:hover { box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.15); }
+
+  .game-card-teal::before { background: linear-gradient(to right, #14b8a6, #06b6d4); }
+  .game-card-teal::after { background: linear-gradient(135deg, rgba(20, 184, 166, 0.04), transparent 60%); }
+  .game-card-teal:hover { box-shadow: 0 10px 40px -10px rgba(20, 184, 166, 0.15); }
+
+  .game-card-orange::before { background: linear-gradient(to right, #f97316, #ef4444); }
+  .game-card-orange::after { background: linear-gradient(135deg, rgba(249, 115, 22, 0.04), transparent 60%); }
+  .game-card-orange:hover { box-shadow: 0 10px 40px -10px rgba(249, 115, 22, 0.15); }
+
+  .game-card-rose::before { background: linear-gradient(to right, #f43f5e, #ec4899); }
+  .game-card-rose::after { background: linear-gradient(135deg, rgba(244, 63, 94, 0.04), transparent 60%); }
+  .game-card-rose:hover { box-shadow: 0 10px 40px -10px rgba(244, 63, 94, 0.15); }
+
+  .game-card-violet::before { background: linear-gradient(to right, #8b5cf6, #7c3aed); }
+  .game-card-violet::after { background: linear-gradient(135deg, rgba(139, 92, 246, 0.04), transparent 60%); }
+  .game-card-violet:hover { box-shadow: 0 10px 40px -10px rgba(139, 92, 246, 0.15); }
+
+  /* Dark mode tint boost */
+  .dark .game-card-pink::after { background: linear-gradient(135deg, rgba(236, 72, 153, 0.06), transparent 60%); }
+  .dark .game-card-cyan::after { background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), transparent 60%); }
+  .dark .game-card-emerald::after { background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), transparent 60%); }
+  .dark .game-card-amber::after { background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), transparent 60%); }
+  .dark .game-card-indigo::after { background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), transparent 60%); }
+  .dark .game-card-teal::after { background: linear-gradient(135deg, rgba(20, 184, 166, 0.06), transparent 60%); }
+  .dark .game-card-orange::after { background: linear-gradient(135deg, rgba(249, 115, 22, 0.06), transparent 60%); }
+  .dark .game-card-rose::after { background: linear-gradient(135deg, rgba(244, 63, 94, 0.06), transparent 60%); }
+  .dark .game-card-violet::after { background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), transparent 60%); }
+
+  /* Game card inner content — ensure it sits above the ::after tint */
+  .game-card > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 @keyframes fadeIn {

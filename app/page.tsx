@@ -703,35 +703,34 @@ export default function HomePage() {
 
               {/* Games Section Header */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="flex items-center gap-3"
+                className="flex items-center gap-4"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 dark:from-violet-500/10 dark:to-pink-500/10">
-                  <span className="text-sm">🎮</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 shadow-lg shadow-violet-500/20">
+                  <span className="text-lg">🎮</span>
                 </div>
-                <div>
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                <div className="flex-1">
+                  <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                     {lang === "en" ? "Learning Games" : "Juegos de aprendizaje"}
                   </h2>
-                  <p className="text-[10px] text-slate-400 dark:text-neutral-500">
-                    {lang === "en" ? "8 games with combo XP multipliers" : "8 juegos con multiplicadores de XP"}
+                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                    {lang === "en" ? "8 games — earn XP, build combos, beat your records" : "8 juegos — gana XP, haz combos, supera tus récords"}
                   </p>
                 </div>
-                <div className="h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent dark:from-white/[0.06]" />
               </motion.div>
 
               {/* Games Grid */}
               <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div className="game-accent game-accent-pink"><TermMatcher lang={lang} /></div>
-                <div className="game-accent game-accent-cyan"><CategorySort lang={lang} /></div>
-                <div className="game-accent game-accent-emerald"><TaxClimber lang={lang} /></div>
-                <div className="game-accent game-accent-amber"><WordScramble lang={lang} /></div>
-                <div className="game-accent game-accent-indigo"><TrueFalseBlitz lang={lang} /></div>
-                <div className="game-accent game-accent-teal"><AcronymChallenge lang={lang} /></div>
-                <div className="game-accent game-accent-orange"><TaxBingo lang={lang} /></div>
-                <div className="game-accent game-accent-rose"><DefinitionDash lang={lang} /></div>
+                <div className="game-card game-card-pink"><TermMatcher lang={lang} /></div>
+                <div className="game-card game-card-cyan"><CategorySort lang={lang} /></div>
+                <div className="game-card game-card-emerald"><TaxClimber lang={lang} /></div>
+                <div className="game-card game-card-amber"><WordScramble lang={lang} /></div>
+                <div className="game-card game-card-indigo"><TrueFalseBlitz lang={lang} /></div>
+                <div className="game-card game-card-teal"><AcronymChallenge lang={lang} /></div>
+                <div className="game-card game-card-orange"><TaxBingo lang={lang} /></div>
+                <div className="game-card game-card-rose"><DefinitionDash lang={lang} /></div>
               </div>
 
               {/* Focus Timer */}
@@ -739,23 +738,22 @@ export default function HomePage() {
 
               {/* Study Tools Section Header */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="flex items-center gap-3"
+                className="flex items-center gap-4"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 dark:from-emerald-500/10 dark:to-cyan-500/10">
-                  <span className="text-sm">🛠️</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/20">
+                  <span className="text-lg">🛠️</span>
                 </div>
-                <div>
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                <div className="flex-1">
+                  <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                     {lang === "en" ? "Study Tools" : "Herramientas de estudio"}
                   </h2>
-                  <p className="text-[10px] text-slate-400 dark:text-neutral-500">
+                  <p className="text-xs text-slate-500 dark:text-neutral-400">
                     {lang === "en" ? "Review, practice exams & more" : "Repaso, exámenes de práctica y más"}
                   </p>
                 </div>
-                <div className="h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent dark:from-white/[0.06]" />
               </motion.div>
 
               <div className="grid gap-5 sm:gap-6 md:grid-cols-2">

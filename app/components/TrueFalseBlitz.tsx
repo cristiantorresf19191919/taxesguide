@@ -195,32 +195,43 @@ export function TrueFalseBlitz({ lang }: { lang: Lang }) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+        className="flex flex-col p-5 sm:p-6"
       >
-        <div className="mb-3 flex items-center gap-2">
-          <span className="text-lg">⚖️</span>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            {isEn ? "True or False Blitz" : "Verdadero o Falso"}
-          </h3>
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-purple-500/15 text-xl dark:from-indigo-500/20 dark:to-purple-500/20">
+            ⚖️
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[15px] font-extrabold text-slate-900 dark:text-white">
+              {isEn ? "True or False Blitz" : "Verdadero o Falso"}
+            </h3>
+            <span className="text-[10px] font-semibold text-indigo-500/80">
+              {isEn ? "Quick Judgment" : "Juicio rápido"}
+            </span>
+          </div>
         </div>
-        <p className="mb-2 text-[11px] text-slate-500 dark:text-neutral-400">
+        <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
           {isEn
-            ? `Read each statement and decide: True or False? You have ${MAX_LIVES} lives. Build combos for x2, x3, x4 XP!`
-            : `Lee cada afirmación y decide: ¿Verdadero o Falso? Tienes ${MAX_LIVES} vidas. ¡Haz combos para x2, x3, x4 XP!`}
+            ? `Read each statement — True or False? ${MAX_LIVES} lives, combos for x2–x4 XP!`
+            : `Lee cada afirmación — ¿Verdadero o Falso? ${MAX_LIVES} vidas, combos x2–x4 XP!`}
         </p>
         {highScore > 0 && (
-          <p className="mb-3 text-[10px] text-indigo-500">
-            {isEn
-              ? `Best: ${highScore} correct`
-              : `Mejor: ${highScore} correctas`}
-          </p>
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-indigo-50/80 px-3 py-2 dark:bg-indigo-500/10">
+            <span className="text-xs">🏆</span>
+            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+              {highScore}
+            </span>
+            <span className="text-[10px] text-indigo-500/60">
+              {isEn ? "correct best" : "mejor marca"}
+            </span>
+          </div>
         )}
         <motion.button
           type="button"
           onClick={startGame}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-500/20"
+          className="w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-shadow hover:shadow-indigo-500/35"
         >
           {isEn ? "Start Blitz" : "Comenzar Blitz"}
         </motion.button>
@@ -234,7 +245,7 @@ export function TrueFalseBlitz({ lang }: { lang: Lang }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+        className="flex flex-col items-center p-5 sm:p-6"
       >
         <motion.div
           initial={{ scale: 0 }}
@@ -287,7 +298,7 @@ export function TrueFalseBlitz({ lang }: { lang: Lang }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+      className="flex flex-col p-5 sm:p-6"
     >
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">

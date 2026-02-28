@@ -169,32 +169,43 @@ export function CategorySort({ lang }: { lang: Lang }) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+        className="flex flex-col p-5 sm:p-6"
       >
-        <div className="mb-3 flex items-center gap-2">
-          <span className="text-lg">🗂️</span>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            {isEn ? "Category Sort" : "Clasificar categorías"}
-          </h3>
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500/15 to-blue-500/15 text-xl dark:from-cyan-500/20 dark:to-blue-500/20">
+            🗂️
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[15px] font-extrabold text-slate-900 dark:text-white">
+              {isEn ? "Category Sort" : "Clasificar categorías"}
+            </h3>
+            <span className="text-[10px] font-semibold text-cyan-500/80">
+              {isEn ? "Classification" : "Clasificación"}
+            </span>
+          </div>
         </div>
-        <p className="mb-2 text-[11px] text-slate-500 dark:text-neutral-400">
+        <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
           {isEn
-            ? `Sort ${ROUND_SIZE} terms into categories in ${TIME_LIMIT}s! Correct answers add +${TIME_BONUS_PER_CORRECT}s. Combos multiply XP!`
+            ? `Sort ${ROUND_SIZE} terms in ${TIME_LIMIT}s! Correct answers add +${TIME_BONUS_PER_CORRECT}s. Combos multiply XP!`
             : `¡Clasifica ${ROUND_SIZE} términos en ${TIME_LIMIT}s! Aciertos dan +${TIME_BONUS_PER_CORRECT}s. ¡Combos multiplican XP!`}
         </p>
         {bestScore > 0 && (
-          <p className="mb-3 text-[10px] text-emerald-500">
-            {isEn
-              ? `Best: ${bestScore}/${ROUND_SIZE}`
-              : `Mejor: ${bestScore}/${ROUND_SIZE}`}
-          </p>
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50/80 px-3 py-2 dark:bg-emerald-500/10">
+            <span className="text-xs">🏆</span>
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+              {bestScore}/{ROUND_SIZE}
+            </span>
+            <span className="text-[10px] text-emerald-500/60">
+              {isEn ? "personal best" : "récord personal"}
+            </span>
+          </div>
         )}
         <motion.button
           type="button"
           onClick={startGame}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 py-3 text-xs font-bold text-white shadow-lg shadow-cyan-500/20"
+          className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition-shadow hover:shadow-cyan-500/35"
         >
           {isEn ? "Start Sorting" : "Comenzar a clasificar"}
         </motion.button>
@@ -212,7 +223,7 @@ export function CategorySort({ lang }: { lang: Lang }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+        className="flex flex-col items-center p-5 sm:p-6"
       >
         <motion.div
           initial={{ scale: 0 }}
@@ -263,7 +274,7 @@ export function CategorySort({ lang }: { lang: Lang }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+      className="flex flex-col p-5 sm:p-6"
     >
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">

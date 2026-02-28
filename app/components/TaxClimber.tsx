@@ -114,20 +114,27 @@ export function TaxClimber({ lang }: { lang: Lang }) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+        className="flex flex-col p-5 sm:p-6"
       >
-        <div className="mb-3 flex items-center gap-2">
-          <span className="text-lg">🧗</span>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            {isEn ? "Tax Climber" : "Escalador fiscal"}
-          </h3>
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/15 to-teal-500/15 text-xl dark:from-emerald-500/20 dark:to-teal-500/20">
+            🧗
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[15px] font-extrabold text-slate-900 dark:text-white">
+              {isEn ? "Tax Climber" : "Escalador fiscal"}
+            </h3>
+            <span className="text-[10px] font-semibold text-emerald-500/80">
+              {isEn ? "Adventure" : "Aventura"}
+            </span>
+          </div>
         </div>
-        <p className="mb-2 text-[11px] text-slate-500 dark:text-neutral-400">
+        <p className="mb-3 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
           {isEn
-            ? `Answer correctly to climb ${LEVELS} levels! You have 3 lives. Reach the summit for bonus XP.`
-            : `¡Responde correctamente para escalar ${LEVELS} niveles! Tienes 3 vidas. Llega a la cima para XP extra.`}
+            ? `Climb ${LEVELS} levels! 3 lives. Reach the summit for bonus XP.`
+            : `¡Escala ${LEVELS} niveles! 3 vidas. Llega a la cima para XP extra.`}
         </p>
-        <div className="mb-3 flex justify-center gap-1">
+        <div className="mb-4 flex justify-center gap-1">
           {LEVEL_EMOJIS.map((e, i) => (
             <span key={i} className="text-sm opacity-40">{e}</span>
           ))}
@@ -137,7 +144,7 @@ export function TaxClimber({ lang }: { lang: Lang }) {
           onClick={startGame}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-500/20"
+          className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-shadow hover:shadow-emerald-500/35"
         >
           {isEn ? "Start Climbing" : "Comenzar a escalar"}
         </motion.button>
@@ -152,7 +159,7 @@ export function TaxClimber({ lang }: { lang: Lang }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+        className="flex flex-col items-center p-5 sm:p-6"
       >
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
@@ -188,7 +195,7 @@ export function TaxClimber({ lang }: { lang: Lang }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+        className="flex flex-col items-center p-5 sm:p-6"
       >
         <div className="mb-2 text-4xl">😤</div>
         <p className="text-lg font-black text-amber-500">
@@ -219,7 +226,7 @@ export function TaxClimber({ lang }: { lang: Lang }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+      className="flex flex-col p-5 sm:p-6"
     >
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">

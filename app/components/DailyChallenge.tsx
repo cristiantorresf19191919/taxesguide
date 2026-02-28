@@ -42,14 +42,21 @@ export function DailyChallenge({ lang }: { lang: Lang }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
+      className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 transition-colors dark:border-white/[0.08] dark:bg-white/[0.03]"
     >
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🎯</span>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            {isEn ? "Daily Challenge" : "Reto diario"}
-          </h3>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500/15 to-orange-500/15 text-xl dark:from-red-500/20 dark:to-orange-500/20">
+            🎯
+          </div>
+          <div>
+            <h3 className="text-[15px] font-extrabold text-slate-900 dark:text-white">
+              {isEn ? "Daily Challenge" : "Reto diario"}
+            </h3>
+            <span className="text-[10px] font-semibold text-red-500/80">
+              +25 XP
+            </span>
+          </div>
         </div>
         {alreadyDone && (
           <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
@@ -58,7 +65,7 @@ export function DailyChallenge({ lang }: { lang: Lang }) {
         )}
       </div>
 
-      <p className="mb-1 text-[11px] font-medium text-slate-400 dark:text-neutral-500">
+      <p className="mb-1 text-xs font-medium text-slate-400 dark:text-neutral-500">
         {isEn ? "Do you know what this means?" : "¿Sabes qué significa esto?"}
       </p>
 
