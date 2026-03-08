@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { memo, useCallback, useMemo, useRef } from "react";
+import { PhaserGame, GAME_COLORS, hexColor } from "./PhaserGame";
 import { TERMS } from "@/app/data/terms";
 import { useProgress } from "@/app/contexts/ProgressContext";
 
 type Lang = "en" | "es";
-type Phase = "idle" | "playing" | "results";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -19,13 +18,9 @@ function shuffle<T>(arr: T[]): T[] {
 
 const MAX_WRONG = 3;
 const BASE_XP = 4;
-const SPEED_BONUS_THRESHOLD = 3; // seconds — answer within 3s for speed bonus
+const SPEED_BONUS_THRESHOLD = 3;
 
-type Round = {
-  term: (typeof TERMS)[0];
-  options: string[];
-  correctIdx: number;
-};
+type Round = { term: (typeof TERMS)[0]; options: string[]; correctIdx: number };
 
 function getComboMultiplier(combo: number): number {
   if (combo >= 10) return 4;
@@ -34,387 +29,268 @@ function getComboMultiplier(combo: number): number {
   return 1;
 }
 
-export function DefinitionDash({ lang }: { lang: Lang }) {
-  const isEn = lang === "en";
-  const { addXP, recordGamePlayed, recordCombo, recordDashScore } = useProgress();
+function createDashScene(Phaser: typeof import("phaser")) {
+  return class DashScene extends Phaser.Scene {
+    private lang: Lang = "en";
+    private callbacks: any = {};
+    private rounds: Round[] = [];
+    private currentIdx = 0;
+    private correct = 0;
+    private wrong = 0;
+    private combo = 0;
+    private bestCombo = 0;
+    private totalXP = 0;
+    private speedAnswers = 0;
+    private highScore = 0;
+    private questionStart = 0;
 
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [rounds, setRounds] = useState<Round[]>([]);
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [correct, setCorrect] = useState(0);
-  const [wrong, setWrong] = useState(0);
-  const [combo, setCombo] = useState(0);
-  const [bestCombo, setBestCombo] = useState(0);
-  const [totalXP, setTotalXP] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [speedAnswers, setSpeedAnswers] = useState(0);
-  const [highScore, setHighScore] = useState(0);
-  const [questionStart, setQuestionStart] = useState(0);
-  const [beatingRecord, setBeatingRecord] = useState(false);
-  const xpAwarded = useRef(false);
+    constructor() { super({ key: "DashScene" }); }
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("tax-guide-defdash-best");
-      if (raw) setHighScore(Number(raw));
-    } catch {}
-  }, []);
-
-  const generateRounds = useCallback(() => {
-    const shuffled = shuffle(TERMS);
-    return shuffled.map((term): Round => {
-      const correctLabel = isEn ? term.labelEn : term.labelEs;
-      const wrongTerms = shuffle(TERMS.filter((t) => t.id !== term.id)).slice(
-        0,
-        3
-      );
-      const allOptions = shuffle([
-        correctLabel,
-        ...wrongTerms.map((t) => (isEn ? t.labelEn : t.labelEs)),
-      ]);
-      const correctIdx = allOptions.indexOf(correctLabel);
-      return { term, options: allOptions, correctIdx };
-    });
-  }, [isEn]);
-
-  const startGame = useCallback(() => {
-    setRounds(generateRounds());
-    setCurrentIdx(0);
-    setCorrect(0);
-    setWrong(0);
-    setCombo(0);
-    setBestCombo(0);
-    setTotalXP(0);
-    setSelected(null);
-    setSpeedAnswers(0);
-    setBeatingRecord(false);
-    setQuestionStart(Date.now());
-    xpAwarded.current = false;
-    setPhase("playing");
-  }, [generateRounds]);
-
-  // Track question start time
-  useEffect(() => {
-    if (phase === "playing") {
-      setQuestionStart(Date.now());
+    receiveData(data: any) {
+      this.lang = data.lang;
+      this.callbacks = data.callbacks;
+      try {
+        const raw = localStorage.getItem("tax-guide-defdash-best");
+        if (raw) this.highScore = Number(raw);
+      } catch {}
+      this.showIdle();
     }
-  }, [currentIdx, phase]);
 
-  // Award XP on results
-  useEffect(() => {
-    if (phase === "results" && !xpAwarded.current) {
-      xpAwarded.current = true;
-      if (totalXP > 0) addXP(totalXP);
-      recordGamePlayed("definition_dash");
-      recordDashScore(correct);
-      if (bestCombo >= 3) recordCombo(bestCombo);
-      if (correct > highScore) {
-        setHighScore(correct);
-        try {
-          localStorage.setItem("tax-guide-defdash-best", String(correct));
-        } catch {}
+    private get isEn() { return this.lang === "en"; }
+    private get W() { return Number(this.scale.width); }
+    private clearAll() { this.children.removeAll(true); }
+
+    private emitParticles(x: number, y: number, color: number) {
+      const key = `p_${color}`;
+      if (!this.textures.exists(key)) {
+        const g = (this.make as any).graphics({ add: false });
+        g.fillStyle(color); g.fillCircle(4, 4, 4);
+        g.generateTexture(key, 8, 8); g.destroy();
       }
+      const e = this.add.particles(x, y, key, {
+        speed: { min: 80, max: 200 }, angle: { min: 0, max: 360 },
+        scale: { start: 1, end: 0 }, alpha: { start: 1, end: 0 },
+        lifespan: 600, quantity: 12, emitting: false,
+      });
+      e.explode();
+      this.time.delayedCall(1000, () => e.destroy());
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
 
-  const handleSelect = useCallback(
-    (optIdx: number) => {
-      if (selected !== null) return;
-      setSelected(optIdx);
+    private createBtn(x: number, y: number, label: string, color: number, onClick: () => void, w?: number) {
+      const bw = w ?? this.W - 48; const h = 44;
+      const bg = this.add.graphics(); bg.fillStyle(color, 1); bg.fillRoundedRect(-bw / 2, -h / 2, bw, h, 12);
+      const txt = this.add.text(0, 0, label, { fontSize: "14px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: "#ffffff" }).setOrigin(0.5);
+      const c = this.add.container(x, y, [bg, txt]); c.setSize(bw, h); c.setInteractive({ useHandCursor: true });
+      c.on("pointerdown", onClick);
+      c.on("pointerover", () => this.tweens.add({ targets: c, scaleX: 1.02, scaleY: 1.02, duration: 100 }));
+      c.on("pointerout", () => this.tweens.add({ targets: c, scaleX: 1, scaleY: 1, duration: 100 }));
+      return c;
+    }
 
-      const round = rounds[currentIdx];
-      const isCorrect = optIdx === round.correctIdx;
-      const responseTime = (Date.now() - questionStart) / 1000;
-      const isFast = responseTime <= SPEED_BONUS_THRESHOLD;
+    private generateRounds(): Round[] {
+      const shuffled = shuffle(TERMS);
+      return shuffled.map(term => {
+        const correctLabel = this.isEn ? term.labelEn : term.labelEs;
+        const wrongTerms = shuffle(TERMS.filter(t => t.id !== term.id)).slice(0, 3);
+        const allOptions = shuffle([correctLabel, ...wrongTerms.map(t => this.isEn ? t.labelEn : t.labelEs)]);
+        const correctIdx = allOptions.indexOf(correctLabel);
+        return { term, options: allOptions, correctIdx };
+      });
+    }
 
-      if (isCorrect) {
-        const newCombo = combo + 1;
-        const mult = getComboMultiplier(newCombo);
-        const speedBonus = isFast ? 3 : 0;
-        const earned = (BASE_XP + speedBonus) * mult;
+    private showIdle() {
+      this.clearAll();
+      const cx = this.W / 2;
+      this.add.text(cx, 35, "\u{1F3C3}", { fontSize: "30px" }).setOrigin(0.5);
+      this.add.text(cx, 68, this.isEn ? "Definition Dash" : "Carrera de definiciones", {
+        fontSize: "16px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.rose),
+      }).setOrigin(0.5);
+      this.add.text(cx, 88, this.isEn ? "Survival" : "Supervivencia", {
+        fontSize: "11px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400),
+      }).setOrigin(0.5);
+      this.add.text(cx, 118, this.isEn
+        ? `Pick the correct term! ${MAX_WRONG} strikes\nand you're out. Answer fast for speed bonuses!`
+        : `\u00A1Elige el t\u00E9rmino correcto! ${MAX_WRONG} errores\ny terminas. \u00A1Responde r\u00E1pido para bonos!`, {
+        fontSize: "11px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate500),
+        align: "center", wordWrap: { width: this.W - 50 },
+      }).setOrigin(0.5);
+      if (this.highScore > 0) {
+        this.add.text(cx, 158, `\u{1F3C6} ${this.highScore}`, {
+          fontSize: "13px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.rose),
+        }).setOrigin(0.5);
+      }
+      this.createBtn(cx, 210, this.isEn ? "Start Dash" : "Comenzar carrera", GAME_COLORS.rose, () => this.startGame());
+    }
 
-        setCorrect((c) => {
-          const newCorrect = c + 1;
-          if (newCorrect > highScore) setBeatingRecord(true);
-          return newCorrect;
+    private startGame() {
+      this.rounds = this.generateRounds();
+      this.currentIdx = 0; this.correct = 0; this.wrong = 0;
+      this.combo = 0; this.bestCombo = 0; this.totalXP = 0; this.speedAnswers = 0;
+      this.showPlaying();
+    }
+
+    private showPlaying() {
+      this.clearAll();
+      const cx = this.W / 2;
+      const round = this.rounds[this.currentIdx];
+      if (!round) { this.rounds = [...this.rounds, ...this.generateRounds()]; }
+      const r = this.rounds[this.currentIdx];
+      if (!r) return;
+      this.questionStart = Date.now();
+      const mult = getComboMultiplier(this.combo);
+
+      // Header
+      this.add.text(12, 8, "\u{1F3C3}", { fontSize: "16px" });
+      this.add.text(32, 10, `#${this.currentIdx + 1}`, {
+        fontSize: "10px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400),
+      });
+      if (this.combo >= 3) {
+        this.add.text(this.W - 90, 10, `x${mult}`, {
+          fontSize: "12px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.amber),
         });
-        setCombo(newCombo);
-        setTotalXP((x) => x + earned);
-        if (newCombo > bestCombo) setBestCombo(newCombo);
-        if (isFast) setSpeedAnswers((s) => s + 1);
-      } else {
-        setCombo(0);
-        const newWrong = wrong + 1;
-        setWrong(newWrong);
-        if (newWrong >= MAX_WRONG) {
-          setTimeout(() => {
-            setSelected(null);
-            setPhase("results");
-          }, 800);
-          return;
-        }
+      }
+      this.add.text(this.W - 55, 10, `${this.correct}\u2713`, {
+        fontSize: "10px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.emerald),
+      });
+      this.add.text(this.W - 12, 10, Array.from({ length: MAX_WRONG }, (_, i) => i < MAX_WRONG - this.wrong ? "\u2764\uFE0F" : "\u{1F5A4}").join(""), {
+        fontSize: "11px",
+      }).setOrigin(1, 0);
+
+      // Score bar
+      this.add.text(12, 30, `Combo: ${this.combo}`, {
+        fontSize: "10px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400),
+      });
+      this.add.text(this.W - 12, 30, `+${this.totalXP} XP`, {
+        fontSize: "10px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.violet),
+      }).setOrigin(1, 0);
+
+      // Definition card
+      const defBg = this.add.graphics(); defBg.lineStyle(2, GAME_COLORS.slate200); defBg.fillStyle(0xf8fafc, 1);
+      defBg.fillRoundedRect(12, 48, this.W - 24, 70, 12); defBg.strokeRoundedRect(12, 48, this.W - 24, 70, 12);
+      this.add.text(cx, 55, this.isEn ? "Which term matches?" : "\u00BFQu\u00E9 t\u00E9rmino corresponde?", {
+        fontSize: "9px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.rose),
+      }).setOrigin(0.5);
+      this.add.text(cx, 83, this.isEn ? r.term.shortEn : r.term.shortEs, {
+        fontSize: "11px", fontFamily: "system-ui, sans-serif", fontStyle: "bold",
+        color: hexColor(GAME_COLORS.slate700), wordWrap: { width: this.W - 50 }, align: "center",
+      }).setOrigin(0.5);
+
+      // 2x2 grid of options
+      let answered = false;
+      const gridW = (this.W - 36) / 2;
+      const gridH = 38;
+      r.options.forEach((opt, i) => {
+        const col = i % 2; const row = Math.floor(i / 2);
+        const x = 16 + gridW / 2 + col * (gridW + 4);
+        const y = 138 + row * (gridH + 4) + gridH / 2;
+
+        const bg = this.add.graphics(); bg.lineStyle(1, GAME_COLORS.slate200); bg.fillStyle(0xffffff, 0.6);
+        bg.fillRoundedRect(-gridW / 2, -gridH / 2, gridW, gridH, 8); bg.strokeRoundedRect(-gridW / 2, -gridH / 2, gridW, gridH, 8);
+        const txt = this.add.text(0, 0, opt, {
+          fontSize: "10px", fontFamily: "system-ui, sans-serif", fontStyle: "bold",
+          color: hexColor(GAME_COLORS.slate700), wordWrap: { width: gridW - 12 }, align: "center",
+        }).setOrigin(0.5);
+        const c = this.add.container(x, y, [bg, txt]); c.setSize(gridW, gridH); c.setInteractive({ useHandCursor: true });
+
+        c.on("pointerdown", () => {
+          if (answered) return; answered = true;
+          const isCorrect = i === r.correctIdx;
+          const responseTime = (Date.now() - this.questionStart) / 1000;
+          const isFast = responseTime <= SPEED_BONUS_THRESHOLD;
+
+          bg.clear();
+          if (isCorrect) {
+            bg.fillStyle(GAME_COLORS.emerald, 0.15); bg.lineStyle(1.5, GAME_COLORS.emerald, 0.6);
+            const newCombo = this.combo + 1;
+            const mult2 = getComboMultiplier(newCombo);
+            const speedBonus = isFast ? 3 : 0;
+            const earned = (BASE_XP + speedBonus) * mult2;
+            this.correct++; this.combo = newCombo; this.totalXP += earned;
+            if (newCombo > this.bestCombo) this.bestCombo = newCombo;
+            if (isFast) this.speedAnswers++;
+            this.emitParticles(x, y, GAME_COLORS.emerald);
+          } else {
+            bg.fillStyle(GAME_COLORS.red, 0.15); bg.lineStyle(1.5, GAME_COLORS.red, 0.6);
+            this.combo = 0; this.wrong++;
+            this.cameras.main.shake(150, 0.003);
+            if (this.wrong >= MAX_WRONG) {
+              bg.fillRoundedRect(-gridW / 2, -gridH / 2, gridW, gridH, 8);
+              bg.strokeRoundedRect(-gridW / 2, -gridH / 2, gridW, gridH, 8);
+              this.time.delayedCall(800, () => this.showResults());
+              return;
+            }
+          }
+          bg.fillRoundedRect(-gridW / 2, -gridH / 2, gridW, gridH, 8);
+          bg.strokeRoundedRect(-gridW / 2, -gridH / 2, gridW, gridH, 8);
+
+          this.time.delayedCall(600, () => {
+            if (this.currentIdx + 1 >= this.rounds.length) {
+              this.rounds = [...this.rounds, ...this.generateRounds()];
+            }
+            this.currentIdx++;
+            this.showPlaying();
+          });
+        });
+      });
+    }
+
+    private showResults() {
+      this.clearAll();
+      const cx = this.W / 2;
+      if (this.totalXP > 0) this.callbacks.onXP(this.totalXP);
+      this.callbacks.onGamePlayed();
+      this.callbacks.onDashScore(this.correct);
+      if (this.bestCombo >= 3) this.callbacks.onCombo(this.bestCombo);
+      if (this.correct > this.highScore) {
+        this.highScore = this.correct;
+        try { localStorage.setItem("tax-guide-defdash-best", String(this.correct)); } catch {}
       }
 
-      setTimeout(() => {
-        setSelected(null);
-        if (currentIdx + 1 >= rounds.length) {
-          // Generate more rounds if we run out
-          setRounds((prev) => [...prev, ...generateRounds()]);
-        }
-        setCurrentIdx((i) => i + 1);
-      }, 600);
+      const emoji = this.correct >= 20 ? "\u{1F525}" : this.correct >= 10 ? "\u{1F3C3}" : "\u{1F4AA}";
+      const icon = this.add.text(cx, 35, emoji, { fontSize: "40px" }).setOrigin(0.5).setScale(0);
+      this.tweens.add({ targets: icon, scaleX: 1, scaleY: 1, duration: 400, ease: "Back.easeOut" });
+      if (this.correct >= 10) this.emitParticles(cx, 50, GAME_COLORS.rose);
+
+      this.add.text(cx, 80, `${this.correct}`, {
+        fontSize: "30px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.rose),
+      }).setOrigin(0.5);
+      this.add.text(cx, 103, this.isEn ? "definitions matched" : "definiciones emparejadas", {
+        fontSize: "11px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate500),
+      }).setOrigin(0.5);
+
+      // Stats row
+      const statsY = 130;
+      this.add.text(cx - 55, statsY, `${this.bestCombo}x`, { fontSize: "13px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.amber) }).setOrigin(0.5);
+      this.add.text(cx - 55, statsY + 14, this.isEn ? "combo" : "combo", { fontSize: "9px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400) }).setOrigin(0.5);
+      this.add.text(cx, statsY, `${this.speedAnswers}`, { fontSize: "13px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.cyan) }).setOrigin(0.5);
+      this.add.text(cx, statsY + 14, this.isEn ? "speed" : "r\u00E1pidas", { fontSize: "9px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400) }).setOrigin(0.5);
+      this.add.text(cx + 55, statsY, `+${this.totalXP}`, { fontSize: "13px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.violet) }).setOrigin(0.5);
+      this.add.text(cx + 55, statsY + 14, "XP", { fontSize: "9px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400) }).setOrigin(0.5);
+
+      this.createBtn(cx, 210, this.isEn ? "Play Again" : "Jugar de nuevo", GAME_COLORS.rose, () => this.startGame());
+    }
+  };
+}
+
+export const DefinitionDash = memo(function DefinitionDash({ lang }: { lang: Lang }) {
+  const { addXP, recordGamePlayed, recordCombo, recordDashScore } = useProgress();
+  const refs = useRef({ addXP, recordGamePlayed, recordCombo, recordDashScore });
+  refs.current = { addXP, recordGamePlayed, recordCombo, recordDashScore };
+
+  const factory = useCallback((Phaser: typeof import("phaser")) => createDashScene(Phaser), []);
+  const sceneData = useMemo(() => ({
+    lang,
+    callbacks: {
+      onXP: (n: number) => refs.current.addXP(n),
+      onGamePlayed: () => refs.current.recordGamePlayed("definition_dash"),
+      onCombo: (n: number) => refs.current.recordCombo(n),
+      onDashScore: (n: number) => refs.current.recordDashScore(n),
     },
-    [
-      selected,
-      rounds,
-      currentIdx,
-      combo,
-      bestCombo,
-      wrong,
-      questionStart,
-      highScore,
-      generateRounds,
-    ]
-  );
-
-  const round = rounds[currentIdx];
-  const mult = getComboMultiplier(combo);
-
-  // Idle
-  if (phase === "idle") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col p-5 sm:p-6"
-      >
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500/15 to-pink-500/15 text-xl dark:from-rose-500/20 dark:to-pink-500/20">
-            🏃
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-extrabold text-slate-900 dark:text-white">
-              {isEn ? "Definition Dash" : "Carrera de definiciones"}
-            </h3>
-            <span className="text-[10px] font-semibold text-rose-500/80">
-              {isEn ? "Survival" : "Supervivencia"}
-            </span>
-          </div>
-        </div>
-        <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
-          {isEn
-            ? `Pick the correct term! ${MAX_WRONG} strikes and you're out. Answer fast for speed bonuses!`
-            : `¡Elige el término correcto! ${MAX_WRONG} errores y terminas. ¡Responde rápido para bonos!`}
-        </p>
-        {highScore > 0 && (
-          <div className="mb-4 flex items-center gap-2 rounded-xl bg-rose-50/80 px-3 py-2 dark:bg-rose-500/10">
-            <span className="text-xs">🏆</span>
-            <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400">
-              {highScore}
-            </span>
-            <span className="text-[10px] text-rose-500/60">
-              {isEn ? "correct best" : "mejor marca"}
-            </span>
-          </div>
-        )}
-        <motion.button
-          type="button"
-          onClick={startGame}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-rose-500/25 transition-shadow hover:shadow-rose-500/35"
-        >
-          {isEn ? "Start Dash" : "Comenzar carrera"}
-        </motion.button>
-      </motion.div>
-    );
-  }
-
-  // Results
-  if (phase === "results") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center p-5 sm:p-6"
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 15 }}
-          className="mb-2 text-4xl"
-        >
-          {correct >= 20 ? "🔥" : correct >= 10 ? "🏃" : "💪"}
-        </motion.div>
-        <p className="text-3xl font-black text-rose-500">{correct}</p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-          {isEn ? "definitions matched" : "definiciones emparejadas"}
-        </p>
-        <div className="mt-3 flex gap-4 text-center">
-          <div>
-            <p className="text-sm font-bold text-amber-500">{bestCombo}x</p>
-            <p className="text-[9px] text-slate-400">
-              {isEn ? "best combo" : "mejor combo"}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-bold text-cyan-500">{speedAnswers}</p>
-            <p className="text-[9px] text-slate-400">
-              {isEn ? "speed answers" : "respuestas rápidas"}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-bold text-violet-500">+{totalXP}</p>
-            <p className="text-[9px] text-slate-400">XP</p>
-          </div>
-        </div>
-        {correct > highScore && correct > 0 && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-2 text-[10px] font-bold text-amber-500"
-          >
-            {isEn ? "New personal best!" : "¡Nuevo récord personal!"}
-          </motion.p>
-        )}
-        <motion.button
-          type="button"
-          onClick={startGame}
-          whileTap={{ scale: 0.97 }}
-          className="mt-4 w-full rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 py-3 text-xs font-bold text-white shadow-lg shadow-rose-500/20"
-        >
-          {isEn ? "Play Again" : "Jugar de nuevo"}
-        </motion.button>
-      </motion.div>
-    );
-  }
-
-  // Playing
-  if (!round) return null;
+  }), [lang]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col p-5 sm:p-6"
-    >
-      {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🏃</span>
-          <span className="text-[10px] font-medium text-slate-400 dark:text-neutral-500">
-            #{currentIdx + 1}
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Combo indicator */}
-          {combo >= 3 && (
-            <motion.div
-              key={combo}
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 dark:bg-amber-500/20"
-            >
-              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400">
-                x{mult}
-              </span>
-            </motion.div>
-          )}
-          {/* Record indicator */}
-          {beatingRecord && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className="text-[9px] font-bold text-amber-500"
-            >
-              {isEn ? "NEW BEST!" : "¡RÉCORD!"}
-            </motion.span>
-          )}
-          <span className="text-emerald-500 text-[10px] font-bold">
-            {correct}✓
-          </span>
-          {/* Lives */}
-          <div className="flex items-center gap-0.5">
-            {Array.from({ length: MAX_WRONG }).map((_, i) => (
-              <span
-                key={i}
-                className={`text-xs ${i < MAX_WRONG - wrong ? "" : "opacity-20"}`}
-              >
-                ❤️
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Score bar */}
-      <div className="mb-4 flex items-center gap-3 text-[10px]">
-        <span className="text-slate-400">
-          {isEn ? `Combo: ${combo}` : `Combo: ${combo}`}
-        </span>
-        <span className="text-slate-400">|</span>
-        <span className="text-violet-500 font-bold">+{totalXP} XP</span>
-      </div>
-
-      {/* Definition */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentIdx}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div
-            className={`mb-4 rounded-xl border-2 p-4 transition-colors ${
-              selected !== null && selected === round.correctIdx
-                ? "border-emerald-400 bg-emerald-50 dark:border-emerald-500/40 dark:bg-emerald-500/10"
-                : selected !== null
-                  ? "border-red-400 bg-red-50 dark:border-red-500/40 dark:bg-red-500/10"
-                  : "border-gray-200 bg-gray-50 dark:border-white/[0.08] dark:bg-white/[0.04]"
-            }`}
-          >
-            <p className="text-[10px] font-medium text-rose-500/60 mb-1">
-              {isEn ? "Which term matches this definition?" : "¿Qué término corresponde a esta definición?"}
-            </p>
-            <p className="text-[13px] font-medium leading-relaxed text-slate-900 dark:text-white">
-              {isEn ? round.term.shortEn : round.term.shortEs}
-            </p>
-          </div>
-
-          {/* Options */}
-          <div className="grid grid-cols-2 gap-2">
-            {round.options.map((opt, i) => {
-              const isSelected = selected === i;
-              const isCorrect = i === round.correctIdx;
-              const showResult = selected !== null;
-
-              return (
-                <motion.button
-                  key={i}
-                  type="button"
-                  onClick={() => handleSelect(i)}
-                  disabled={selected !== null}
-                  whileTap={{ scale: 0.95 }}
-                  className={`rounded-xl border px-3 py-3 text-center text-xs font-bold transition-all ${
-                    showResult && isCorrect
-                      ? "border-emerald-400/40 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-                      : showResult && isSelected && !isCorrect
-                        ? "border-red-400/40 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300"
-                        : showResult
-                          ? "border-gray-200 text-slate-400 dark:border-white/[0.04] dark:text-neutral-600"
-                          : "border-gray-200 text-slate-700 hover:border-rose-300 hover:bg-rose-50/50 dark:border-white/[0.08] dark:text-neutral-200 dark:hover:bg-white/[0.04]"
-                  }`}
-                >
-                  {opt}
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    </motion.div>
+    <div className="flex flex-col p-2" style={{ minHeight: 260 }}>
+      <PhaserGame sceneFactory={factory} sceneData={sceneData} width={400} height={260} className="w-full" />
+    </div>
   );
-}
+});

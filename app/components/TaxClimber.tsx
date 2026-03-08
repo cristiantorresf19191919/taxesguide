@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { memo, useCallback, useMemo, useRef } from "react";
+import { PhaserGame, GAME_COLORS, hexColor } from "./PhaserGame";
 import { TERMS } from "@/app/data/terms";
 import { useProgress } from "@/app/contexts/ProgressContext";
 import { claudeQuestions } from "@/app/data/quiz-claude";
@@ -10,7 +10,6 @@ import { geminiQuestions } from "@/app/data/quiz-gemini";
 import type { QuizQuestion } from "@/app/components/AnalysisQuiz";
 
 type Lang = "en" | "es";
-type Phase = "idle" | "climbing" | "summit" | "fallen";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -24,6 +23,7 @@ function shuffle<T>(arr: T[]): T[] {
 const LEVELS = 10;
 const XP_PER_LEVEL = 8;
 const SUMMIT_BONUS = 40;
+const LEVEL_EMOJIS = ["🏕️", "🌲", "🌿", "⛰️", "🪨", "🏔️", "☁️", "✨", "🌟", "🏆"];
 
 function generateQuestions(): QuizQuestion[] {
   const fromAnalyses = [...claudeQuestions, ...chatgptQuestions, ...geminiQuestions];
@@ -32,294 +32,193 @@ function generateQuestions(): QuizQuestion[] {
     const options = shuffle([term, ...wrong]);
     const correctIdx = options.findIndex((o) => o.id === term.id);
     return {
-      en: {
-        question: `What is "${term.labelEn}"?`,
-        options: options.map((o) => o.shortEn),
-        correct: correctIdx,
-        explanation: term.shortEn,
-      },
-      es: {
-        question: `¿Qué es "${term.labelEs}"?`,
-        options: options.map((o) => o.shortEs),
-        correct: correctIdx,
-        explanation: term.shortEs,
-      },
+      en: { question: `What is "${term.labelEn}"?`, options: options.map((o) => o.shortEn), correct: correctIdx, explanation: term.shortEn },
+      es: { question: `¿Qué es "${term.labelEs}"?`, options: options.map((o) => o.shortEs), correct: correctIdx, explanation: term.shortEs },
     };
   });
   return shuffle([...fromAnalyses, ...fromTerms]);
 }
 
-const LEVEL_EMOJIS = ["🏕️", "🌲", "🌿", "⛰️", "🪨", "🏔️", "☁️", "✨", "🌟", "🏆"];
+function createClimberScene(Phaser: typeof import("phaser")) {
+  return class ClimberScene extends Phaser.Scene {
+    private lang: Lang = "en";
+    private callbacks: any = {};
+    private questions: QuizQuestion[] = [];
+    private qIdx = 0;
+    private level = 0;
+    private lives = 3;
+    private selected: number | null = null;
+    private optionButtons: any[] = [];
+    private questionText: any;
+    private levelText: any;
 
-export function TaxClimber({ lang }: { lang: Lang }) {
-  const isEn = lang === "en";
+    constructor() { super({ key: "ClimberScene" }); }
+
+    receiveData(data: any) {
+      this.lang = data.lang;
+      this.callbacks = data.callbacks;
+      this.showIdle();
+    }
+
+    private get isEn() { return this.lang === "en"; }
+    private get W() { return Number(this.scale.width); }
+    private clearAll() { this.children.removeAll(true); }
+
+    private emitParticles(x: number, y: number, color: number) {
+      const key = `p_${color}`;
+      if (!this.textures.exists(key)) {
+        const g = (this.make as any).graphics({ add: false });
+        g.fillStyle(color); g.fillCircle(4, 4, 4);
+        g.generateTexture(key, 8, 8); g.destroy();
+      }
+      const e = this.add.particles(x, y, key, {
+        speed: { min: 80, max: 200 }, angle: { min: 0, max: 360 },
+        scale: { start: 1, end: 0 }, alpha: { start: 1, end: 0 },
+        lifespan: 600, quantity: 12, emitting: false,
+      });
+      e.explode();
+      this.time.delayedCall(1000, () => e.destroy());
+    }
+
+    private createBtn(x: number, y: number, label: string, color: number, onClick: () => void) {
+      const w = this.W - 48; const h = 44;
+      const bg = this.add.graphics(); bg.fillStyle(color); bg.fillRoundedRect(-w / 2, -h / 2, w, h, 12);
+      const txt = this.add.text(0, 0, label, { fontSize: "14px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: "#fff" }).setOrigin(0.5);
+      const c = this.add.container(x, y, [bg, txt]); c.setSize(w, h); c.setInteractive({ useHandCursor: true });
+      c.on("pointerdown", onClick);
+      c.on("pointerover", () => this.tweens.add({ targets: c, scaleX: 1.02, scaleY: 1.02, duration: 100 }));
+      c.on("pointerout", () => this.tweens.add({ targets: c, scaleX: 1, scaleY: 1, duration: 100 }));
+    }
+
+    private showIdle() {
+      this.clearAll();
+      const cx = this.W / 2;
+      this.add.text(cx, 40, "🧗", { fontSize: "32px" }).setOrigin(0.5);
+      this.add.text(cx, 80, this.isEn ? "Tax Climber" : "Escalador fiscal", {
+        fontSize: "18px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.emerald),
+      }).setOrigin(0.5);
+      this.add.text(cx, 100, this.isEn ? "Adventure" : "Aventura", {
+        fontSize: "11px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400),
+      }).setOrigin(0.5);
+      this.add.text(cx, 130, this.isEn
+        ? `Climb ${LEVELS} levels! 3 lives.\nReach the summit for bonus XP.`
+        : `¡Escala ${LEVELS} niveles! 3 vidas.\nLlega a la cima para XP extra.`, {
+        fontSize: "12px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate500), align: "center", wordWrap: { width: this.W - 60 },
+      }).setOrigin(0.5);
+      const startX = cx - (LEVEL_EMOJIS.length * 20) / 2;
+      LEVEL_EMOJIS.forEach((e, i) => this.add.text(startX + i * 20, 170, e, { fontSize: "14px" }).setOrigin(0.5).setAlpha(0.4));
+      this.createBtn(cx, 220, this.isEn ? "Start Climbing" : "Comenzar a escalar", GAME_COLORS.emerald, () => this.startGame());
+    }
+
+    private startGame() {
+      this.questions = generateQuestions().slice(0, 30);
+      this.qIdx = 0; this.level = 0; this.lives = 3; this.selected = null;
+      this.showClimbing();
+    }
+
+    private showClimbing() {
+      this.clearAll();
+      const cx = this.W / 2;
+      this.add.text(12, 12, "🧗", { fontSize: "18px" });
+      this.add.text(34, 14, this.isEn ? "Tax Climber" : "Escalador fiscal", {
+        fontSize: "12px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.slate700),
+      });
+      this.add.text(this.W - 16, 14, Array.from({ length: 3 }, (_, i) => i < this.lives ? "❤️" : "🖤").join(""), { fontSize: "12px" }).setOrigin(1, 0);
+
+      const startX = cx - (LEVEL_EMOJIS.length * 22) / 2;
+      LEVEL_EMOJIS.forEach((e, i) => {
+        const t = this.add.text(startX + i * 22, 48, e, { fontSize: "13px" }).setOrigin(0.5).setAlpha(i <= this.level ? 1 : 0.3);
+        if (i === this.level) this.tweens.add({ targets: t, scaleX: 1.3, scaleY: 1.3, yoyo: true, repeat: -1, duration: 600 });
+      });
+      this.add.circle(startX + this.level * 22, 60, 3, GAME_COLORS.emerald);
+      this.showQuestion();
+    }
+
+    private showQuestion() {
+      const q = this.questions[this.qIdx]?.[this.lang]; if (!q) return;
+      const cx = this.W / 2; this.selected = null;
+      this.add.text(cx, 76, `Level ${this.level + 1}/${LEVELS}`, {
+        fontSize: "10px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.emerald),
+      }).setOrigin(0.5);
+      const qText = this.add.text(cx, 100, q.question, {
+        fontSize: "11px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.slate700),
+        wordWrap: { width: this.W - 40 }, align: "center",
+      }).setOrigin(0.5, 0);
+      const optStartY = qText.y + qText.height + 12;
+      this.optionButtons = [];
+      q.options.forEach((opt, i) => {
+        const y = optStartY + i * 42;
+        const w = this.W - 40; const h = 36;
+        const bg = this.add.graphics();
+        bg.lineStyle(1, GAME_COLORS.slate200); bg.fillStyle(0xffffff, 0.6);
+        bg.fillRoundedRect(-w / 2, -h / 2, w, h, 8); bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 8);
+        const letters = ["A", "B", "C", "D"];
+        const ltr = this.add.text(-w / 2 + 12, 0, letters[i], { fontSize: "9px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.slate400) }).setOrigin(0, 0.5);
+        const txt = this.add.text(-w / 2 + 28, 0, opt, { fontSize: "10px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate700), wordWrap: { width: w - 40 } }).setOrigin(0, 0.5);
+        const c = this.add.container(cx, y, [bg, ltr, txt]); c.setSize(w, h); c.setInteractive({ useHandCursor: true });
+        c.on("pointerdown", () => {
+          if (this.selected !== null) return; this.selected = i;
+          this.optionButtons.forEach((btn, j) => {
+            const b = btn.first as any; b.clear();
+            if (j === q.correct) { b.fillStyle(GAME_COLORS.emerald, 0.15); b.lineStyle(1.5, GAME_COLORS.emerald, 0.6); }
+            else if (j === i) { b.fillStyle(GAME_COLORS.red, 0.15); b.lineStyle(1.5, GAME_COLORS.red, 0.6); }
+            else { b.fillStyle(0xffffff, 0.3); b.lineStyle(1, GAME_COLORS.slate200, 0.4); }
+            b.fillRoundedRect(-w / 2, -h / 2, w, h, 8); b.strokeRoundedRect(-w / 2, -h / 2, w, h, 8);
+            btn.disableInteractive();
+          });
+          const isCorrect = i === q.correct;
+          if (isCorrect) this.emitParticles(cx, y, GAME_COLORS.emerald);
+          else this.cameras.main.shake(200, 0.005);
+          this.time.delayedCall(1000, () => {
+            if (isCorrect) { this.level++; if (this.level >= LEVELS) { this.callbacks.onXP(LEVELS * XP_PER_LEVEL + SUMMIT_BONUS); this.callbacks.onGamePlayed(); this.callbacks.onSummit(); this.showSummit(); return; } }
+            else { this.lives--; if (this.lives <= 0) { this.callbacks.onXP(this.level * XP_PER_LEVEL); this.callbacks.onGamePlayed(); this.showFallen(); return; } }
+            this.qIdx++; this.showClimbing();
+          });
+        });
+        this.optionButtons.push(c);
+      });
+    }
+
+    private showSummit() {
+      this.clearAll(); const cx = this.W / 2; const totalXP = LEVELS * XP_PER_LEVEL + SUMMIT_BONUS;
+      const t = this.add.text(cx, 50, "🏆", { fontSize: "48px" }).setOrigin(0.5).setScale(0);
+      this.tweens.add({ targets: t, scaleX: 1, scaleY: 1, duration: 500, ease: "Back.easeOut" });
+      this.emitParticles(cx - 40, 80, GAME_COLORS.emerald); this.emitParticles(cx + 40, 80, GAME_COLORS.amber);
+      this.add.text(cx, 110, this.isEn ? "Summit Reached!" : "¡Llegaste a la cima!", { fontSize: "18px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.emerald) }).setOrigin(0.5);
+      this.add.text(cx, 135, this.isEn ? `All ${LEVELS} levels conquered` : `Los ${LEVELS} niveles conquistados`, { fontSize: "12px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate500) }).setOrigin(0.5);
+      this.add.text(cx, 165, `+${totalXP} XP`, { fontSize: "22px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.violet) }).setOrigin(0.5);
+      this.createBtn(cx, 220, this.isEn ? "Climb Again" : "Escalar de nuevo", GAME_COLORS.emerald, () => this.startGame());
+    }
+
+    private showFallen() {
+      this.clearAll(); const cx = this.W / 2; const totalXP = this.level * XP_PER_LEVEL;
+      this.add.text(cx, 50, "😤", { fontSize: "40px" }).setOrigin(0.5);
+      this.add.text(cx, 100, this.isEn ? "Keep Practicing!" : "¡Sigue practicando!", { fontSize: "18px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.amber) }).setOrigin(0.5);
+      this.add.text(cx, 125, this.isEn ? `Reached level ${this.level}/${LEVELS}` : `Llegaste al nivel ${this.level}/${LEVELS}`, { fontSize: "12px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate500) }).setOrigin(0.5);
+      if (totalXP > 0) this.add.text(cx, 155, `+${totalXP} XP`, { fontSize: "16px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.violet) }).setOrigin(0.5);
+      this.createBtn(cx, 220, this.isEn ? "Try Again" : "Intentar de nuevo", GAME_COLORS.emerald, () => this.startGame());
+    }
+  };
+}
+
+export const TaxClimber = memo(function TaxClimber({ lang }: { lang: Lang }) {
   const { addXP, recordGamePlayed, recordClimberSummit } = useProgress();
+  const refs = useRef({ addXP, recordGamePlayed, recordClimberSummit });
+  refs.current = { addXP, recordGamePlayed, recordClimberSummit };
 
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
-  const [qIdx, setQIdx] = useState(0);
-  const [level, setLevel] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [lives, setLives] = useState(3);
-
-  const q = questions[qIdx]?.[lang];
-
-  const startGame = useCallback(() => {
-    setQuestions(generateQuestions().slice(0, 30));
-    setQIdx(0);
-    setLevel(0);
-    setSelected(null);
-    setLives(3);
-    setPhase("climbing");
-  }, []);
-
-  const handleSelect = useCallback(
-    (optIdx: number) => {
-      if (selected !== null || !q) return;
-      setSelected(optIdx);
-
-      const isCorrect = optIdx === q.correct;
-
-      setTimeout(() => {
-        if (isCorrect) {
-          const newLevel = level + 1;
-          setLevel(newLevel);
-          if (newLevel >= LEVELS) {
-            setPhase("summit");
-            addXP(LEVELS * XP_PER_LEVEL + SUMMIT_BONUS);
-            recordGamePlayed("tax_climber");
-            recordClimberSummit();
-            return;
-          }
-        } else {
-          const newLives = lives - 1;
-          setLives(newLives);
-          if (newLives <= 0) {
-            setPhase("fallen");
-            addXP(level * XP_PER_LEVEL);
-            recordGamePlayed("tax_climber");
-            return;
-          }
-        }
-        setSelected(null);
-        setQIdx((i) => i + 1);
-      }, 1000);
+  const factory = useCallback((Phaser: typeof import("phaser")) => createClimberScene(Phaser), []);
+  const sceneData = useMemo(() => ({
+    lang,
+    callbacks: {
+      onXP: (xp: number) => refs.current.addXP(xp),
+      onGamePlayed: () => refs.current.recordGamePlayed("tax_climber"),
+      onSummit: () => refs.current.recordClimberSummit(),
     },
-    [selected, q, level, lives, addXP]
-  );
-
-  // Idle
-  if (phase === "idle") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col p-5 sm:p-6"
-      >
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/15 to-teal-500/15 text-xl dark:from-emerald-500/20 dark:to-teal-500/20">
-            🧗
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-extrabold text-slate-900 dark:text-white">
-              {isEn ? "Tax Climber" : "Escalador fiscal"}
-            </h3>
-            <span className="text-[10px] font-semibold text-emerald-500/80">
-              {isEn ? "Adventure" : "Aventura"}
-            </span>
-          </div>
-        </div>
-        <p className="mb-3 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
-          {isEn
-            ? `Climb ${LEVELS} levels! 3 lives. Reach the summit for bonus XP.`
-            : `¡Escala ${LEVELS} niveles! 3 vidas. Llega a la cima para XP extra.`}
-        </p>
-        <div className="mb-4 flex justify-center gap-1">
-          {LEVEL_EMOJIS.map((e, i) => (
-            <span key={i} className="text-sm opacity-40">{e}</span>
-          ))}
-        </div>
-        <motion.button
-          type="button"
-          onClick={startGame}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-shadow hover:shadow-emerald-500/35"
-        >
-          {isEn ? "Start Climbing" : "Comenzar a escalar"}
-        </motion.button>
-      </motion.div>
-    );
-  }
-
-  // Summit
-  if (phase === "summit") {
-    const totalXP = LEVELS * XP_PER_LEVEL + SUMMIT_BONUS;
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center p-5 sm:p-6"
-      >
-        <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 12 }}
-          className="mb-2 text-5xl"
-        >
-          🏆
-        </motion.div>
-        <p className="text-lg font-black text-emerald-500">
-          {isEn ? "Summit Reached!" : "¡Llegaste a la cima!"}
-        </p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-          {isEn ? `All ${LEVELS} levels conquered` : `Los ${LEVELS} niveles conquistados`}
-        </p>
-        <p className="mt-2 text-xl font-bold text-violet-500">+{totalXP} XP</p>
-        <motion.button
-          type="button"
-          onClick={startGame}
-          whileTap={{ scale: 0.97 }}
-          className="mt-4 w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-500/20"
-        >
-          {isEn ? "Climb Again" : "Escalar de nuevo"}
-        </motion.button>
-      </motion.div>
-    );
-  }
-
-  // Fallen
-  if (phase === "fallen") {
-    const totalXP = level * XP_PER_LEVEL;
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center p-5 sm:p-6"
-      >
-        <div className="mb-2 text-4xl">😤</div>
-        <p className="text-lg font-black text-amber-500">
-          {isEn ? "Keep Practicing!" : "¡Sigue practicando!"}
-        </p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-          {isEn ? `Reached level ${level}/${LEVELS}` : `Llegaste al nivel ${level}/${LEVELS}`}
-        </p>
-        {totalXP > 0 && (
-          <p className="mt-2 text-xs font-bold text-violet-500">+{totalXP} XP</p>
-        )}
-        <motion.button
-          type="button"
-          onClick={startGame}
-          whileTap={{ scale: 0.97 }}
-          className="mt-4 w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-500/20"
-        >
-          {isEn ? "Try Again" : "Intentar de nuevo"}
-        </motion.button>
-      </motion.div>
-    );
-  }
-
-  // Climbing
-  if (!q) return null;
+  }), [lang]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col p-5 sm:p-6"
-    >
-      {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🧗</span>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            {isEn ? "Tax Climber" : "Escalador fiscal"}
-          </h3>
-        </div>
-        <div className="flex items-center gap-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <span key={i} className={`text-sm ${i < lives ? "" : "opacity-20"}`}>
-              ❤️
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Mountain progress */}
-      <div className="mb-4 flex items-end justify-center gap-1">
-        {LEVEL_EMOJIS.map((emoji, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              scale: i === level ? 1.3 : 1,
-              opacity: i <= level ? 1 : 0.3,
-            }}
-            className="flex flex-col items-center"
-          >
-            <span className="text-sm">{emoji}</span>
-            {i === level && (
-              <motion.div
-                layoutId="climber"
-                className="mt-0.5 h-1 w-1 rounded-full bg-emerald-500"
-              />
-            )}
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Question */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={qIdx}
-          initial={{ opacity: 0, x: 12 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -12 }}
-          transition={{ duration: 0.2 }}
-        >
-          <p className="mb-4 text-[13px] font-semibold leading-relaxed text-slate-900 dark:text-white">
-            {q.question}
-          </p>
-
-          <div className="space-y-2">
-            {q.options.map((opt, i) => {
-              const isSelected = selected === i;
-              const isCorrect = i === q.correct;
-              const showResult = selected !== null;
-
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => handleSelect(i)}
-                  disabled={selected !== null}
-                  className={`w-full rounded-xl border px-4 py-3 text-left text-[11px] leading-snug transition-all ${
-                    showResult && isCorrect
-                      ? "border-emerald-400/40 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-                      : showResult && isSelected && !isCorrect
-                        ? "border-red-400/40 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300"
-                        : showResult
-                          ? "border-gray-200 text-slate-400 dark:border-white/[0.04] dark:text-neutral-600"
-                          : "border-gray-200 text-slate-600 hover:border-gray-300 hover:bg-gray-50 dark:border-white/[0.08] dark:text-neutral-300 dark:hover:bg-white/[0.04]"
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-bold ${
-                      showResult && isCorrect
-                        ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
-                        : showResult && isSelected
-                          ? "bg-red-500/20 text-red-700 dark:text-red-300"
-                          : "bg-gray-100 text-slate-400 dark:bg-white/[0.06] dark:text-neutral-500"
-                    }`}>
-                      {String.fromCharCode(65 + i)}
-                    </span>
-                    {opt}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    </motion.div>
+    <div className="flex flex-col p-2" style={{ minHeight: 280 }}>
+      <PhaserGame sceneFactory={factory} sceneData={sceneData} width={400} height={280} className="w-full" />
+    </div>
   );
-}
+});

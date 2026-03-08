@@ -1,389 +1,151 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { memo, useCallback, useMemo, useRef } from "react";
+import { PhaserGame, GAME_COLORS, hexColor } from "./PhaserGame";
 import { TERMS } from "@/app/data/terms";
 import { useProgress } from "@/app/contexts/ProgressContext";
 
 type Lang = "en" | "es";
-type Phase = "idle" | "playing" | "won";
-
-type Card = {
-  id: string;
-  pairId: string;
-  content: string;
-  type: "term" | "def";
-};
+type Card = { id: string; pairId: string; content: string; type: "term" | "def" };
 
 function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
-  }
-  return a;
+  const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j]!, a[i]!]; } return a;
 }
 
 const PAIRS = 6;
 const XP_BASE = 30;
 
-export function TermMatcher({ lang }: { lang: Lang }) {
-  const isEn = lang === "en";
-  const { addXP, recordGamePlayed, recordMatcherTime } = useProgress();
+function createMatcherScene(Phaser: typeof import("phaser")) {
+  return class MatcherScene extends Phaser.Scene {
+    private lang: Lang = "en";
+    private callbacks: any = {};
+    private cards: Card[] = [];
+    private cardSprites: any[] = [];
+    private flipped: number[] = [];
+    private matched: string[] = [];
+    private attempts = 0;
+    private elapsed = 0;
+    private matchStreak = 0;
+    private bestStreak = 0;
+    private locked = false;
+    private timerEvent: any = null;
+    private timerText: any;
+    private matchText: any;
+    private bestTime: number | null = null;
 
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [cards, setCards] = useState<Card[]>([]);
-  const [flipped, setFlipped] = useState<number[]>([]);
-  const [matched, setMatched] = useState<string[]>([]);
-  const [attempts, setAttempts] = useState(0);
-  const [elapsed, setElapsed] = useState(0);
-  const [bestTime, setBestTime] = useState<number | null>(null);
-  const [matchStreak, setMatchStreak] = useState(0);
-  const [bestStreak, setBestStreak] = useState(0);
-  const [lastMatchFlash, setLastMatchFlash] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lockRef = useRef(false);
+    constructor() { super({ key: "MatcherScene" }); }
+    receiveData(data: any) { this.lang = data.lang; this.callbacks = data.callbacks; try { const raw = localStorage.getItem("tax-guide-matcher-best"); if (raw) this.bestTime = Number(raw); } catch {} this.showIdle(); }
+    private get isEn() { return this.lang === "en"; }
+    private get W() { return Number(this.scale.width); }
+    private clearAll() { this.children.removeAll(true); if (this.timerEvent) { this.timerEvent.destroy(); this.timerEvent = null; } }
 
-  // Load best time
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("tax-guide-matcher-best");
-      if (raw) setBestTime(Number(raw));
-    } catch {}
-  }, []);
-
-  const startGame = useCallback(() => {
-    const selected = shuffle(TERMS).slice(0, PAIRS);
-    const newCards: Card[] = [];
-    selected.forEach((term) => {
-      newCards.push({
-        id: `${term.id}-term`,
-        pairId: term.id,
-        content: isEn ? term.labelEn : term.labelEs,
-        type: "term",
-      });
-      newCards.push({
-        id: `${term.id}-def`,
-        pairId: term.id,
-        content: isEn ? term.shortEn : term.shortEs,
-        type: "def",
-      });
-    });
-    setCards(shuffle(newCards));
-    setFlipped([]);
-    setMatched([]);
-    setAttempts(0);
-    setElapsed(0);
-    setMatchStreak(0);
-    setBestStreak(0);
-    setLastMatchFlash(false);
-    setPhase("playing");
-    lockRef.current = false;
-  }, [isEn]);
-
-  // Timer
-  useEffect(() => {
-    if (phase === "playing") {
-      timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
-      return () => {
-        if (timerRef.current) clearInterval(timerRef.current);
-      };
+    private emitParticles(x: number, y: number, color: number) {
+      const key = `p_${color}`; if (!this.textures.exists(key)) { const g = (this.make as any).graphics({ add: false }); g.fillStyle(color); g.fillCircle(4, 4, 4); g.generateTexture(key, 8, 8); g.destroy(); }
+      const e = this.add.particles(x, y, key, { speed: { min: 80, max: 200 }, angle: { min: 0, max: 360 }, scale: { start: 1, end: 0 }, alpha: { start: 1, end: 0 }, lifespan: 600, quantity: 12, emitting: false }); e.explode(); this.time.delayedCall(1000, () => e.destroy());
     }
-    if (timerRef.current) clearInterval(timerRef.current);
-  }, [phase]);
 
-  const handleFlip = useCallback(
-    (idx: number) => {
-      if (phase !== "playing" || lockRef.current) return;
-      if (flipped.includes(idx)) return;
-      if (matched.includes(cards[idx].pairId)) return;
+    private createBtn(x: number, y: number, label: string, color: number, onClick: () => void) {
+      const w = this.W - 48; const h = 44;
+      const bg = this.add.graphics(); bg.fillStyle(color); bg.fillRoundedRect(-w / 2, -h / 2, w, h, 12);
+      const txt = this.add.text(0, 0, label, { fontSize: "14px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: "#fff" }).setOrigin(0.5);
+      const c = this.add.container(x, y, [bg, txt]); c.setSize(w, h); c.setInteractive({ useHandCursor: true }); c.on("pointerdown", onClick);
+    }
 
-      const newFlipped = [...flipped, idx];
-      setFlipped(newFlipped);
+    private showIdle() {
+      this.clearAll(); const cx = this.W / 2;
+      this.add.text(cx, 35, "🃏", { fontSize: "30px" }).setOrigin(0.5);
+      this.add.text(cx, 68, this.isEn ? "Term Matcher" : "Emparejar términos", { fontSize: "17px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.pink) }).setOrigin(0.5);
+      this.add.text(cx, 88, this.isEn ? "Memory" : "Memoria", { fontSize: "11px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400) }).setOrigin(0.5);
+      this.add.text(cx, 118, this.isEn ? "Flip cards to match terms with definitions.\nConsecutive matches earn streak bonus XP!" : "Voltea cartas para emparejar términos.\n¡Emparejamientos consecutivos = XP de racha!", { fontSize: "11px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate500), align: "center", wordWrap: { width: this.W - 50 } }).setOrigin(0.5);
+      if (this.bestTime !== null) { const m = Math.floor(this.bestTime / 60); const s = this.bestTime % 60; this.add.text(cx, 158, `🏆 ${m}:${s.toString().padStart(2, "0")}`, { fontSize: "13px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.violet) }).setOrigin(0.5); }
+      this.createBtn(cx, 210, this.isEn ? "Start Game" : "Iniciar juego", GAME_COLORS.pink, () => this.startGame());
+    }
 
-      if (newFlipped.length === 2) {
-        lockRef.current = true;
-        setAttempts((a) => a + 1);
+    private startGame() {
+      const selected = shuffle(TERMS).slice(0, PAIRS); this.cards = [];
+      selected.forEach(term => { this.cards.push({ id: `${term.id}-t`, pairId: term.id, content: this.isEn ? term.labelEn : term.labelEs, type: "term" }); this.cards.push({ id: `${term.id}-d`, pairId: term.id, content: this.isEn ? term.shortEn : term.shortEs, type: "def" }); });
+      this.cards = shuffle(this.cards); this.flipped = []; this.matched = []; this.attempts = 0; this.elapsed = 0; this.matchStreak = 0; this.bestStreak = 0; this.locked = false;
+      this.showPlaying();
+    }
 
-        const [first, second] = newFlipped;
-        const card1 = cards[first];
-        const card2 = cards[second];
+    private showPlaying() {
+      this.clearAll(); const cx = this.W / 2;
+      this.add.text(12, 8, "🃏", { fontSize: "16px" });
+      this.add.text(34, 10, this.isEn ? "Term Matcher" : "Emparejar", { fontSize: "11px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.slate700) });
+      this.matchText = this.add.text(this.W - 60, 10, `${this.matched.length}/${PAIRS}`, { fontSize: "11px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate500) });
+      this.timerText = this.add.text(this.W - 12, 10, "0:00", { fontSize: "12px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.slate700) }).setOrigin(1, 0);
+      this.timerEvent = this.time.addEvent({ delay: 1000, loop: true, callback: () => { this.elapsed++; const m = Math.floor(this.elapsed / 60); const s = this.elapsed % 60; this.timerText.setText(`${m}:${s.toString().padStart(2, "0")}`); } });
 
-        if (card1.pairId === card2.pairId && card1.type !== card2.type) {
-          // Match!
-          const newMatched = [...matched, card1.pairId];
-          setMatched(newMatched);
-          setFlipped([]);
-          lockRef.current = false;
+      const cols = 4; const cardW = (this.W - 40 - (cols - 1) * 6) / cols; const cardH = 50; const startX = 20 + cardW / 2; const startY = 36 + cardH / 2;
+      this.cardSprites = [];
+      this.cards.forEach((card, idx) => {
+        const col = idx % cols; const row = Math.floor(idx / cols);
+        const x = startX + col * (cardW + 6); const y = startY + row * (cardH + 6);
+        const bg = this.add.graphics(); bg.lineStyle(1, GAME_COLORS.slate200); bg.fillStyle(0xf8fafc); bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8); bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8);
+        const q = this.add.text(0, 0, "?", { fontSize: "16px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400) }).setOrigin(0.5);
+        const f = this.add.text(0, 0, card.content, { fontSize: card.type === "term" ? "8px" : "7px", fontFamily: "system-ui, sans-serif", fontStyle: card.type === "term" ? "bold" : "normal", color: hexColor(card.type === "term" ? GAME_COLORS.slate900 : GAME_COLORS.slate500), wordWrap: { width: cardW - 8 }, align: "center" }).setOrigin(0.5).setVisible(false);
+        const c = this.add.container(x, y, [bg, q, f]); c.setSize(cardW, cardH); c.setInteractive({ useHandCursor: true });
+        c.setData("idx", idx); c.setData("bg", bg); c.setData("q", q); c.setData("f", f); c.setData("w", cardW); c.setData("h", cardH);
+        c.on("pointerdown", () => this.flipCard(idx));
+        this.cardSprites.push(c);
+      });
+    }
 
-          const newStreak = matchStreak + 1;
-          setMatchStreak(newStreak);
-          if (newStreak > bestStreak) setBestStreak(newStreak);
-
-          // Flash effect
-          setLastMatchFlash(true);
-          setTimeout(() => setLastMatchFlash(false), 400);
-
-          if (newMatched.length === PAIRS) {
-            // Won!
-            if (timerRef.current) clearInterval(timerRef.current);
-            setPhase("won");
-
-            // Improved XP calculation: smoother scaling
-            const attemptBonus = Math.max(0, 20 - Math.max(0, attempts - PAIRS));
-            const speedBonus = Math.max(0, Math.floor((180 - elapsed) / 8));
-            const streakBonus = newStreak >= 3 ? 10 : 0;
-            const totalXP = XP_BASE + attemptBonus + speedBonus + streakBonus;
-            addXP(totalXP);
-            recordGamePlayed("term_matcher");
-            recordMatcherTime(elapsed);
-
-            // Save best time
-            const finalTime = elapsed;
-            if (bestTime === null || finalTime < bestTime) {
-              setBestTime(finalTime);
-              try {
-                localStorage.setItem(
-                  "tax-guide-matcher-best",
-                  String(finalTime)
-                );
-              } catch {}
-            }
-          }
+    private flipCard(idx: number) {
+      if (this.locked || this.flipped.includes(idx) || this.matched.includes(this.cards[idx].pairId)) return;
+      const s = this.cardSprites[idx]; const q = s.getData("q"); const f = s.getData("f"); const bg = s.getData("bg"); const w = s.getData("w"); const h = s.getData("h");
+      this.tweens.add({ targets: s, scaleX: 0, duration: 80, onComplete: () => { q.setVisible(false); f.setVisible(true); bg.clear(); bg.lineStyle(1.5, GAME_COLORS.pink, 0.6); bg.fillStyle(0xfdf2f8); bg.fillRoundedRect(-w / 2, -h / 2, w, h, 8); bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 8); this.tweens.add({ targets: s, scaleX: 1, duration: 80 }); } });
+      this.flipped.push(idx);
+      if (this.flipped.length === 2) {
+        this.locked = true; this.attempts++;
+        const [a, b] = this.flipped; const c1 = this.cards[a]; const c2 = this.cards[b];
+        if (c1.pairId === c2.pairId && c1.type !== c2.type) {
+          this.matched.push(c1.pairId); this.matchStreak++; if (this.matchStreak > this.bestStreak) this.bestStreak = this.matchStreak;
+          this.matchText.setText(`${this.matched.length}/${PAIRS}`);
+          [a, b].forEach(i => { const sp = this.cardSprites[i]; const bg2 = sp.getData("bg"); const w2 = sp.getData("w"); const h2 = sp.getData("h"); bg2.clear(); bg2.lineStyle(1.5, GAME_COLORS.emerald, 0.6); bg2.fillStyle(0xecfdf5); bg2.fillRoundedRect(-w2 / 2, -h2 / 2, w2, h2, 8); bg2.strokeRoundedRect(-w2 / 2, -h2 / 2, w2, h2, 8); });
+          this.emitParticles(this.cardSprites[a].x, this.cardSprites[a].y, GAME_COLORS.emerald);
+          this.flipped = []; this.locked = false;
+          if (this.matched.length === PAIRS) { this.timerEvent?.destroy(); this.time.delayedCall(400, () => this.showWon()); }
         } else {
-          // No match — flip back
-          setMatchStreak(0);
-          setTimeout(() => {
-            setFlipped([]);
-            lockRef.current = false;
-          }, 800);
+          this.matchStreak = 0;
+          this.time.delayedCall(600, () => {
+            [a, b].forEach(i => { const sp = this.cardSprites[i]; const q2 = sp.getData("q"); const f2 = sp.getData("f"); const bg2 = sp.getData("bg"); const w2 = sp.getData("w"); const h2 = sp.getData("h");
+              this.tweens.add({ targets: sp, scaleX: 0, duration: 80, onComplete: () => { f2.setVisible(false); q2.setVisible(true); bg2.clear(); bg2.lineStyle(1, GAME_COLORS.slate200); bg2.fillStyle(0xf8fafc); bg2.fillRoundedRect(-w2 / 2, -h2 / 2, w2, h2, 8); bg2.strokeRoundedRect(-w2 / 2, -h2 / 2, w2, h2, 8); this.tweens.add({ targets: sp, scaleX: 1, duration: 80 }); } }); });
+            this.flipped = []; this.locked = false;
+          });
         }
       }
-    },
-    [
-      phase,
-      flipped,
-      matched,
-      cards,
-      attempts,
-      elapsed,
-      addXP,
-      bestTime,
-      matchStreak,
-      bestStreak,
-    ]
-  );
+    }
 
-  const mins = Math.floor(elapsed / 60);
-  const secs = elapsed % 60;
-
-  // Idle
-  if (phase === "idle") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col p-5 sm:p-6"
-      >
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500/15 to-rose-500/15 text-xl dark:from-pink-500/20 dark:to-rose-500/20">
-            🃏
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-extrabold text-slate-900 dark:text-white">
-              {isEn ? "Term Matcher" : "Emparejar términos"}
-            </h3>
-            <span className="text-[10px] font-semibold text-pink-500/80">
-              {isEn ? "Memory" : "Memoria"}
-            </span>
-          </div>
-        </div>
-        <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
-          {isEn
-            ? "Flip cards to match tax terms with definitions. Consecutive matches earn streak bonus XP!"
-            : "Voltea cartas para emparejar términos con definiciones. ¡Emparejamientos consecutivos = XP de racha!"}
-        </p>
-        {bestTime !== null && (
-          <div className="mb-4 flex items-center gap-2 rounded-xl bg-violet-50/80 px-3 py-2 dark:bg-violet-500/10">
-            <span className="text-xs">🏆</span>
-            <span className="text-[11px] font-bold text-violet-600 dark:text-violet-400">
-              {Math.floor(bestTime / 60)}:{(bestTime % 60).toString().padStart(2, "0")}
-            </span>
-            <span className="text-[10px] text-violet-500/60">
-              {isEn ? "best time" : "mejor tiempo"}
-            </span>
-          </div>
-        )}
-        <motion.button
-          type="button"
-          onClick={startGame}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-pink-500/25 transition-shadow hover:shadow-pink-500/35"
-        >
-          {isEn ? "Start Game" : "Iniciar juego"}
-        </motion.button>
-      </motion.div>
-    );
-  }
-
-  // Won
-  if (phase === "won") {
-    const attemptBonus = Math.max(0, 20 - Math.max(0, attempts - PAIRS));
-    const speedBonus = Math.max(0, Math.floor((180 - elapsed) / 8));
-    const streakBonus = bestStreak >= 3 ? 10 : 0;
-    const totalXP = XP_BASE + attemptBonus + speedBonus + streakBonus;
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center p-5 sm:p-6"
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 15 }}
-          className="mb-2 text-4xl"
-        >
-          🎉
-        </motion.div>
-        <p className="text-lg font-black text-slate-900 dark:text-white">
-          {isEn ? "All Matched!" : "¡Todos emparejados!"}
-        </p>
-        <div className="mt-3 flex gap-4 text-center">
-          <div>
-            <p className="text-xl font-bold text-pink-500">{attempts}</p>
-            <p className="text-[9px] text-slate-400">
-              {isEn ? "attempts" : "intentos"}
-            </p>
-          </div>
-          <div>
-            <p className="text-xl font-bold text-slate-700 dark:text-neutral-200 tabular-nums">
-              {mins}:{secs.toString().padStart(2, "0")}
-            </p>
-            <p className="text-[9px] text-slate-400">
-              {isEn ? "time" : "tiempo"}
-            </p>
-          </div>
-          <div>
-            <p className="text-xl font-bold text-violet-500">+{totalXP}</p>
-            <p className="text-[9px] text-slate-400">XP</p>
-          </div>
-        </div>
-        {bestStreak >= 3 && (
-          <p className="mt-2 text-[10px] text-amber-500">
-            {isEn
-              ? `${bestStreak} consecutive matches! +10 streak bonus`
-              : `¡${bestStreak} emparejamientos consecutivos! +10 bonus`}
-          </p>
-        )}
-        <motion.button
-          type="button"
-          onClick={startGame}
-          whileTap={{ scale: 0.97 }}
-          className="mt-4 w-full rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 py-3 text-xs font-bold text-white shadow-lg shadow-pink-500/20"
-        >
-          {isEn ? "Play Again" : "Jugar de nuevo"}
-        </motion.button>
-      </motion.div>
-    );
-  }
-
-  // Playing
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col p-5 sm:p-6"
-    >
-      {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🃏</span>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            {isEn ? "Term Matcher" : "Emparejar términos"}
-          </h3>
-        </div>
-        <div className="flex items-center gap-3 text-[11px]">
-          {matchStreak >= 2 && (
-            <motion.span
-              key={matchStreak}
-              initial={{ scale: 0.5 }}
-              animate={{ scale: 1 }}
-              className="text-[10px] font-bold text-amber-500"
-            >
-              {matchStreak}x
-            </motion.span>
-          )}
-          <span className="text-slate-500 dark:text-neutral-400">
-            {matched.length}/{PAIRS}
-          </span>
-          <span className="font-bold tabular-nums text-slate-700 dark:text-neutral-200">
-            {mins}:{secs.toString().padStart(2, "0")}
-          </span>
-        </div>
-      </div>
-
-      {/* Card grid */}
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-        {cards.map((card, idx) => {
-          const isFlipped = flipped.includes(idx);
-          const isMatched = matched.includes(card.pairId);
-          const showFace = isFlipped || isMatched;
-
-          return (
-            <motion.button
-              key={card.id}
-              type="button"
-              onClick={() => handleFlip(idx)}
-              whileTap={!showFace ? { scale: 0.95 } : undefined}
-              animate={
-                isMatched && lastMatchFlash
-                  ? { scale: [1, 1.05, 1] }
-                  : undefined
-              }
-              className={`relative flex min-h-[72px] items-center justify-center rounded-xl border p-2 text-center transition-all duration-200 ${
-                isMatched
-                  ? "border-emerald-400/40 bg-emerald-50 dark:border-emerald-500/20 dark:bg-emerald-500/10"
-                  : isFlipped
-                    ? "border-pink-400/40 bg-pink-50 dark:border-pink-500/20 dark:bg-pink-500/10"
-                    : "cursor-pointer border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100 dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.06]"
-              }`}
-            >
-              <AnimatePresence mode="wait">
-                {showFace ? (
-                  <motion.span
-                    key="face"
-                    initial={{ rotateY: 90, opacity: 0 }}
-                    animate={{ rotateY: 0, opacity: 1 }}
-                    exit={{ rotateY: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={`text-[10px] leading-tight ${
-                      card.type === "term"
-                        ? "font-bold text-slate-900 dark:text-white"
-                        : "text-slate-600 dark:text-neutral-300"
-                    }`}
-                  >
-                    {card.content}
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="back"
-                    initial={{ rotateY: -90, opacity: 0 }}
-                    animate={{ rotateY: 0, opacity: 1 }}
-                    exit={{ rotateY: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="text-lg text-slate-300 dark:text-neutral-600"
-                  >
-                    ?
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
-          );
-        })}
-      </div>
-    </motion.div>
-  );
+    private showWon() {
+      this.clearAll(); const cx = this.W / 2;
+      const attemptBonus = Math.max(0, 20 - Math.max(0, this.attempts - PAIRS));
+      const speedBonus = Math.max(0, Math.floor((180 - this.elapsed) / 8));
+      const streakBonus = this.bestStreak >= 3 ? 10 : 0;
+      const totalXP = XP_BASE + attemptBonus + speedBonus + streakBonus;
+      this.callbacks.onXP(totalXP); this.callbacks.onGamePlayed(); this.callbacks.onMatcherTime(this.elapsed);
+      if (this.bestTime === null || this.elapsed < this.bestTime) { this.bestTime = this.elapsed; try { localStorage.setItem("tax-guide-matcher-best", String(this.elapsed)); } catch {} }
+      const t = this.add.text(cx, 35, "🎉", { fontSize: "40px" }).setOrigin(0.5).setScale(0);
+      this.tweens.add({ targets: t, scaleX: 1, scaleY: 1, duration: 500, ease: "Back.easeOut" });
+      this.emitParticles(cx, 55, GAME_COLORS.pink);
+      this.add.text(cx, 80, this.isEn ? "All Matched!" : "¡Todos emparejados!", { fontSize: "17px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.slate700) }).setOrigin(0.5);
+      const m = Math.floor(this.elapsed / 60); const s = this.elapsed % 60;
+      this.add.text(cx - 55, 110, `${this.attempts}`, { fontSize: "18px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.pink) }).setOrigin(0.5);
+      this.add.text(cx - 55, 126, this.isEn ? "attempts" : "intentos", { fontSize: "9px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400) }).setOrigin(0.5);
+      this.add.text(cx, 110, `${m}:${s.toString().padStart(2, "0")}`, { fontSize: "18px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.slate700) }).setOrigin(0.5);
+      this.add.text(cx, 126, this.isEn ? "time" : "tiempo", { fontSize: "9px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400) }).setOrigin(0.5);
+      this.add.text(cx + 55, 110, `+${totalXP}`, { fontSize: "18px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.violet) }).setOrigin(0.5);
+      this.add.text(cx + 55, 126, "XP", { fontSize: "9px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400) }).setOrigin(0.5);
+      this.createBtn(cx, 200, this.isEn ? "Play Again" : "Jugar de nuevo", GAME_COLORS.pink, () => this.startGame());
+    }
+  };
 }
+
+export const TermMatcher = memo(function TermMatcher({ lang }: { lang: Lang }) {
+  const { addXP, recordGamePlayed, recordMatcherTime } = useProgress();
+  const refs = useRef({ addXP, recordGamePlayed, recordMatcherTime });
+  refs.current = { addXP, recordGamePlayed, recordMatcherTime };
+  const factory = useCallback((P: typeof import("phaser")) => createMatcherScene(P), []);
+  const sceneData = useMemo(() => ({ lang, callbacks: { onXP: (n: number) => refs.current.addXP(n), onGamePlayed: () => refs.current.recordGamePlayed("term_matcher"), onMatcherTime: (s: number) => refs.current.recordMatcherTime(s) } }), [lang]);
+  return <div className="flex flex-col p-2" style={{ minHeight: 260 }}><PhaserGame sceneFactory={factory} sceneData={sceneData} width={400} height={260} className="w-full" /></div>;
+});

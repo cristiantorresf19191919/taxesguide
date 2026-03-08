@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { memo, useCallback, useMemo, useRef } from "react";
+import { PhaserGame, GAME_COLORS, hexColor } from "./PhaserGame";
 import { TERMS } from "@/app/data/terms";
 import { useProgress } from "@/app/contexts/ProgressContext";
 
 type Lang = "en" | "es";
-type Phase = "idle" | "playing" | "won";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -22,382 +21,292 @@ const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 const XP_PER_CELL = 4;
 const BINGO_BONUS = 35;
 
-type BingoCell = {
-  term: (typeof TERMS)[0];
-  claimed: boolean;
-  failed: boolean;
-};
+type BingoCell = { term: (typeof TERMS)[0]; claimed: boolean; failed: boolean };
 
-type QuestionState = {
-  cellIdx: number;
-  term: (typeof TERMS)[0];
-  options: string[];
-  correctIdx: number;
-} | null;
-
-const WIN_LINES = [
-  // Rows
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  // Columns
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  // Diagonals
-  [0, 4, 8],
-  [2, 4, 6],
-];
+const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
 function checkBingo(cells: BingoCell[]): number[] | null {
-  for (const line of WIN_LINES) {
-    if (line.every((i) => cells[i].claimed)) return line;
-  }
+  for (const line of WIN_LINES) { if (line.every(i => cells[i].claimed)) return line; }
   return null;
 }
 
-export function TaxBingo({ lang }: { lang: Lang }) {
-  const isEn = lang === "en";
-  const { addXP, recordGamePlayed, recordBingoWin } = useProgress();
+function createBingoScene(Phaser: typeof import("phaser")) {
+  return class BingoScene extends Phaser.Scene {
+    private lang: Lang = "en";
+    private callbacks: any = {};
+    private cells: BingoCell[] = [];
+    private claimedCount = 0;
+    private totalXP = 0;
+    private bestClaimed = 0;
+    private winLine: number[] | null = null;
+    private questionActive = false;
+    private questionCellIdx = -1;
 
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [cells, setCells] = useState<BingoCell[]>([]);
-  const [question, setQuestion] = useState<QuestionState>(null);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [claimedCount, setClaimedCount] = useState(0);
-  const [winLine, setWinLine] = useState<number[] | null>(null);
-  const [bestClaimed, setBestClaimed] = useState(0);
-  const [totalXP, setTotalXP] = useState(0);
-  const xpAwarded = useRef(false);
+    constructor() { super({ key: "BingoScene" }); }
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("tax-guide-bingo-best");
-      if (raw) setBestClaimed(Number(raw));
-    } catch {}
-  }, []);
+    receiveData(data: any) {
+      this.lang = data.lang;
+      this.callbacks = data.callbacks;
+      try { const raw = localStorage.getItem("tax-guide-bingo-best"); if (raw) this.bestClaimed = Number(raw); } catch {}
+      this.showIdle();
+    }
 
-  const startGame = useCallback(() => {
-    const selectedTerms = shuffle(TERMS).slice(0, TOTAL_CELLS);
-    const newCells: BingoCell[] = selectedTerms.map((term) => ({
-      term,
-      claimed: false,
-      failed: false,
-    }));
-    setCells(newCells);
-    setQuestion(null);
-    setSelected(null);
-    setClaimedCount(0);
-    setWinLine(null);
-    setTotalXP(0);
-    xpAwarded.current = false;
-    setPhase("playing");
-  }, []);
+    private get isEn() { return this.lang === "en"; }
+    private get W() { return Number(this.scale.width); }
+    private clearAll() { this.children.removeAll(true); }
 
-  // Award XP on win
-  useEffect(() => {
-    if (phase === "won" && !xpAwarded.current) {
-      xpAwarded.current = true;
-      const finalXP = totalXP + BINGO_BONUS;
-      if (finalXP > 0) addXP(finalXP);
-      recordGamePlayed("tax_bingo");
-      if (winLine) recordBingoWin();
-      if (claimedCount > bestClaimed) {
-        setBestClaimed(claimedCount);
-        try {
-          localStorage.setItem("tax-guide-bingo-best", String(claimedCount));
-        } catch {}
+    private emitParticles(x: number, y: number, color: number) {
+      const key = `p_${color}`;
+      if (!this.textures.exists(key)) {
+        const g = (this.make as any).graphics({ add: false });
+        g.fillStyle(color); g.fillCircle(4, 4, 4);
+        g.generateTexture(key, 8, 8); g.destroy();
+      }
+      const e = this.add.particles(x, y, key, {
+        speed: { min: 80, max: 200 }, angle: { min: 0, max: 360 },
+        scale: { start: 1, end: 0 }, alpha: { start: 1, end: 0 },
+        lifespan: 600, quantity: 12, emitting: false,
+      });
+      e.explode();
+      this.time.delayedCall(1000, () => e.destroy());
+    }
+
+    private createBtn(x: number, y: number, label: string, color: number, onClick: () => void, w?: number) {
+      const bw = w ?? this.W - 48; const h = 44;
+      const bg = this.add.graphics(); bg.fillStyle(color, 1); bg.fillRoundedRect(-bw / 2, -h / 2, bw, h, 12);
+      const txt = this.add.text(0, 0, label, { fontSize: "14px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: "#ffffff" }).setOrigin(0.5);
+      const c = this.add.container(x, y, [bg, txt]); c.setSize(bw, h); c.setInteractive({ useHandCursor: true });
+      c.on("pointerdown", onClick);
+      c.on("pointerover", () => this.tweens.add({ targets: c, scaleX: 1.02, scaleY: 1.02, duration: 100 }));
+      c.on("pointerout", () => this.tweens.add({ targets: c, scaleX: 1, scaleY: 1, duration: 100 }));
+      return c;
+    }
+
+    private showIdle() {
+      this.clearAll();
+      const cx = this.W / 2;
+      this.add.text(cx, 35, "\uD83C\uDFB1", { fontSize: "30px" }).setOrigin(0.5);
+      this.add.text(cx, 68, this.isEn ? "Tax Bingo" : "Bingo fiscal", {
+        fontSize: "17px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.orange),
+      }).setOrigin(0.5);
+      this.add.text(cx, 88, this.isEn ? "Strategy" : "Estrategia", {
+        fontSize: "11px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400),
+      }).setOrigin(0.5);
+      this.add.text(cx, 118, this.isEn
+        ? "Pick cells, answer correctly to claim them.\nGet 3 in a row for BINGO and bonus XP!"
+        : "Elige celdas, responde bien para reclamarlas.\n\u00A1Haz 3 en l\u00EDnea para BINGO y XP extra!", {
+        fontSize: "11px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate500),
+        align: "center", wordWrap: { width: this.W - 50 },
+      }).setOrigin(0.5);
+      if (this.bestClaimed > 0) {
+        this.add.text(cx, 158, `\uD83C\uDFC6 ${this.bestClaimed}`, {
+          fontSize: "13px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.orange),
+        }).setOrigin(0.5);
+      }
+      this.createBtn(cx, 210, this.isEn ? "Start Bingo" : "Comenzar Bingo", GAME_COLORS.orange, () => this.startGame());
+    }
+
+    private startGame() {
+      const selectedTerms = shuffle(TERMS).slice(0, TOTAL_CELLS);
+      this.cells = selectedTerms.map(term => ({ term, claimed: false, failed: false }));
+      this.claimedCount = 0; this.totalXP = 0; this.winLine = null; this.questionActive = false;
+      this.showPlaying();
+    }
+
+    private showPlaying() {
+      this.clearAll();
+      const cx = this.W / 2;
+
+      // Header
+      this.add.text(12, 8, "\uD83C\uDFB1", { fontSize: "16px" });
+      this.add.text(34, 10, this.isEn ? "Tax Bingo" : "Bingo fiscal", {
+        fontSize: "12px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.slate700),
+      });
+      this.add.text(this.W - 12, 10, `${this.claimedCount}\u2713`, {
+        fontSize: "11px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.emerald),
+      }).setOrigin(1, 0);
+
+      // 3x3 Grid
+      const cellSize = (this.W - 36 - 8) / 3;
+      const startX = 18 + cellSize / 2;
+      const startY = 38 + cellSize / 2;
+
+      this.cells.forEach((cell, idx) => {
+        const col = idx % 3; const row = Math.floor(idx / 3);
+        const x = startX + col * (cellSize + 4);
+        const y = startY + row * (cellSize + 4);
+
+        const bg = this.add.graphics();
+        if (cell.claimed) {
+          bg.lineStyle(1.5, GAME_COLORS.emerald, 0.6); bg.fillStyle(0xecfdf5, 1);
+        } else if (cell.failed) {
+          bg.lineStyle(1, GAME_COLORS.red, 0.3); bg.fillStyle(0xfef2f2, 0.5);
+        } else {
+          bg.lineStyle(1, GAME_COLORS.slate200); bg.fillStyle(0xf8fafc, 1);
+        }
+        bg.fillRoundedRect(-cellSize / 2, -cellSize / 2, cellSize, cellSize, 10);
+        bg.strokeRoundedRect(-cellSize / 2, -cellSize / 2, cellSize, cellSize, 10);
+
+        const label = this.isEn ? cell.term.labelEn : cell.term.labelEs;
+        const txt = this.add.text(0, 0, label, {
+          fontSize: "9px", fontFamily: "system-ui, sans-serif", fontStyle: "bold",
+          color: hexColor(cell.claimed ? GAME_COLORS.emerald : cell.failed ? GAME_COLORS.slate400 : GAME_COLORS.slate700),
+          wordWrap: { width: cellSize - 10 }, align: "center",
+        }).setOrigin(0.5);
+
+        const overlay = cell.claimed ? this.add.text(0, 0, "\u2705", { fontSize: "22px" }).setOrigin(0.5) :
+                        cell.failed ? this.add.text(0, 0, "\u274C", { fontSize: "16px" }).setOrigin(0.5).setAlpha(0.4) : null;
+
+        const items = overlay ? [bg, txt, overlay] : [bg, txt];
+        const container = this.add.container(x, y, items);
+        container.setSize(cellSize, cellSize);
+
+        if (!cell.claimed && !cell.failed && !this.questionActive) {
+          container.setInteractive({ useHandCursor: true });
+          container.on("pointerdown", () => this.openQuestion(idx));
+        }
+      });
+
+      if (!this.questionActive) {
+        this.add.text(cx, this.W < 350 ? 235 : 245, this.isEn ? "Tap a cell to answer" : "Toca una celda para responder", {
+          fontSize: "10px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate400),
+        }).setOrigin(0.5);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
 
-  const openQuestion = useCallback(
-    (cellIdx: number) => {
-      if (question || cells[cellIdx].claimed || cells[cellIdx].failed) return;
-      const term = cells[cellIdx].term;
+    private openQuestion(cellIdx: number) {
+      this.questionActive = true;
+      this.questionCellIdx = cellIdx;
+      this.clearAll();
+      const cx = this.W / 2;
+      const cell = this.cells[cellIdx];
+      const term = cell.term;
 
-      const wrongTerms = shuffle(TERMS.filter((t) => t.id !== term.id)).slice(
-        0,
-        3
-      );
-      const correctDef = isEn ? term.shortEn : term.shortEs;
-      const allOptions = shuffle([
-        correctDef,
-        ...wrongTerms.map((t) => (isEn ? t.shortEn : t.shortEs)),
-      ]);
+      const wrongTerms = shuffle(TERMS.filter(t => t.id !== term.id)).slice(0, 3);
+      const correctDef = this.isEn ? term.shortEn : term.shortEs;
+      const allOptions = shuffle([correctDef, ...wrongTerms.map(t => this.isEn ? t.shortEn : t.shortEs)]);
       const correctIdx = allOptions.indexOf(correctDef);
 
-      setQuestion({ cellIdx, term, options: allOptions, correctIdx });
-      setSelected(null);
-    },
-    [question, cells, isEn]
-  );
+      // Question card
+      const cardBg = this.add.graphics(); cardBg.lineStyle(2, GAME_COLORS.orange, 0.5); cardBg.fillStyle(0xfff7ed, 1);
+      cardBg.fillRoundedRect(12, 10, this.W - 24, 60, 12); cardBg.strokeRoundedRect(12, 10, this.W - 24, 60, 12);
 
-  const handleAnswer = useCallback(
-    (optIdx: number) => {
-      if (selected !== null || !question) return;
-      setSelected(optIdx);
+      this.add.text(cx, 25, this.isEn ? "Define this term:" : "Define este t\u00E9rmino:", {
+        fontSize: "9px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.orange),
+      }).setOrigin(0.5);
+      this.add.text(cx, 48, this.isEn ? term.labelEn : term.labelEs, {
+        fontSize: "14px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.slate700),
+        wordWrap: { width: this.W - 50 }, align: "center",
+      }).setOrigin(0.5);
 
-      const isCorrect = optIdx === question.correctIdx;
-      const cellIdx = question.cellIdx;
+      // Options
+      let answered = false;
+      allOptions.forEach((opt, i) => {
+        const y = 88 + i * 40;
+        const w = this.W - 32; const h = 34;
+        const bg = this.add.graphics();
+        bg.lineStyle(1, GAME_COLORS.slate200); bg.fillStyle(0xffffff, 0.8);
+        bg.fillRoundedRect(-w / 2, -h / 2, w, h, 8); bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 8);
+        const txt = this.add.text(0, 0, opt, {
+          fontSize: "10px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate700),
+          wordWrap: { width: w - 16 }, align: "center",
+        }).setOrigin(0.5);
+        const c = this.add.container(cx, y, [bg, txt]); c.setSize(w, h); c.setInteractive({ useHandCursor: true });
 
-      setTimeout(() => {
-        const newCells = [...cells];
-        if (isCorrect) {
-          newCells[cellIdx] = { ...newCells[cellIdx], claimed: true };
-          const newClaimed = claimedCount + 1;
-          setClaimedCount(newClaimed);
-          setTotalXP((x) => x + XP_PER_CELL);
-
-          const bingo = checkBingo(newCells);
-          if (bingo) {
-            setWinLine(bingo);
-            setCells(newCells);
-            setQuestion(null);
-            setSelected(null);
-            setPhase("won");
-            return;
+        c.on("pointerdown", () => {
+          if (answered) return; answered = true;
+          const isCorrect = i === correctIdx;
+          bg.clear();
+          if (isCorrect) {
+            bg.fillStyle(GAME_COLORS.emerald, 0.15); bg.lineStyle(1.5, GAME_COLORS.emerald, 0.6);
+            this.emitParticles(cx, y, GAME_COLORS.emerald);
+          } else {
+            bg.fillStyle(GAME_COLORS.red, 0.15); bg.lineStyle(1.5, GAME_COLORS.red, 0.6);
+            this.cameras.main.shake(150, 0.003);
           }
-        } else {
-          newCells[cellIdx] = { ...newCells[cellIdx], failed: true };
-        }
-        setCells(newCells);
-        setQuestion(null);
-        setSelected(null);
+          bg.fillRoundedRect(-w / 2, -h / 2, w, h, 8); bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 8);
 
-        // Check if all cells are used (no more moves)
-        const remaining = newCells.filter((c) => !c.claimed && !c.failed);
-        if (remaining.length === 0 && !checkBingo(newCells)) {
-          setPhase("won"); // end game even without bingo
-        }
-      }, 800);
-    },
-    [selected, question, cells, claimedCount]
-  );
-
-  // Idle
-  if (phase === "idle") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col p-5 sm:p-6"
-      >
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500/15 to-red-500/15 text-xl dark:from-orange-500/20 dark:to-red-500/20">
-            🎱
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-extrabold text-slate-900 dark:text-white">
-              {isEn ? "Tax Bingo" : "Bingo fiscal"}
-            </h3>
-            <span className="text-[10px] font-semibold text-orange-500/80">
-              {isEn ? "Strategy" : "Estrategia"}
-            </span>
-          </div>
-        </div>
-        <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
-          {isEn
-            ? "Pick cells, answer correctly to claim them. Get 3 in a row for BINGO and bonus XP!"
-            : "Elige celdas, responde bien para reclamarlas. ¡Haz 3 en línea para BINGO y XP extra!"}
-        </p>
-        {bestClaimed > 0 && (
-          <div className="mb-4 flex items-center gap-2 rounded-xl bg-orange-50/80 px-3 py-2 dark:bg-orange-500/10">
-            <span className="text-xs">🏆</span>
-            <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">
-              {bestClaimed}
-            </span>
-            <span className="text-[10px] text-orange-500/60">
-              {isEn ? "cells claimed" : "celdas reclamadas"}
-            </span>
-          </div>
-        )}
-        <motion.button
-          type="button"
-          onClick={startGame}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-red-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition-shadow hover:shadow-orange-500/35"
-        >
-          {isEn ? "Start Bingo" : "Comenzar Bingo"}
-        </motion.button>
-      </motion.div>
-    );
-  }
-
-  // Won
-  if (phase === "won") {
-    const hasBingo = winLine !== null;
-    const finalXP = totalXP + (hasBingo ? BINGO_BONUS : 0);
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center p-5 sm:p-6"
-      >
-        <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 12 }}
-          className="mb-2 text-5xl"
-        >
-          {hasBingo ? "🎉" : "👏"}
-        </motion.div>
-        <p className="text-lg font-black text-orange-500">
-          {hasBingo
-            ? isEn
-              ? "BINGO!"
-              : "¡BINGO!"
-            : isEn
-              ? "Game Over"
-              : "Fin del juego"}
-        </p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-          {isEn
-            ? `${claimedCount}/${TOTAL_CELLS} cells claimed`
-            : `${claimedCount}/${TOTAL_CELLS} celdas reclamadas`}
-        </p>
-        <p className="mt-2 text-xl font-bold text-violet-500">+{finalXP} XP</p>
-        <motion.button
-          type="button"
-          onClick={startGame}
-          whileTap={{ scale: 0.97 }}
-          className="mt-4 w-full rounded-xl bg-gradient-to-r from-orange-500 to-red-500 py-3 text-xs font-bold text-white shadow-lg shadow-orange-500/20"
-        >
-          {isEn ? "Play Again" : "Jugar de nuevo"}
-        </motion.button>
-      </motion.div>
-    );
-  }
-
-  // Playing
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col p-5 sm:p-6"
-    >
-      {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🎱</span>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            {isEn ? "Tax Bingo" : "Bingo fiscal"}
-          </h3>
-        </div>
-        <span className="text-emerald-500 text-[10px] font-bold">
-          {claimedCount}✓
-        </span>
-      </div>
-
-      {/* Bingo Grid */}
-      <div className="mb-4 grid grid-cols-3 gap-2">
-        {cells.map((cell, idx) => (
-          <motion.button
-            key={cell.term.id}
-            type="button"
-            onClick={() => openQuestion(idx)}
-            disabled={cell.claimed || cell.failed || question !== null}
-            whileTap={
-              !cell.claimed && !cell.failed && !question
-                ? { scale: 0.95 }
-                : undefined
+          this.time.delayedCall(800, () => {
+            if (isCorrect) {
+              this.cells[cellIdx].claimed = true;
+              this.claimedCount++;
+              this.totalXP += XP_PER_CELL;
+              const bingo = checkBingo(this.cells);
+              if (bingo) {
+                this.winLine = bingo;
+                this.questionActive = false;
+                this.showWon();
+                return;
+              }
+            } else {
+              this.cells[cellIdx].failed = true;
             }
-            className={`relative flex min-h-[64px] items-center justify-center rounded-xl border p-2 text-center transition-all ${
-              cell.claimed
-                ? "border-emerald-400 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10"
-                : cell.failed
-                  ? "border-red-300/40 bg-red-50/50 dark:border-red-500/20 dark:bg-red-500/5"
-                  : question?.cellIdx === idx
-                    ? "border-orange-400 bg-orange-50 ring-2 ring-orange-400/30 dark:border-orange-500/40 dark:bg-orange-500/10"
-                    : "cursor-pointer border-gray-200 bg-gray-50 hover:border-orange-300 hover:bg-orange-50/50 dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.06]"
-            }`}
-          >
-            {cell.claimed && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute inset-0 flex items-center justify-center text-2xl"
-              >
-                ✅
-              </motion.div>
-            )}
-            {cell.failed && (
-              <span className="absolute inset-0 flex items-center justify-center text-lg opacity-40">
-                ❌
-              </span>
-            )}
-            <span
-              className={`text-[10px] font-bold leading-tight ${
-                cell.claimed
-                  ? "text-emerald-600/40 dark:text-emerald-400/40"
-                  : cell.failed
-                    ? "text-slate-400/50 line-through dark:text-neutral-500/50"
-                    : "text-slate-700 dark:text-neutral-200"
-              }`}
-            >
-              {isEn ? cell.term.labelEn : cell.term.labelEs}
-            </span>
-          </motion.button>
-        ))}
-      </div>
+            this.questionActive = false;
+            const remaining = this.cells.filter(c => !c.claimed && !c.failed);
+            if (remaining.length === 0 && !checkBingo(this.cells)) {
+              this.showWon();
+            } else {
+              this.showPlaying();
+            }
+          });
+        });
+      });
+    }
 
-      {/* Question Modal */}
-      <AnimatePresence>
-        {question && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="rounded-xl border-2 border-orange-300 bg-orange-50 p-4 dark:border-orange-500/30 dark:bg-orange-500/10"
-          >
-            <p className="mb-1 text-[10px] font-medium text-orange-600/60 dark:text-orange-400/60">
-              {isEn ? "Define this term:" : "Define este término:"}
-            </p>
-            <p className="mb-3 text-sm font-bold text-slate-900 dark:text-white">
-              {isEn ? question.term.labelEn : question.term.labelEs}
-            </p>
+    private showWon() {
+      this.clearAll();
+      const cx = this.W / 2;
+      const hasBingo = this.winLine !== null;
+      const finalXP = this.totalXP + (hasBingo ? BINGO_BONUS : 0);
 
-            <div className="space-y-2">
-              {question.options.map((opt, i) => {
-                const isSelected = selected === i;
-                const isCorrect = i === question.correctIdx;
-                const showResult = selected !== null;
+      if (finalXP > 0) this.callbacks.onXP(finalXP);
+      this.callbacks.onGamePlayed();
+      if (hasBingo) this.callbacks.onBingoWin();
+      if (this.claimedCount > this.bestClaimed) {
+        this.bestClaimed = this.claimedCount;
+        try { localStorage.setItem("tax-guide-bingo-best", String(this.claimedCount)); } catch {}
+      }
 
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => handleAnswer(i)}
-                    disabled={selected !== null}
-                    className={`w-full rounded-lg border px-3 py-2.5 text-left text-[10px] leading-snug transition-all ${
-                      showResult && isCorrect
-                        ? "border-emerald-400/40 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-                        : showResult && isSelected && !isCorrect
-                          ? "border-red-400/40 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300"
-                          : showResult
-                            ? "border-gray-200 text-slate-400 dark:border-white/[0.04] dark:text-neutral-600"
-                            : "border-gray-200 bg-white text-slate-600 hover:border-gray-300 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-neutral-300"
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      const emoji = hasBingo ? "\uD83C\uDF89" : "\uD83D\uDC4F";
+      const icon = this.add.text(cx, 40, emoji, { fontSize: "44px" }).setOrigin(0.5).setScale(0);
+      this.tweens.add({ targets: icon, scaleX: 1, scaleY: 1, duration: 500, ease: "Back.easeOut" });
+      if (hasBingo) {
+        this.emitParticles(cx - 30, 50, GAME_COLORS.orange);
+        this.emitParticles(cx + 30, 50, GAME_COLORS.amber);
+      }
 
-      {!question && (
-        <p className="text-center text-[10px] text-slate-400 dark:text-neutral-500">
-          {isEn
-            ? "Tap a cell to answer its question"
-            : "Toca una celda para responder su pregunta"}
-        </p>
-      )}
-    </motion.div>
-  );
+      this.add.text(cx, 90, hasBingo ? "BINGO!" : (this.isEn ? "Game Over" : "Fin del juego"), {
+        fontSize: "20px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.orange),
+      }).setOrigin(0.5);
+      this.add.text(cx, 115, `${this.claimedCount}/${TOTAL_CELLS} ${this.isEn ? "cells claimed" : "celdas reclamadas"}`, {
+        fontSize: "12px", fontFamily: "system-ui, sans-serif", color: hexColor(GAME_COLORS.slate500),
+      }).setOrigin(0.5);
+      this.add.text(cx, 145, `+${finalXP} XP`, {
+        fontSize: "20px", fontFamily: "system-ui, sans-serif", fontStyle: "bold", color: hexColor(GAME_COLORS.violet),
+      }).setOrigin(0.5);
+      this.createBtn(cx, 210, this.isEn ? "Play Again" : "Jugar de nuevo", GAME_COLORS.orange, () => this.startGame());
+    }
+  };
 }
+
+export const TaxBingo = memo(function TaxBingo({ lang }: { lang: Lang }) {
+  const { addXP, recordGamePlayed, recordBingoWin } = useProgress();
+  const refs = useRef({ addXP, recordGamePlayed, recordBingoWin });
+  refs.current = { addXP, recordGamePlayed, recordBingoWin };
+
+  const factory = useCallback((Phaser: typeof import("phaser")) => createBingoScene(Phaser), []);
+  const sceneData = useMemo(() => ({
+    lang,
+    callbacks: {
+      onXP: (xp: number) => refs.current.addXP(xp),
+      onGamePlayed: () => refs.current.recordGamePlayed("tax_bingo"),
+      onBingoWin: () => refs.current.recordBingoWin(),
+    },
+  }), [lang]);
+
+  return (
+    <div className="flex flex-col p-2" style={{ minHeight: 260 }}>
+      <PhaserGame sceneFactory={factory} sceneData={sceneData} width={400} height={260} className="w-full" />
+    </div>
+  );
+});
